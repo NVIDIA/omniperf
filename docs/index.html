@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Isaac Lab Performance Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <rect width="24" height="24" rx="4" fill="#76b900"/>
+            <path d="M7 12L10.5 15.5L17 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h1>Isaac Lab <span class="accent">Performance</span></h1>
+        </div>
+        <p class="subtitle">Omniperf Benchmark Results</p>
+      </div>
+      <div class="header-right">
+        <span id="lastUpdated" class="meta-badge"></span>
+        <a href="https://github.com/isaac-sim/IsaacLab" target="_blank" class="gh-link">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-nav">
+    <div class="tab-nav-inner">
+      <button class="nav-tab active" data-tab="overview">Overview</button>
+      <button class="nav-tab" data-tab="detail">Detail</button>
+      <div class="tab-gpu-select">
+        <label for="gpuSelectGlobal">GPU</label>
+        <select id="gpuSelectGlobal"></select>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ===== OVERVIEW TAB ===== -->
+    <div id="overviewPanel" class="tab-panel active">
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="overviewSearch" placeholder="Filter benchmarks... (e.g. shadow, cartpole)" autocomplete="off">
+          <button id="searchClear" class="search-clear" style="display:none">&times;</button>
+        </div>
+        <div id="searchSuggestions" class="search-suggestions"></div>
+      </div>
+      <div id="overviewGrid"></div>
+    </div>
+
+    <!-- ===== DETAIL TAB ===== -->
+    <div id="detailPanel" class="tab-panel">
+      <div class="controls">
+        <div class="control-group">
+          <label for="benchmarkSelect">Benchmark</label>
+          <select id="benchmarkSelect"></select>
+        </div>
+        <div class="control-group">
+          <label for="runSelect">Run</label>
+          <select id="runSelect"></select>
+        </div>
+        <div class="control-group">
+          <label for="sectionSelect">Section</label>
+          <select id="sectionSelect">
+            <option value="runtime">Runtime</option>
+            <option value="startup">Startup</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label for="metricSelect">Metric</label>
+          <select id="metricSelect"></select>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <div class="card chart-card">
+          <div class="card-header">
+            <h2 id="chartTitle">Loading...</h2>
+            <div class="chart-info">
+              <span id="chartRunCount" class="info-badge"></span>
+              <span id="chartDateRange" class="info-badge"></span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="mainChart"></canvas>
+          </div>
+        </div>
+
+        <div class="card summary-card">
+          <div class="card-header">
+            <h2>Run Summary</h2>
+            <span id="summaryCommit" class="commit-badge"></span>
+          </div>
+          <div id="versionBar" class="version-bar"></div>
+          <div id="summaryContent" class="summary-content"></div>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-header">
+            <h2>All Benchmarks Overview</h2>
+            <div class="table-controls">
+              <button id="btnShowRuntime" class="tab-btn active" data-section="runtime">Runtime</button>
+              <button id="btnShowStartup" class="tab-btn" data-section="startup">Startup</button>
+            </div>
+          </div>
+          <div class="table-wrapper">
+            <table id="overviewTable">
+              <thead><tr id="overviewHeader"></tr></thead>
+              <tbody id="overviewBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Isaac Lab Performance Dashboard &middot; Data sourced from internal CI/CD benchmarks</p>
+  </footer>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p>Loading benchmark data...</p>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
