@@ -150,10 +150,14 @@
       if (state.manifest.datasets.length > 0) {
         await loadGPU(state.manifest.datasets[0].file);
       }
-      $("#lastUpdated").textContent = "Updated: " +
+      const updatedEl = $("#lastUpdated");
+      const dateStr = "Updated: " +
         new Date(state.manifest.generated_at).toLocaleDateString("en-US", {
           year: "numeric", month: "short", day: "numeric",
         });
+      updatedEl.childNodes[0]
+        ? (updatedEl.childNodes[0].textContent = dateStr)
+        : updatedEl.insertBefore(document.createTextNode(dateStr), updatedEl.firstChild);
     } catch (e) {
       console.error("Init failed:", e);
     } finally {

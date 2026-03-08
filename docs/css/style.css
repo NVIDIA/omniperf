@@ -66,7 +66,33 @@ header {
   padding: 4px 10px;
   border-radius: 20px;
   border: 1px solid var(--border);
+}
+
+.tooltip {
+  position: relative;
   cursor: help;
+}
+
+.tooltip .tooltip-text {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  z-index: 200;
+  pointer-events: none;
+}
+
+.tooltip:hover .tooltip-text {
+  display: block;
 }
 
 .gh-link { color: var(--text-secondary); transition: color 0.2s; display: flex; }
