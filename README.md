@@ -77,6 +77,10 @@ To enable GitHub Pages for a fresh clone:
 
 - Vulnerability disclosure: See `SECURITY.md`
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, including the Developer Certificate of Origin (DCO) requirement.
+
 ## License
 
-See the [LICENSE](LICENSE) file for details.
+This project is licensed under the [Apache License 2.0](LICENSE).
