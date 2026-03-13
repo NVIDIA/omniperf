@@ -635,7 +635,7 @@
     const values = metricMap[repMetric];
     if (!values) return null;
 
-    const vramMetric = "GPU Memory Used";
+    const vramMetric = metricMap["GPU Memory Used"] ? "GPU Memory Used" : "GPU 0 Memory Used";
     const vramValues = metricMap[vramMetric] || {};
     const gpuTotalGb = run?.env_info?.gpu_total_memory_gb || 0;
 
