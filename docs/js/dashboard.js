@@ -1522,15 +1522,16 @@
     const labels = data.runs.map((r) => r.commit_sha);
     const datasets = presets.map((preset, idx) => {
       const values = data.runs.map((run) => {
-        const entry = run.entries.find((e) => e.preset === preset);
-        if (!entry) return null;
-        const bench = entry.benchmarks.find((b) =>
-          b.workflow === workflow && (!task || b.task === task) &&
-          (!state.histEnv || String(b.num_envs) === state.histEnv) &&
-          (!state.histResolution || String(b.resolution) === state.histResolution)
-        );
-        if (!bench) return null;
-        return bench.runtime?.[metric] ?? bench.train?.[metric] ?? null;
+        for (const entry of run.entries) {
+          if (entry.preset !== preset) continue;
+          const bench = entry.benchmarks.find((b) =>
+            b.workflow === workflow && (!task || b.task === task) &&
+            (!state.histEnv || String(b.num_envs) === state.histEnv) &&
+            (!state.histResolution || String(b.resolution) === state.histResolution)
+          );
+          if (bench) return bench.runtime?.[metric] ?? bench.train?.[metric] ?? null;
+        }
+        return null;
       });
 
       const color = PRESET_COLORS[idx % PRESET_COLORS.length];
@@ -1775,15 +1776,16 @@
 
         const datasets = presets.map((preset, idx) => {
           const values = data.runs.map((run) => {
-            const entry = run.entries.find((e) => e.preset === preset);
-            if (!entry) return null;
-            const bench = entry.benchmarks.find((b) =>
-              b.workflow === wf && b.task === task &&
-              (!state.histEnv || String(b.num_envs) === state.histEnv) &&
-              (!state.histResolution || String(b.resolution) === state.histResolution)
-            );
-            if (!bench) return null;
-            return bench.runtime?.[repMetric] ?? bench.train?.[repMetric] ?? null;
+            for (const entry of run.entries) {
+              if (entry.preset !== preset) continue;
+              const bench = entry.benchmarks.find((b) =>
+                b.workflow === wf && b.task === task &&
+                (!state.histEnv || String(b.num_envs) === state.histEnv) &&
+                (!state.histResolution || String(b.resolution) === state.histResolution)
+              );
+              if (bench) return bench.runtime?.[repMetric] ?? bench.train?.[repMetric] ?? null;
+            }
+            return null;
           });
           const color = PRESET_COLORS[idx % PRESET_COLORS.length];
           const p = parsePreset(preset);
