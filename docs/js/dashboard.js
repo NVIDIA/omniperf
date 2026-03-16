@@ -40,6 +40,8 @@
     return "Mean Environment step effective FPS";
   }
 
+  const ENV_SIZES = [1024, 2048, 4096, 8192, 16384, 32768];
+
   const state = {
     datasets: {},
     manifest: null,
@@ -62,6 +64,14 @@
     histFilterInited: false,
     histRunDetail: -1,
     histChart: null,
+    scalingRunIndex: -1,
+    compEnv: "",
+    compResolution: "",
+    histEnv: "",
+    histResolution: "",
+    scalingResolution: "",
+    scalingLinearX: false,
+    scalingEnvFilter: new Set(ENV_SIZES.map(String)),
   };
 
   let compControlsInitialized = false;
@@ -78,9 +88,19 @@
     }
     if (p.has("task")) state.compTask = p.get("task");
     if (p.has("workflow")) state.compWorkflow = p.get("workflow");
+    if (p.has("env")) state.compEnv = p.get("env");
+    if (p.has("res")) state.compResolution = p.get("res");
     if (p.has("htask")) state.histTask = p.get("htask");
     if (p.has("hworkflow")) state.histWorkflow = p.get("hworkflow");
     if (p.has("hmetric")) state.histMetric = p.get("hmetric");
+    if (p.has("henv")) state.histEnv = p.get("henv");
+    if (p.has("hres")) state.histResolution = p.get("hres");
+    if (p.has("sres")) state.scalingResolution = p.get("sres");
+    if (p.has("slinear")) state.scalingLinearX = p.get("slinear") === "1";
+    if (p.has("senvs")) {
+      const envList = p.get("senvs").split(",").filter(Boolean);
+      if (envList.length > 0) state.scalingEnvFilter = new Set(envList);
+    }
     if (p.has("phys")) {
       const list = p.get("phys").split(",").filter(Boolean);
       if (list.length > 0) { state.compPhysicsFilter = new Set(list); state.compFilterFromUrl = true; }
@@ -125,6 +145,8 @@
       if (state.compRunIndex != null) p.set("run", state.compRunIndex);
       if (state.compTask) p.set("task", state.compTask);
       if (state.compWorkflow) p.set("workflow", state.compWorkflow);
+      if (state.compEnv) p.set("env", state.compEnv);
+      if (state.compResolution) p.set("res", state.compResolution);
       if (state.compPhysicsFilter.size > 0) p.set("phys", [...state.compPhysicsFilter].sort().join(","));
       if (state.compRendererFilter.size > 0) p.set("rend", [...state.compRendererFilter].sort().join(","));
       if (state.compDatatypeFilter.size > 0) p.set("dt", [...state.compDatatypeFilter].sort().join(","));
@@ -136,10 +158,18 @@
       if (state.histTask) p.set("htask", state.histTask);
       if (state.histWorkflow) p.set("hworkflow", state.histWorkflow);
       if (state.histMetric) p.set("hmetric", state.histMetric);
+      if (state.histEnv) p.set("henv", state.histEnv);
+      if (state.histResolution) p.set("hres", state.histResolution);
       if (state.histRunDetail >= 0) p.set("hrun", state.histRunDetail);
       if (state.histPhysicsFilter.size > 0) p.set("hphys", [...state.histPhysicsFilter].sort().join(","));
       if (state.histRendererFilter.size > 0) p.set("hrend", [...state.histRendererFilter].sort().join(","));
       if (state.histDatatypeFilter.size > 0) p.set("hdt", [...state.histDatatypeFilter].sort().join(","));
+    } else if (state.currentTab === "scaling") {
+      if (state.scalingResolution) p.set("sres", state.scalingResolution);
+      if (state.scalingLinearX) p.set("slinear", "1");
+      if (state.scalingEnvFilter.size < ENV_SIZES.length) {
+        p.set("senvs", [...state.scalingEnvFilter].sort((a, b) => a - b).join(","));
+      }
     }
     const qs = p.toString();
     const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
@@ -223,26 +253,70 @@
     return [...taskSet].sort();
   }
 
-  function getWorkflows(data, task) {
+  function getWorkflows(data, task, env, resolution) {
     if (!data || !data.runs.length) return [];
     const wfSet = new Set();
     for (const run of data.runs) {
       for (const entry of run.entries) {
         for (const b of entry.benchmarks) {
-          if (!isHiddenWorkflow(b.workflow) && (!task || b.task === task)) wfSet.add(b.workflow);
+          if (isHiddenWorkflow(b.workflow)) continue;
+          if (task && b.task !== task) continue;
+          if (env && String(b.num_envs) !== String(env)) continue;
+          if (resolution && String(b.resolution) !== String(resolution)) continue;
+          wfSet.add(b.workflow);
         }
       }
     }
     return [...wfSet].sort();
   }
 
-  function getRuntimeMetrics(data, workflow, task) {
+  function getEnvs(data, task) {
+    if (!data || !data.runs.length) return [];
+    const envSet = new Set();
+    for (const run of data.runs) {
+      for (const entry of run.entries) {
+        if (isHiddenPreset(entry.preset)) continue;
+        for (const b of entry.benchmarks) {
+          if (!isHiddenWorkflow(b.workflow) && b.task === task && b.num_envs != null) {
+            envSet.add(b.num_envs);
+          }
+        }
+      }
+    }
+    return [...envSet].sort((a, b) => a - b);
+  }
+
+  function getResolutions(data, task, numEnvs) {
+    if (!data || !data.runs.length) return [];
+    const resSet = new Set();
+    for (const run of data.runs) {
+      for (const entry of run.entries) {
+        if (isHiddenPreset(entry.preset)) continue;
+        for (const b of entry.benchmarks) {
+          if (isHiddenWorkflow(b.workflow)) continue;
+          if (task && b.task !== task) continue;
+          if (numEnvs && String(b.num_envs) !== String(numEnvs)) continue;
+          if (b.resolution != null) resSet.add(b.resolution);
+        }
+      }
+    }
+    const arr = [...resSet];
+    return arr.sort((a, b) => {
+      if (a === "default") return -1;
+      if (b === "default") return 1;
+      return Number(a) - Number(b);
+    });
+  }
+
+  function getRuntimeMetrics(data, workflow, task, env, resolution) {
     const metricSet = new Set();
     for (const run of data.runs) {
       for (const entry of run.entries) {
         for (const b of entry.benchmarks) {
           if (b.workflow !== workflow) continue;
           if (task && b.task !== task) continue;
+          if (env && String(b.num_envs) !== String(env)) continue;
+          if (resolution && String(b.resolution) !== String(resolution)) continue;
           for (const section of [b.runtime, b.train]) {
             if (!section) continue;
             for (const k of Object.keys(section)) {
@@ -291,7 +365,7 @@
       btn.classList.toggle("active", btn.dataset.tab === tab);
     });
     $$(".tab-panel").forEach((p) => p.classList.remove("active"));
-    const panelIds = { comparison: "comparisonPanel", history: "historyPanel", info: "infoPanel" };
+    const panelIds = { comparison: "comparisonPanel", history: "historyPanel", scaling: "scalingPanel", info: "infoPanel" };
     const panelId = panelIds[tab] || "comparisonPanel";
     $(`#${panelId}`).classList.add("active");
     renderCurrentTab();
@@ -300,8 +374,283 @@
   function renderCurrentTab() {
     if (state.currentTab === "comparison") renderComparison();
     else if (state.currentTab === "history") renderHistory();
+    else if (state.currentTab === "scaling") renderScaling();
     else if (state.currentTab === "info") renderInfo();
     syncUrlState();
+  }
+
+  /* ─── Env Scaling Tab ─── */
+
+  const scalingCharts = [];
+
+  function renderScaling() {
+    const data = getCurrentData();
+    if (!data || !data.runs.length) return;
+
+    const runSel = $("#runSelectScaling");
+    runSel.innerHTML = "";
+    const runs = data.runs;
+    for (let i = runs.length - 1; i >= 0; i--) {
+      const r = runs[i];
+      const label = i === runs.length - 1
+        ? `${r.commit_sha} · ${r.commit_date} (latest)`
+        : `${r.commit_sha} · ${r.commit_date}`;
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = label;
+      runSel.appendChild(opt);
+    }
+    if (state.scalingRunIndex >= 0 && runSel.querySelector(`option[value="${state.scalingRunIndex}"]`)) {
+      runSel.value = state.scalingRunIndex;
+    } else {
+      state.scalingRunIndex = runs.length - 1;
+      runSel.value = state.scalingRunIndex;
+    }
+
+    renderVersionBar(runs[state.scalingRunIndex], "#scalingVersionBar");
+
+    const scalingResSet = new Set();
+    for (const run of data.runs) {
+      for (const entry of run.entries) {
+        if (isHiddenPreset(entry.preset)) continue;
+        for (const b of entry.benchmarks) {
+          if (!isHiddenWorkflow(b.workflow) && b.num_envs && ENV_SIZES.includes(b.num_envs) && b.resolution != null) {
+            scalingResSet.add(b.resolution);
+          }
+        }
+      }
+    }
+    const scalingResolutions = [...scalingResSet].sort((a, b) => {
+      if (a === "default") return -1;
+      if (b === "default") return 1;
+      return Number(a) - Number(b);
+    });
+    const resSel = $("#resSelectScaling");
+    resSel.innerHTML = "";
+    for (const r of scalingResolutions) {
+      const opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = String(r);
+      resSel.appendChild(opt);
+    }
+    if (state.scalingResolution && resSel.querySelector(`option[value="${state.scalingResolution}"]`)) {
+      resSel.value = state.scalingResolution;
+    } else {
+      state.scalingResolution = resSel.value;
+    }
+
+    const envFilterBtn = $("#scalingEnvFilterBtn");
+    const envCheckboxes = $("#scalingEnvCheckboxes");
+    envCheckboxes.innerHTML = "";
+    const ef = state.scalingEnvFilter;
+    envFilterBtn.textContent = ef.size === ENV_SIZES.length
+      ? "Env Sizes (all) \u25BC"
+      : `Env Sizes (${ef.size}) \u25BC`;
+    for (const envVal of ENV_SIZES) {
+      const label = document.createElement("label");
+      label.className = "datatype-checkbox-label";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = ef.has(String(envVal));
+      input.addEventListener("change", () => {
+        if (input.checked) ef.add(String(envVal));
+        else ef.delete(String(envVal));
+        renderScaling();
+        syncUrlState();
+      });
+      label.appendChild(input);
+      label.appendChild(document.createTextNode(` ${envVal.toLocaleString()}`));
+      envCheckboxes.appendChild(label);
+    }
+
+    $("#scalingLinearToggle").checked = state.scalingLinearX;
+
+    const activeEnvSizes = ENV_SIZES.filter((e) => ef.has(String(e)));
+
+    for (const c of scalingCharts) c.destroy();
+    scalingCharts.length = 0;
+
+    const container = $("#scalingContent");
+    container.innerHTML = "";
+
+    const wfTaskMap = {};
+    const presetValues = {};
+
+    const selectedIdx = state.scalingRunIndex;
+    for (let ri = selectedIdx; ri >= 0; ri--) {
+      const run = data.runs[ri];
+      for (const entry of run.entries) {
+        if (isHiddenPreset(entry.preset)) continue;
+        for (const b of entry.benchmarks) {
+          if (isHiddenWorkflow(b.workflow)) continue;
+          if (state.scalingResolution && String(b.resolution) !== state.scalingResolution) continue;
+          const rawTask = b.raw_task || b.task;
+          const numEnvs = b.num_envs;
+          if (!numEnvs || !activeEnvSizes.includes(numEnvs)) continue;
+
+          const wfKey = `${b.workflow}||${rawTask}`;
+          if (!wfTaskMap[wfKey]) wfTaskMap[wfKey] = { workflow: b.workflow, rawTask };
+
+          const repMetric = getRepFpsMetric(b.workflow);
+          const val = b.runtime?.[repMetric] ?? b.train?.[repMetric];
+          if (val == null) continue;
+
+          const pp = parsePreset(entry.preset);
+          const presetLabel = `${pp.physics} / ${pp.renderer} / ${pp.datatype}`;
+          const fullKey = `${wfKey}||${presetLabel}||${numEnvs}`;
+          if (!presetValues[fullKey]) {
+            presetValues[fullKey] = { wfKey, presetLabel, numEnvs, val };
+          }
+        }
+      }
+    }
+
+    const wfTaskKeys = Object.keys(wfTaskMap).sort();
+    if (wfTaskKeys.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-secondary);padding:20px;">No scaling data available.</p>';
+      return;
+    }
+
+    for (const wfKey of wfTaskKeys) {
+      const { workflow, rawTask } = wfTaskMap[wfKey];
+      const repMetric = getRepFpsMetric(workflow);
+
+      const chartData = {};
+      for (const fk of Object.keys(presetValues)) {
+        const pv = presetValues[fk];
+        if (pv.wfKey !== wfKey) continue;
+        if (!chartData[pv.presetLabel]) chartData[pv.presetLabel] = {};
+        chartData[pv.presetLabel][pv.numEnvs] = pv.val;
+      }
+
+      const presetLabels = Object.keys(chartData)
+        .filter((pl) => Object.keys(chartData[pl]).length >= 2)
+        .sort();
+      if (presetLabels.length === 0) continue;
+
+      const section = document.createElement("div");
+      section.className = "card scaling-chart-card";
+      const wfShort = workflow.replace("benchmark_", "").replace("_train", " (train)");
+      const title = document.createElement("div");
+      title.className = "scaling-chart-title";
+      title.textContent = `${rawTask} — ${wfShort}`;
+      section.appendChild(title);
+      const metricLabel = document.createElement("div");
+      metricLabel.className = "scaling-chart-metric";
+      metricLabel.textContent = repMetric;
+      section.appendChild(metricLabel);
+      const canvasWrap = document.createElement("div");
+      canvasWrap.className = "scaling-canvas-wrap";
+      const canvas = document.createElement("canvas");
+      canvasWrap.appendChild(canvas);
+      section.appendChild(canvasWrap);
+      container.appendChild(section);
+
+      const useLinear = state.scalingLinearX;
+      let chartConfig;
+
+      if (useLinear) {
+        const datasets = presetLabels.map((preset, idx) => {
+          const points = activeEnvSizes
+            .filter((e) => chartData[preset]?.[e] != null)
+            .map((e) => ({ x: e, y: chartData[preset][e] }));
+          const color = PRESET_COLORS[idx % PRESET_COLORS.length];
+          return {
+            label: preset,
+            data: points,
+            borderColor: color,
+            backgroundColor: color + "40",
+            borderWidth: 2.5,
+            pointRadius: 6,
+            pointHoverRadius: 10,
+            tension: 0.3,
+          };
+        });
+        chartConfig = {
+          type: "line",
+          data: { datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "nearest", intersect: true },
+            plugins: {
+              legend: { position: "right", labels: { color: "#8b949e", font: { size: 10 }, boxWidth: 12, padding: 8 } },
+              tooltip: {
+                backgroundColor: "#1c2128", titleColor: "#e6edf3", bodyColor: "#e6edf3", borderColor: "#30363d", borderWidth: 1,
+                callbacks: {
+                  title: (items) => `${items[0].parsed.x.toLocaleString()} envs`,
+                  label: (ctx) => `${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}`,
+                },
+              },
+            },
+            scales: {
+              x: {
+                type: "linear",
+                title: { display: true, text: "Number of Environments", color: "#8b949e", font: { size: 11 } },
+                afterBuildTicks: (axis) => { axis.ticks = activeEnvSizes.map((v) => ({ value: v })); },
+                ticks: { color: "#8b949e", font: { size: 10 }, callback: (v) => v >= 1000 ? `${(v/1024).toFixed(0)}K` : v },
+                grid: { color: "rgba(48,54,61,0.5)" },
+                min: activeEnvSizes[0],
+                max: activeEnvSizes[activeEnvSizes.length - 1],
+              },
+              y: {
+                title: { display: true, text: "FPS", color: "#8b949e", font: { size: 11 } },
+                ticks: { color: "#8b949e", font: { size: 11 } },
+                grid: { color: "rgba(48,54,61,0.5)" },
+              },
+            },
+          },
+        };
+      } else {
+        const labels = activeEnvSizes.map((e) => e.toLocaleString());
+        const datasets = presetLabels.map((preset, idx) => {
+          const vals = activeEnvSizes.map((e) => chartData[preset]?.[e] ?? null);
+          const color = PRESET_COLORS[idx % PRESET_COLORS.length];
+          return {
+            label: preset,
+            data: vals,
+            borderColor: color,
+            backgroundColor: color + "40",
+            borderWidth: 2.5,
+            pointRadius: 6,
+            pointHoverRadius: 10,
+            tension: 0.3,
+            spanGaps: true,
+          };
+        });
+        chartConfig = {
+          type: "line",
+          data: { labels, datasets },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: { mode: "nearest", intersect: true },
+            plugins: {
+              legend: { position: "right", labels: { color: "#8b949e", font: { size: 10 }, boxWidth: 12, padding: 8 } },
+              tooltip: {
+                backgroundColor: "#1c2128", titleColor: "#e6edf3", bodyColor: "#e6edf3", borderColor: "#30363d", borderWidth: 1,
+                callbacks: { label: (ctx) => `${ctx.dataset.label}: ${formatNumber(ctx.parsed.y)}` },
+              },
+            },
+            scales: {
+              x: {
+                title: { display: true, text: "Number of Environments", color: "#8b949e", font: { size: 11 } },
+                ticks: { color: "#8b949e", font: { size: 10 } },
+                grid: { color: "rgba(48,54,61,0.5)" },
+              },
+              y: {
+                title: { display: true, text: "FPS", color: "#8b949e", font: { size: 11 } },
+                ticks: { color: "#8b949e", font: { size: 11 } },
+                grid: { color: "rgba(48,54,61,0.5)" },
+              },
+            },
+          },
+        };
+      }
+
+      const chart = new Chart(canvas, chartConfig);
+      scalingCharts.push(chart);
+    }
   }
 
   function renderInfo() {
@@ -370,9 +719,37 @@
       state.compTask = taskSel.value;
     }
 
+    const envSel = $("#envSelectComp");
+    envSel.innerHTML = "";
+    for (const e of getEnvs(data, state.compTask)) {
+      const opt = document.createElement("option");
+      opt.value = e;
+      opt.textContent = String(e);
+      envSel.appendChild(opt);
+    }
+    if (state.compEnv && envSel.querySelector(`option[value="${state.compEnv}"]`)) {
+      envSel.value = state.compEnv;
+    } else {
+      state.compEnv = envSel.value;
+    }
+
+    const resSel = $("#resSelectComp");
+    resSel.innerHTML = "";
+    for (const r of getResolutions(data, state.compTask, state.compEnv)) {
+      const opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = String(r);
+      resSel.appendChild(opt);
+    }
+    if (state.compResolution && resSel.querySelector(`option[value="${state.compResolution}"]`)) {
+      resSel.value = state.compResolution;
+    } else {
+      state.compResolution = resSel.value;
+    }
+
     const wfSel = $("#workflowSelectComp");
     wfSel.innerHTML = "";
-    for (const wf of getWorkflows(data, state.compTask)) {
+    for (const wf of getWorkflows(data, state.compTask, state.compEnv, state.compResolution)) {
       const opt = document.createElement("option");
       opt.value = wf;
       opt.textContent = wf.replace("benchmark_", "").replace("_train", " (train)");
@@ -447,6 +824,8 @@
       for (const b of entry.benchmarks) {
         if (b.workflow !== workflow) continue;
         if (task && b.task !== task) continue;
+        if (state.compEnv && String(b.num_envs) !== state.compEnv) continue;
+        if (state.compResolution && String(b.resolution) !== state.compResolution) continue;
         const preset = entry.preset;
         if (!presets.includes(preset)) presets.push(preset);
         if (b.num_envs != null) presetNumEnvs[preset] = b.num_envs;
@@ -715,6 +1094,8 @@
       for (const b of entry.benchmarks) {
         if (b.workflow !== workflow) continue;
         if (task && b.task !== task) continue;
+        if (state.compEnv && String(b.num_envs) !== state.compEnv) continue;
+        if (state.compResolution && String(b.resolution) !== state.compResolution) continue;
         if (b.preview) {
           items.push({
             label: `${pp.physics} / ${pp.renderer} / ${pp.datatype}`,
@@ -947,9 +1328,37 @@
       state.histTask = taskSel.value;
     }
 
+    const envSelH = $("#envSelectHist");
+    envSelH.innerHTML = "";
+    for (const e of getEnvs(data, state.histTask)) {
+      const opt = document.createElement("option");
+      opt.value = e;
+      opt.textContent = String(e);
+      envSelH.appendChild(opt);
+    }
+    if (state.histEnv && envSelH.querySelector(`option[value="${state.histEnv}"]`)) {
+      envSelH.value = state.histEnv;
+    } else {
+      state.histEnv = envSelH.value;
+    }
+
+    const resSelH = $("#resSelectHist");
+    resSelH.innerHTML = "";
+    for (const r of getResolutions(data, state.histTask, state.histEnv)) {
+      const opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = String(r);
+      resSelH.appendChild(opt);
+    }
+    if (state.histResolution && resSelH.querySelector(`option[value="${state.histResolution}"]`)) {
+      resSelH.value = state.histResolution;
+    } else {
+      state.histResolution = resSelH.value;
+    }
+
     const wfSel = $("#workflowSelectHist");
     wfSel.innerHTML = "";
-    for (const wf of getWorkflows(data, state.histTask)) {
+    for (const wf of getWorkflows(data, state.histTask, state.histEnv, state.histResolution)) {
       const opt = document.createElement("option");
       opt.value = wf;
       opt.textContent = wf.replace("benchmark_", "").replace("_train", " (train)");
@@ -967,7 +1376,7 @@
   function populateHistMetrics(data) {
     const metSel = $("#metricSelectHist");
     metSel.innerHTML = "";
-    const metrics = getRuntimeMetrics(data, state.histWorkflow, state.histTask);
+    const metrics = getRuntimeMetrics(data, state.histWorkflow, state.histTask, state.histEnv, state.histResolution);
 
     const fpsMetrics = getFpsMetrics(state.histWorkflow);
 
@@ -1100,7 +1509,11 @@
         if (hrf.size === 0 || !hrf.has(pp.renderer)) continue;
         if (hdf.size === 0 || !hdf.has(pp.datatype)) continue;
         for (const b of entry.benchmarks) {
-          if (b.workflow === workflow && (!task || b.task === task)) presetsSeen.add(entry.preset);
+          if (b.workflow !== workflow) continue;
+          if (task && b.task !== task) continue;
+          if (state.histEnv && String(b.num_envs) !== state.histEnv) continue;
+          if (state.histResolution && String(b.resolution) !== state.histResolution) continue;
+          presetsSeen.add(entry.preset);
         }
       }
     }
@@ -1111,7 +1524,11 @@
       const values = data.runs.map((run) => {
         const entry = run.entries.find((e) => e.preset === preset);
         if (!entry) return null;
-        const bench = entry.benchmarks.find((b) => b.workflow === workflow && (!task || b.task === task));
+        const bench = entry.benchmarks.find((b) =>
+          b.workflow === workflow && (!task || b.task === task) &&
+          (!state.histEnv || String(b.num_envs) === state.histEnv) &&
+          (!state.histResolution || String(b.resolution) === state.histResolution)
+        );
         if (!bench) return null;
         return bench.runtime?.[metric] ?? bench.train?.[metric] ?? null;
       });
@@ -1244,7 +1661,11 @@
 
     for (const entry of run.entries) {
       if (isHiddenPreset(entry.preset)) continue;
-      const bench = entry.benchmarks.find((b) => b.workflow === workflow && (!task || b.task === task));
+      const bench = entry.benchmarks.find((b) =>
+        b.workflow === workflow && (!task || b.task === task) &&
+        (!state.histEnv || String(b.num_envs) === state.histEnv) &&
+        (!state.histResolution || String(b.resolution) === state.histResolution)
+      );
       if (!bench) continue;
 
       const val = bench.runtime?.[metric] ?? bench.train?.[metric];
@@ -1292,6 +1713,8 @@
         if (hdf.size === 0 || !hdf.has(pp.datatype)) continue;
         for (const b of entry.benchmarks) {
           if (isHiddenWorkflow(b.workflow)) continue;
+          if (state.histEnv && String(b.num_envs) !== state.histEnv) continue;
+          if (state.histResolution && String(b.resolution) !== state.histResolution) continue;
           if (!wfTaskMap[b.workflow]) wfTaskMap[b.workflow] = new Set();
           wfTaskMap[b.workflow].add(b.task);
         }
@@ -1340,7 +1763,10 @@
             if (hrf.size === 0 || !hrf.has(pp.renderer)) continue;
             if (hdf.size === 0 || !hdf.has(pp.datatype)) continue;
             for (const b of entry.benchmarks) {
-              if (b.workflow === wf && b.task === task) presetsSeen.add(entry.preset);
+              if (b.workflow !== wf || b.task !== task) continue;
+              if (state.histEnv && String(b.num_envs) !== state.histEnv) continue;
+              if (state.histResolution && String(b.resolution) !== state.histResolution) continue;
+              presetsSeen.add(entry.preset);
             }
           }
         }
@@ -1351,7 +1777,11 @@
           const values = data.runs.map((run) => {
             const entry = run.entries.find((e) => e.preset === preset);
             if (!entry) return null;
-            const bench = entry.benchmarks.find((b) => b.workflow === wf && b.task === task);
+            const bench = entry.benchmarks.find((b) =>
+              b.workflow === wf && b.task === task &&
+              (!state.histEnv || String(b.num_envs) === state.histEnv) &&
+              (!state.histResolution || String(b.resolution) === state.histResolution)
+            );
             if (!bench) return null;
             return bench.runtime?.[repMetric] ?? bench.train?.[repMetric] ?? null;
           });
@@ -1441,6 +1871,8 @@
         const hasJob = !!entry.ci_job_id;
         for (const b of entry.benchmarks) {
           if (isHiddenWorkflow(b.workflow)) continue;
+          if (state.histEnv && String(b.num_envs) !== state.histEnv) continue;
+          if (state.histResolution && String(b.resolution) !== state.histResolution) continue;
           const col = `${b.workflow}|${b.task}`;
           allWfTasks[col] = { workflow: b.workflow, task: b.task };
         }
@@ -1451,6 +1883,8 @@
         }
         for (const b of entry.benchmarks) {
           if (isHiddenWorkflow(b.workflow)) continue;
+          if (state.histEnv && String(b.num_envs) !== state.histEnv) continue;
+          if (state.histResolution && String(b.resolution) !== state.histResolution) continue;
           const col = `${b.workflow}|${b.task}`;
           presetJobMap[run.commit_sha][pKey].benchKeys.add(col);
         }
@@ -1591,6 +2025,11 @@
   $("#gpuSelectGlobal").addEventListener("change", async (e) => {
     state.currentGpu = e.target.value;
     state.compFilterRunIndex = -1;
+    state.compEnv = "";
+    state.compResolution = "";
+    state.histEnv = "";
+    state.histResolution = "";
+    state.scalingResolution = "";
     compControlsInitialized = false;
     state.histFilterInited = false;
     state.histRunDetail = -1;
@@ -1609,6 +2048,21 @@
 
   $("#taskSelectComp").addEventListener("change", (e) => {
     state.compTask = e.target.value;
+    state.compEnv = "";
+    state.compResolution = "";
+    state.compFilterRunIndex = -1;
+    renderComparison();
+  });
+
+  $("#envSelectComp").addEventListener("change", (e) => {
+    state.compEnv = e.target.value;
+    state.compResolution = "";
+    state.compFilterRunIndex = -1;
+    renderComparison();
+  });
+
+  $("#resSelectComp").addEventListener("change", (e) => {
+    state.compResolution = e.target.value;
     state.compFilterRunIndex = -1;
     renderComparison();
   });
@@ -1617,6 +2071,38 @@
     state.compWorkflow = e.target.value;
     renderComparison();
   });
+
+  $("#runSelectScaling").addEventListener("change", (e) => {
+    state.scalingRunIndex = parseInt(e.target.value, 10);
+    renderScaling();
+    syncUrlState();
+  });
+
+  $("#resSelectScaling").addEventListener("change", (e) => {
+    state.scalingResolution = e.target.value;
+    renderScaling();
+    syncUrlState();
+  });
+
+  $("#scalingLinearToggle").addEventListener("change", (e) => {
+    state.scalingLinearX = e.target.checked;
+    renderScaling();
+    syncUrlState();
+  });
+
+  initDropdownToggle("#scalingEnvFilterBtn", "#scalingEnvFilterPanel");
+
+  $("#scalingEnvSelectAll").addEventListener("click", () => {
+    state.scalingEnvFilter = new Set(ENV_SIZES.map(String));
+    renderScaling();
+    syncUrlState();
+  });
+  $("#scalingEnvDeselectAll").addEventListener("click", () => {
+    state.scalingEnvFilter.clear();
+    renderScaling();
+    syncUrlState();
+  });
+
 
   function initDropdownToggle(btnSel, panelSel) {
     $(btnSel).addEventListener("click", (e) => {
@@ -1635,7 +2121,8 @@
 
   document.addEventListener("click", () => {
     ["#physicsFilterPanel", "#rendererFilterPanel", "#datatypeFilterPanel",
-     "#physicsFilterPanelHist", "#rendererFilterPanelHist", "#datatypeFilterPanelHist"].forEach((sel) => {
+     "#physicsFilterPanelHist", "#rendererFilterPanelHist", "#datatypeFilterPanelHist",
+     "#scalingEnvFilterPanel"].forEach((sel) => {
       const panel = $(sel);
       if (panel && panel.getAttribute("aria-hidden") !== "true") {
         panel.setAttribute("aria-hidden", "true");
@@ -1669,7 +2156,22 @@
 
   $("#taskSelectHist").addEventListener("change", (e) => {
     state.histTask = e.target.value;
+    state.histEnv = "";
+    state.histResolution = "";
     state.histFilterInited = false;
+    const data = getCurrentData();
+    if (data) renderHistory();
+  });
+
+  $("#envSelectHist").addEventListener("change", (e) => {
+    state.histEnv = e.target.value;
+    state.histResolution = "";
+    const data = getCurrentData();
+    if (data) renderHistory();
+  });
+
+  $("#resSelectHist").addEventListener("change", (e) => {
+    state.histResolution = e.target.value;
     const data = getCurrentData();
     if (data) renderHistory();
   });

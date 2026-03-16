@@ -771,6 +771,26 @@ select:focus { outline: 1px solid var(--accent); }
 .status-fail { background: rgba(248, 81, 73, 0.1); }
 .status-not-run { color: var(--text-secondary); font-style: italic; }
 
+.scaling-chart-card {
+  margin-bottom: 20px;
+  padding: 16px;
+}
+.scaling-chart-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+.scaling-chart-metric {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.scaling-canvas-wrap {
+  position: relative;
+  height: 420px;
+}
+
 .toast-container {
   position: fixed;
   bottom: 24px;

@@ -35,6 +35,7 @@
     <div class="tab-nav-inner">
       <button class="nav-tab active" data-tab="comparison">Preset Comparison</button>
       <button class="nav-tab" data-tab="history">Performance History</button>
+      <button class="nav-tab" data-tab="scaling">Env Scaling</button>
       <button class="nav-tab" data-tab="info">Info</button>
       <div class="tab-gpu-select">
         <label for="gpuSelectGlobal">GPU</label>
@@ -54,6 +55,14 @@
         <div class="control-group">
           <label for="taskSelectComp">Task</label>
           <select id="taskSelectComp"></select>
+        </div>
+        <div class="control-group">
+          <label for="envSelectComp">Env</label>
+          <select id="envSelectComp"></select>
+        </div>
+        <div class="control-group">
+          <label for="resSelectComp">Resolution</label>
+          <select id="resSelectComp"></select>
         </div>
         <div class="control-group">
           <label for="workflowSelectComp">Workflow</label>
@@ -111,6 +120,14 @@
         <div class="control-group">
           <label for="taskSelectHist">Task</label>
           <select id="taskSelectHist"></select>
+        </div>
+        <div class="control-group">
+          <label for="envSelectHist">Env</label>
+          <select id="envSelectHist"></select>
+        </div>
+        <div class="control-group">
+          <label for="resSelectHist">Resolution</label>
+          <select id="resSelectHist"></select>
         </div>
         <div class="control-group">
           <label for="workflowSelectHist">Workflow</label>
@@ -186,6 +203,41 @@
       <div id="allTasksOverview"></div>
 
       <div id="benchmarkStatusGrid"></div>
+    </div>
+
+    <!-- ===== ENV SCALING TAB ===== -->
+    <div id="scalingPanel" class="tab-panel">
+      <div class="controls">
+        <div class="control-group">
+          <label for="runSelectScaling">Run (Commit)</label>
+          <select id="runSelectScaling"></select>
+        </div>
+        <div class="control-group">
+          <label for="resSelectScaling">Resolution</label>
+          <select id="resSelectScaling"></select>
+        </div>
+        <div class="control-group datatype-filter-wrap">
+          <label>Env Sizes</label>
+          <div class="datatype-dropdown">
+            <button type="button" class="datatype-dropdown-btn" id="scalingEnvFilterBtn">Env Sizes (all) &#9660;</button>
+            <div class="datatype-dropdown-panel" id="scalingEnvFilterPanel" aria-hidden="true">
+              <div class="datatype-actions">
+                <button type="button" class="datatype-action-btn" id="scalingEnvSelectAll">Select all</button>
+                <button type="button" class="datatype-action-btn" id="scalingEnvDeselectAll">Deselect all</button>
+              </div>
+              <div class="datatype-checkboxes" id="scalingEnvCheckboxes"></div>
+            </div>
+          </div>
+        </div>
+        <div class="control-group" style="justify-content:flex-end;">
+          <label class="datatype-checkbox-label" style="gap:6px;cursor:pointer;">
+            <input type="checkbox" id="scalingLinearToggle">
+            Proportional X-axis
+          </label>
+        </div>
+      </div>
+      <div id="scalingVersionBar" class="version-bar"></div>
+      <div id="scalingContent"></div>
     </div>
 
     <!-- ===== INFO TAB ===== -->
