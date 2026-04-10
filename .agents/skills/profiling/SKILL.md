@@ -1,0 +1,199 @@
+---
+name: profiling
+description: Profile and capture performance data using Tracy and Nsight Systems. Use when the user asks to profile, capture traces, or measure performance overhead.
+---
+
+# Profiling Guide
+
+This is the canonical reference for profiling Kit-based applications (Isaac Sim, Isaac Lab, Kit SDK).
+Other skills reference this one for profiling details — keep this up to date.
+
+## Tracy Profiling
+
+### Environment Setup
+```bash
+export CARB_PROFILING_PYTHON=1
+export TRACY_NO_SYS_TRACE=1
+export TRACY_NO_CALLSTACK=1
+```
+
+### Kit Args (common for all Kit-based products)
+```
+--/app/profilerBackend=tracy
+--/app/profileFromStart=true
+--/profiler/gpu/tracyInject/enabled=true
+--/app/profilerMask=1
+--/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false
+--/profiler/channels/carb.events/enabled=false
+--/profiler/channels/carb.tasking/enabled=false
+--/rtx/addTileGpuAnnotations=true
+```
+
+### Tracy Capture — Correct Procedure (IMPORTANT)
+
+Tracy capture is error-prone. Follow this exact sequence to avoid port conflicts and data loss.
+
+**Default Tracy port: 8086.** Kit/Isaac Sim auto-increments to 8087, 8088... if 8086 is already in use.
+
+**Tracy capture binary:** Build from source at https://github.com/wolfpld/tracy or obtain pre-built binaries.
+
+#### Step-by-step:
+```bash
+# 1. Kill any existing Tracy-related processes hogging the port
+pkill -f capture || true
+ss -tlnp | grep :8086  # verify port is free
+
+# 2. Start the application FIRST (in background)
+nohup ./python.sh <benchmark_script> <args> \
+  --/app/profilerBackend=tracy --/app/profileFromStart=true \
+  ... > /tmp/app.log 2>&1 &
+APP_PID=$!
+
+# 3. Poll until Tracy port is open (app needs time to initialize)
+for i in $(seq 1 60); do
+  ss -tlnp | grep -q :8086 && break
+  sleep 2
+done
+
+# 4. Start capture AFTER port is confirmed open
+capture -o trace_output.tracy -f -p 8086
+
+# 5. Wait for app to finish — capture auto-disconnects and saves
+# DO NOT kill capture manually! It saves data only on clean disconnect.
+wait $APP_PID
+```
+
+#### Critical warnings:
+- **NEVER start capture before the app.** The app might open on 8087 if 8086 is occupied.
+- **NEVER kill capture with kill/SIGTERM.** It will NOT save the trace file.
+- **Always check for zombie processes** on port 8086 before starting.
+- **v6.0.0 shutdown hang:** v6.0.0 with Tracy may hang during shutdown. If the app doesn't exit within ~2 min after benchmark completes, kill the app process (not capture).
+
+### MANDATORY: Apply `os._exit(0)` close patch (prevents shutdown hang)
+
+Isaac Sim's `simulation_app.py` `close()` method hangs during shutdown, especially with Tracy.
+Patch BEFORE running any benchmark:
+
+```bash
+SIM_APP="<package_path>/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py"
+grep -n 'Close the running Omniverse Toolkit' "$SIM_APP"
+sed -i 's/"""Close the running Omniverse Toolkit."""/os._exit(0)/' "$SIM_APP"
+grep -n 'os._exit(0)' "$SIM_APP"
+```
+
+Must be applied to EVERY fresh install.
+
+### MANDATORY: Force-kill hung benchmarks when results exist
+
+If ALL expected output files exist with non-zero size, and the process is
+still running after 2+ minutes with no new output, it is HUNG. Force-kill it:
+
+```bash
+ls -la <result_path>/kpis_*.json <result_path>/*.tracy 2>/dev/null
+# If files exist and size > 0:
+kill -9 <pid>
+```
+
+## Nsight Systems Profiling
+
+### Install
+```bash
+# Linux: download from https://developer.nvidia.com/nsight-systems
+sudo dpkg -i nsight-systems-*.deb
+
+# Windows: install via CUDA Toolkit from https://developer.nvidia.com/cuda-downloads
+```
+
+### Kit Args for NVTX
+```
+--/app/profileFromStart=true
+--/profiler/enabled=true
+--/app/profilerBackend=nvtx
+--/app/profilerMask=1
+--/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false
+--/profiler/channels/carb.events/enabled=false
+--/profiler/channels/carb.tasking/enabled=false
+```
+
+### Nsys Command
+```bash
+export CARB_PROFILING_PYTHON=1
+
+sudo -E nsys profile \
+  -t nvtx,cuda,osrt \
+  --gpu-metrics-devices=all \
+  --gpuctxsw=true \
+  --cuda-memory-usage=true \
+  --python-backtrace=cuda \
+  <APPLICATION_COMMAND>
+```
+
+### Windows nsys Differences
+- `-t osrt` is NOT supported on Windows (use `-t wddm`)
+- `nsys profile` CANNOT profile `.bat` files — must target `.exe` directly
+- `nsys stats` may fail with UnicodeDecodeError — export to SQLite instead
+- Must `cd` to the directory containing the target exe
+
+## Analyzing Profiles
+
+### Key NVTX Zones in Kit-based Apps
+| Zone | Meaning |
+|---|---|
+| App Update | Full frame time |
+| UsdContext hydraRender | Total rendering time |
+| SceneRenderer-rtx: render | Individual render pass (1 per render product) |
+| ViewportSceneLayer | Viewport callbacks (eliminate with tiled camera) |
+| PhysXUpdate | Physics simulation |
+| Replicator on_update | Annotator pipeline |
+
+### nsys SQLite Export (when nsys stats fails or custom queries needed)
+```bash
+nsys export --type=sqlite -o profile.sqlite profile.nsys-rep
+```
+
+**NVTX_EVENTS gotcha:** There is NO `name` column. Use `text` (inline) or join `textId` to `StringIds`:
+```sql
+sqlite3 profile.sqlite "
+SELECT COALESCE(e.text, s.value) as zone_name,
+       COUNT(*) as cnt,
+       ROUND(AVG(e.end - e.start) / 1e6, 2) as avg_ms,
+       ROUND(SUM(e.end - e.start) / 1e6, 2) as total_ms
+FROM NVTX_EVENTS e
+LEFT JOIN StringIds s ON e.textId = s.id
+WHERE e.start > 25000000000
+  AND e.end IS NOT NULL AND (e.end - e.start) > 0
+GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
+"
+```
+
+**CUDA Kernels = 0 is normal** for Kit/Isaac Sim — RTX uses its own GPU pipeline, not CUDA API. NVTX zones are the only analysis source.
+
+### Tracy CSV Export (fallback analysis without nsys-analyzer)
+```bash
+csvexport profile.tracy > zones.csv
+# Columns: name, src_file, src_line, ns_since_start, exec_time_ns, ...
+sort -t',' -k5 -rn zones.csv | head -50
+```
+
+---
+
+# CPU Governor — Performance Mode
+
+## MANDATORY: Set Before ANY Benchmark
+
+```bash
+# Check
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c
+
+# Set
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+
+# Verify
+cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c
+```
+
+- Not persistent across reboots
+- Requires sudo
+- Dynamic governors (`ondemand`, `schedutil`) cause inconsistent benchmark results
+
+---
