@@ -8,6 +8,15 @@ description: Install Isaac Sim via pip or source build. Covers Docker setup, ver
 **Public repo:** https://github.com/isaac-sim/IsaacSim
 **Branch convention:** `develop` (latest), `release/*` (stable), version tags (e.g., `6.0.0`)
 
+## System Requirements
+
+- **GPU:** NVIDIA RTX (Ada, Ampere, or newer recommended)
+- **Driver:** 535+ (check with `nvidia-smi`)
+- **OS:** Ubuntu 22.04+ (Linux), Windows 10/11
+- **Python:** 3.10+
+- **RAM:** 32 GB+ recommended
+- **Disk:** ~30 GB for full install with cached assets
+
 ## Method 1: Pip Install (Quickest)
 
 ```bash

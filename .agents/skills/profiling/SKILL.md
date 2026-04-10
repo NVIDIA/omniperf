@@ -136,15 +136,31 @@ sudo -E nsys profile \
 
 ## Analyzing Profiles
 
-### Key NVTX Zones in Kit-based Apps
-| Zone | Meaning |
-|---|---|
-| App Update | Full frame time |
-| UsdContext hydraRender | Total rendering time |
-| SceneRenderer-rtx: render | Individual render pass (1 per render product) |
-| ViewportSceneLayer | Viewport callbacks (eliminate with tiled camera) |
-| PhysXUpdate | Physics simulation |
-| Replicator on_update | Annotator pipeline |
+For NVTX zone interpretation and phase detection config, see the `nsys-analyze` skill.
+
+### Product-Specific Profiling Examples
+
+**Isaac Sim with Tracy:**
+```bash
+./python.sh standalone_examples/benchmarks/benchmark_camera.py \
+  --num-cameras 1 --resolution 1920 1080 --num-gpus 1 --num-frames 600 \
+  --/app/profilerBackend=tracy --/app/profileFromStart=true \
+  --/profiler/gpu/tracyInject/enabled=true --/app/profilerMask=1 \
+  --/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false \
+  --/profiler/channels/carb.events/enabled=false \
+  --/profiler/channels/carb.tasking/enabled=false \
+  --/rtx/addTileGpuAnnotations=true \
+  --/exts/isaacsim.benchmark.services/metrics/metrics_output_folder=/tmp/results
+```
+
+**Isaac Lab with Nsight:**
+```bash
+sudo -E nsys profile -t nvtx,cuda,osrt --gpu-metrics-devices=all \
+  --gpuctxsw=true --cuda-memory-usage=true --python-backtrace=cuda \
+  ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
+  --task=Isaac-Cartpole-RGB-Camera-Direct-v0 --num_frames 100 --headless --enable_cameras --num_envs=512 \
+  --kit_args "--/app/profileFromStart=true --/profiler/enabled=true --/app/profilerBackend=nvtx --/app/profilerMask=1"
+```
 
 ### nsys SQLite Export (when nsys stats fails or custom queries needed)
 ```bash

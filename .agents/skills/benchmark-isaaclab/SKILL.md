@@ -7,32 +7,11 @@ description: Run Isaac Lab benchmarks. Covers setup, RL training, environment st
 
 > **Parameter references may be outdated.** Always verify with `./isaaclab.sh -p <script> --help`.
 > For profiling details (Tracy, Nsight, CPU governor), see the `profiling` skill.
-> For Isaac Sim setup, see the `benchmark-isaacsim` skill.
+> For installation, see the `install-isaaclab` skill.
 
 ## Setup
 
-**Repo:** https://github.com/isaac-sim/IsaacLab.git
-**Requires:** Isaac Sim + Miniconda
-
-```bash
-# 1. Install Isaac Sim first (see benchmark-isaacsim skill)
-# 2. Clone Isaac Lab
-git clone https://github.com/isaac-sim/IsaacLab.git
-cd IsaacLab && git checkout develop
-
-# 3. Link Isaac Sim
-ln -s <ISAAC_SIM_PATH> _isaac_sim
-
-# 4. Create conda env and install
-./isaaclab.sh -c _isaaclab_env
-./isaaclab.sh -i
-```
-
-**Activate:**
-```bash
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate _isaaclab_env
-```
+See the `install-isaaclab` skill for installation (clone, conda env, Isaac Sim linking).
 
 ## Before Running Any Benchmark
 
@@ -54,6 +33,13 @@ All in `scripts/benchmarks/`. Run via `./isaaclab.sh -p scripts/benchmarks/<scri
 | `benchmark_view_comparison.py` | XformPrimView vs PhysX | `--num_envs`, `--num_iterations` |
 
 **Common params:** `--headless`, `--device`, `--enable_cameras`, `--benchmark_backend`, `--output_path`, `--distributed`
+
+**Passing Kit args** (for profiling, output control, etc.):
+```bash
+./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
+    --task=Isaac-Ant-Direct-v0 --headless --num_envs=4096 \
+    --kit_args "--/app/profilerBackend=tracy --/log/file=/tmp/kit.log"
+```
 
 ### Batch suites
 ```bash

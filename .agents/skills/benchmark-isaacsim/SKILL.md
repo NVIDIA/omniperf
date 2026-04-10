@@ -10,33 +10,13 @@ description: Run Isaac Sim benchmarks. Covers setup, known pitfalls, and perform
 
 ## Setup
 
-**Public repo:** https://github.com/isaac-sim/IsaacSim
-
-```bash
-# Pip install (quickest)
-pip install isaacsim
-
-# Or source build
-git clone https://github.com/isaac-sim/IsaacSim.git
-cd IsaacSim
-git checkout develop
-pip install -e .       # or ./build.sh -xr (requires Docker)
-```
-
-**Branch convention:** `develop` (latest), `release/*` (stable), version tags.
-
-**Docker:** Source build requires Docker by default. Install with `sudo apt-get install -y docker.io` if missing. Use `./build.sh -xr --no-docker` as fallback.
+See the `install-isaacsim` skill for installation (pip, source build, Docker).
 
 ## Before Running Any Benchmark
 
 1. **Apply the `os._exit(0)` patch** — see `profiling` skill. Prevents shutdown hang.
 2. **Set CPU governor to performance** — see `profiling` skill.
-3. **Set Nucleus auth** (if using Nucleus-hosted assets):
-   ```bash
-   export OMNI_USER='$omni-api-token'
-   export OMNI_PASS='<YOUR-API-TOKEN>'
-   ```
-   Some benchmarks use local assets and don't need this.
+3. **Set Nucleus auth** if using Nucleus-hosted assets — see `install-isaacsim` skill.
 
 ## Benchmark Scripts
 
@@ -58,6 +38,12 @@ All in `standalone_examples/benchmarks/`. Run via `./python.sh <script> [args]`.
 | `benchmark_nucleus_kpis.py` | Nucleus KPIs | (none) |
 
 **Common params:** `--num-frames` (default 600), `--num-gpus`, `--backend-type`, `--viewport-updates`, `--non-headless`
+
+**Output control Kit args** (append to any benchmark command):
+```
+--/exts/isaacsim.benchmark.services/metrics/metrics_output_folder=<output_dir>
+--/log/file=<output_dir>/kit.log
+```
 
 ## Critical Gotchas
 
@@ -87,12 +73,7 @@ settings.set("/app/renderer/skipWhileMinimized", True)
 ```
 
 ### JWT token expiry = silent black renders
-Expired `OMNI_PASS` tokens cause scenes to load with missing materials (all-black).
-```bash
-echo "$OMNI_PASS" | cut -d. -f2 | base64 -d 2>/dev/null | python3 -c "
-import json, sys; from datetime import datetime; d = json.load(sys.stdin)
-print(f'Expires: {datetime.fromtimestamp(d.get(\"exp\", 0))}')"
-```
+Expired `OMNI_PASS` tokens cause silent asset loading failure. See `install-isaacsim` skill for the expiry check command.
 
 ### carb.log_warn() doesn't go to stdout
 Monitor progress by polling for result JSON files, not watching stdout.
