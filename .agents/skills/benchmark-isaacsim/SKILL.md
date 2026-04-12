@@ -28,13 +28,17 @@ All in `standalone_examples/benchmarks/`. Run via `./python.sh <script> [args]`.
 | `benchmark_sdg.py` | Synthetic data generation throughput | `--num-cameras`, `--annotators`, `--asset-count` |
 | `benchmark_scene_loading.py` | Scene load time + FPS | `--env-url` (required) |
 | `benchmark_robots_o3dyn.py` | O3Dyn robot physics | `--num-robots`, `--physics` |
-| `benchmark_robots_humanoid.py` | Humanoid physics | `--num-robots` |
+| `benchmark_robots_humanoid.py` | Humanoid physics | `--num-robots`, `--physics` |
 | `benchmark_robots_nova_carter.py` | Nova Carter (no ROS) | `--num-robots` |
 | `benchmark_robots_nova_carter_ros2.py` | Nova Carter + ROS2 | `--num-robots`, `--enable-3d-lidar`, `--enable-hawks` |
 | `benchmark_robots_evobot.py` | Evobot multi-phase | `--num-robots 1 10 20` |
 | `benchmark_robots_ur10.py` | UR10 manipulation | `--num-robots`, `--device` |
-| `benchmark_core_world.py` | Core world cloning | `--num-envs` |
+| `benchmark_core_world.py` | Core world cloning | `--num-envs` (no `--num-frames`) |
 | `benchmark_rtx_lidar.py` | RTX lidar sensor | `--num-sensors`, `--lidar-type` |
+| `benchmark_physx_lidar.py` | PhysX lidar sensor | `--num-sensors` |
+| `benchmark_rtx_radar.py` | RTX radar sensor | `--num-sensors` |
+| `benchmark_single_view_depth_sensor.py` | Single-view depth camera | `--num-cameras`, `--resolution W H` |
+| `benchmark_rtx_lidar_ros2_pcl_metadata.py` | RTX lidar + ROS2 PCL (v6+) | `--num-sensors`, `--metadata` |
 | `benchmark_nucleus_kpis.py` | Nucleus KPIs | (none) |
 
 **Common params:** `--num-frames` (default 600), `--num-gpus`, `--backend-type`, `--viewport-updates`, `--non-headless`
@@ -105,9 +109,12 @@ data, info = sensor.get_data("rgb")  # warp array on GPU, shape (N, H, W, C)
 
 ## Output Files
 
-- `startup_*.json`, `kpis_*.json` — benchmark KPIs
-- `benchmark_result.json` — final results
-- `kit.log` — execution log
-- `*.tracy` / `*.nsys-rep` — profiling traces
+- `kpis_benchmark_<name>.json` — benchmark KPIs (main results)
+- `kit.log` — execution log (if `--/log/file=` is set)
+- `*.tracy` — Tracy profiling trace (only with Tracy args)
+- `*.nsys-rep` — Nsight profiling trace (only with nsys)
+
+> **Note:** `benchmark_result.json` and `startup_*.json` are NOT produced by default
+> in v5.x/v6.x. The primary results file is `kpis_benchmark_<name>.json`.
 
 ---

@@ -19,6 +19,9 @@ description: Install Isaac Sim via pip or source build. Covers Docker setup, ver
 
 ## Method 1: Pip Install (Quickest)
 
+> **Note:** As of April 2026, pip only has IsaacSim up to v4.5.0.0.
+> For v5.x and v6.x, use the source build (Method 2) or editable install (Method 3).
+
 ```bash
 pip install isaacsim
 ```

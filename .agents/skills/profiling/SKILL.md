@@ -75,11 +75,24 @@ Isaac Sim's `simulation_app.py` `close()` method hangs during shutdown, especial
 Patch BEFORE running any benchmark:
 
 ```bash
-SIM_APP="<package_path>/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py"
-grep -n 'Close the running Omniverse Toolkit' "$SIM_APP"
-sed -i 's/"""Close the running Omniverse Toolkit."""/os._exit(0)/' "$SIM_APP"
+# Find simulation_app.py — path varies between source and build layouts:
+#   Source build: source/extensions/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
+#   Build output: _build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
+SIM_APP=$(find <package_path> -path "*/isaacsim/simulation_app/simulation_app.py" -not -path "*/__pycache__/*" | head -1)
+echo "Found: $SIM_APP"
+
+# Insert os._exit(0) as first line of the close() method body.
+# The docstring varies across versions so we match the method signature instead.
+sed -i '/def close(self[^)]*)/a\        import os; os._exit(0)' "$SIM_APP"
+
+# Verify the patch applied
 grep -n 'os._exit(0)' "$SIM_APP"
 ```
+
+> **Why not sed on the docstring?** The docstring text differs between v5 (`"""Close the running
+> Omniverse Toolkit application."""` — multi-line) and v6, and the old single-line pattern
+> `"""Close the running Omniverse Toolkit."""` silently fails on both. Matching the `def close`
+> signature is robust across versions.
 
 Must be applied to EVERY fresh install.
 
