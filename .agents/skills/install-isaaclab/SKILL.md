@@ -45,39 +45,52 @@ ln -s /path/to/IsaacSim/_build/linux-x86_64/release _isaac_sim
 ## Step 5: Create Conda Environment
 
 ```bash
-./isaaclab.sh -c _isaaclab_env
+./isaaclab.sh -c isaaclab_env
 ```
 
 This creates a conda env with the correct Python version and base dependencies.
+The default name (if you omit the argument) is `env_isaaclab`.
+
+> **Note:** You may need to accept conda channel TOS first if this is a fresh install:
+> ```bash
+> conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+> conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+> ```
 
 ## Step 6: Install Dependencies
 
 ```bash
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate _isaaclab_env
+conda activate isaaclab_env
 ./isaaclab.sh -i
 ```
+
+> **Important:** Make sure to run these commands in `bash` (not `sh`). The `source` builtin
+> and `conda activate` require bash.
 
 ## Verify
 
 ```bash
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate _isaaclab_env
+conda activate isaaclab_env
 cd IsaacLab
 
 # Quick import check
 ./isaaclab.sh -p -c "import isaaclab; print('OK')"
 
-# Run a minimal benchmark (headless, few frames)
+# Run a minimal benchmark (few frames)
 ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-  --task=Isaac-Cartpole-Direct-v0 --num_frames 10 --headless --num_envs=16
+  --task=Isaac-Cartpole-Direct-v0 --num_frames 10 --num_envs=16
 ```
+
+> **Note:** `--headless` is deprecated in recent versions. Omit `--viz` for headless mode,
+> or use `--viz none` to force headless when visualizers are configured.
 
 ## Day-to-Day Activation
 
 ```bash
 source ~/miniconda3/etc/profile.d/conda.sh
-conda activate _isaaclab_env
+conda activate isaaclab_env
 cd IsaacLab
 ```
 
@@ -92,8 +105,8 @@ ls -la _isaac_sim/
 
 ### Conda env already exists
 ```bash
-conda env remove -n _isaaclab_env
-./isaaclab.sh -c _isaaclab_env
+conda env remove -n isaaclab_env
+./isaaclab.sh -c isaaclab_env
 ```
 
 ### GPU not found / CUDA errors
