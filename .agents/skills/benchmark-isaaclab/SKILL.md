@@ -29,10 +29,14 @@ All in `scripts/benchmarks/`. Run via `./isaaclab.sh -p scripts/benchmarks/<scri
 | `benchmark_rsl_rl.py` | RSL-RL training throughput | `--task`, `--num_envs`, `--max_iterations` |
 | `benchmark_cameras.py` | Camera system FPS + autotune | `--num_tiled_cameras`, `--num_standard_cameras`, `--height`, `--width`, `--autotune` |
 | `benchmark_load_robot.py` | Robot loading time | `--num_envs`, `--robot {anymal_d,h1,g1}` |
-| `benchmark_lazy_export.py` | Lazy export/import speed | `--iterations` |
-| `benchmark_view_comparison.py` | XformPrimView vs PhysX | `--num_envs`, `--num_iterations` |
-| `benchmark_startup.py` | Application startup time | (standard params) |
-| `benchmark_xform_prim_view.py` | XformPrimView performance | `--num_envs` |
+| `benchmark_startup.py` | App startup time profiling | `--task` (required), `--num_envs`, `--top_n` |
+| `benchmark_lazy_export.py` | Lazy export/import speed | `--iterations`, `--tasks` (stdout only, no JSON backend) |
+| `benchmark_view_comparison.py` | XformPrimView vs PhysX | `--num_envs`, `--num_iterations`, `--profile` (stdout/cProfile, no JSON backend) |
+| `benchmark_xform_prim_view.py` | XformPrimView performance | `--num_envs`, `--num_iterations`, `--profile` (stdout/cProfile, no JSON backend) |
+
+> **Note:** `benchmark_lazy_export.py`, `benchmark_view_comparison.py`, and `benchmark_xform_prim_view.py`
+> do NOT support `--benchmark_backend` or `--output_path`. They output results to stdout.
+> Use `--profile` (where available) to save cProfile `.prof` files.
 
 **Common params:** `--device`, `--enable_cameras`, `--benchmark_backend`, `--output_path`, `--distributed`
 
