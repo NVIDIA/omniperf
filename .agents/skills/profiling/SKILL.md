@@ -197,7 +197,7 @@ GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
 
 **CUDA Kernels = 0 is normal** for Kit/Isaac Sim — RTX uses its own GPU pipeline, not CUDA API. NVTX zones are the only analysis source.
 
-### Tracy CSV Export (fallback analysis without nsys-analyzer)
+### Tracy CSV Export (alternative analysis path)
 ```bash
 csvexport profile.tracy > zones.csv
 # Columns: name, src_file, src_line, ns_since_start, exec_time_ns, ...
