@@ -13,18 +13,51 @@ description: Install Isaac Sim via pip or source build. Covers Docker setup, ver
 - **GPU:** NVIDIA RTX (Ada, Ampere, or newer recommended)
 - **Driver:** 535+ (check with `nvidia-smi`)
 - **OS:** Ubuntu 22.04+ (Linux), Windows 10/11
-- **Python:** 3.10+
+- **Python:** see [Python version matrix](#python-version-matrix) below (version is pinned per Isaac Sim release)
 - **RAM:** 32 GB+ recommended
 - **Disk:** ~30 GB for full install with cached assets
+
+## Python version matrix
+
+Isaac Sim is built against a single, specific CPython version per release. Using the wrong Python version will cause `pip install` to fail to resolve wheels, or import-time ABI errors for the source build. Match the table exactly — newer or older minor versions are not supported.
+
+| Isaac Sim | Python | Notes |
+|-----------|--------|-------|
+| 4.0.x – 4.2.x | 3.10 | Linux/Windows |
+| 4.5.x | 3.10 | Last 3.10 release |
+| 5.0.x | 3.11 | GLIBC 2.35+ required on Linux |
+| 5.1.x | 3.11 | |
+| 6.0.x | 3.12 | Current (Early Developer Release → GA) |
+
+Primary sources:
+- 4.5: <https://docs.isaacsim.omniverse.nvidia.com/4.5.0/installation/install_python.html>
+- 5.0: <https://docs.isaacsim.omniverse.nvidia.com/5.0.0/installation/install_python.html>
+- 5.1: <https://docs.isaacsim.omniverse.nvidia.com/5.1.0/installation/install_python.html>
+- 6.0: <https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/install_python.html>
+
+Check your Python:
+```bash
+python3 --version
+```
+
+If the required version isn't installed (Ubuntu example):
+```bash
+sudo add-apt-repository -y ppa:deadsnakes/ppa
+sudo apt-get update
+sudo apt-get install -y python3.12 python3.12-venv python3.12-dev   # adjust version to match the table
+```
 
 ## Virtual Environment (Strongly Recommended)
 
 Always install Isaac Sim into an isolated Python environment. Installing into the system Python conflicts with distro packages (especially on Ubuntu) and makes upgrades/uninstalls messy. Use one of the options below before running any `pip install` command from this skill.
 
+> **Pick the Python version that matches your target Isaac Sim release** — see the [Python version matrix](#python-version-matrix). Examples below use 3.12 for Isaac Sim 6.0.x; substitute 3.11 for 5.x or 3.10 for 4.5.x.
+
 ### Option A: `venv` (stdlib, simplest)
 
 ```bash
-python3.10 -m venv ~/venvs/isaacsim
+# Replace 3.12 with the version required by your Isaac Sim release
+python3.12 -m venv ~/venvs/isaacsim
 source ~/venvs/isaacsim/bin/activate
 python -m pip install --upgrade pip setuptools wheel
 ```
@@ -35,7 +68,7 @@ Deactivate later with `deactivate`. Re-activate in any new shell before running 
 
 ```bash
 # Install uv once: https://docs.astral.sh/uv/
-uv venv --python 3.10 ~/venvs/isaacsim
+uv venv --python 3.12 ~/venvs/isaacsim   # match Python to Isaac Sim release
 source ~/venvs/isaacsim/bin/activate
 uv pip install --upgrade pip
 ```
@@ -43,13 +76,13 @@ uv pip install --upgrade pip
 ### Option C: `conda` / `mamba`
 
 ```bash
-conda create -n isaacsim python=3.10 -y
+conda create -n isaacsim python=3.12 -y   # match Python to Isaac Sim release
 conda activate isaacsim
 ```
 
 ### Notes
 
-- **Python version must match.** Isaac Sim requires Python 3.10+; pinning to 3.10 is the safest default.
+- **Python version is strict.** Each Isaac Sim release is built against one specific CPython minor version — see the [matrix](#python-version-matrix). Mismatches cause wheel resolution failures or import-time ABI errors.
 - **Method 2 (source build) ships its own Python** via `_build/linux-x86_64/release/python.sh` — you do not need a venv for running the source build, but you still want one for any host-side tooling (tests, scripts, editable installs).
 - **Editable install (Method 3) needs an active venv** — never `pip install -e .` into system Python.
 - **Cached assets & shader caches** live under `~/.cache/ov` and `~/.local/share/ov`. These are shared across venvs; deleting the venv does not clear them.
@@ -57,13 +90,18 @@ conda activate isaacsim
 
 ## Method 1: Pip Install (Quickest)
 
-> **Note:** As of April 2026, pip only has IsaacSim up to v4.5.0.0.
-> For v5.x and v6.x, use the source build (Method 2) or editable install (Method 3).
+> **Note:** As of April 2026, PyPI ships `isaacsim` up through `6.0.0.0`. Pick the version that matches your venv's Python (see the [matrix](#python-version-matrix)); `pip install isaacsim` without a pin will resolve to the newest compatible wheel.
 
 Activate your venv first (see [Virtual Environment](#virtual-environment-strongly-recommended)), then:
 
 ```bash
+# Latest compatible with the active Python
 pip install isaacsim
+
+# Or pin to a specific release
+pip install 'isaacsim==4.5.0.0'   # Python 3.10
+pip install 'isaacsim==5.1.0.0'   # Python 3.11
+pip install 'isaacsim==6.0.0.0'   # Python 3.12
 ```
 
 Verify:
