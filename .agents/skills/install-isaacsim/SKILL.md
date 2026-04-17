@@ -17,10 +17,50 @@ description: Install Isaac Sim via pip or source build. Covers Docker setup, ver
 - **RAM:** 32 GB+ recommended
 - **Disk:** ~30 GB for full install with cached assets
 
+## Virtual Environment (Strongly Recommended)
+
+Always install Isaac Sim into an isolated Python environment. Installing into the system Python conflicts with distro packages (especially on Ubuntu) and makes upgrades/uninstalls messy. Use one of the options below before running any `pip install` command from this skill.
+
+### Option A: `venv` (stdlib, simplest)
+
+```bash
+python3.10 -m venv ~/venvs/isaacsim
+source ~/venvs/isaacsim/bin/activate
+python -m pip install --upgrade pip setuptools wheel
+```
+
+Deactivate later with `deactivate`. Re-activate in any new shell before running Isaac Sim commands.
+
+### Option B: `uv` (fast, recommended for CI)
+
+```bash
+# Install uv once: https://docs.astral.sh/uv/
+uv venv --python 3.10 ~/venvs/isaacsim
+source ~/venvs/isaacsim/bin/activate
+uv pip install --upgrade pip
+```
+
+### Option C: `conda` / `mamba`
+
+```bash
+conda create -n isaacsim python=3.10 -y
+conda activate isaacsim
+```
+
+### Notes
+
+- **Python version must match.** Isaac Sim requires Python 3.10+; pinning to 3.10 is the safest default.
+- **Method 2 (source build) ships its own Python** via `_build/linux-x86_64/release/python.sh` — you do not need a venv for running the source build, but you still want one for any host-side tooling (tests, scripts, editable installs).
+- **Editable install (Method 3) needs an active venv** — never `pip install -e .` into system Python.
+- **Cached assets & shader caches** live under `~/.cache/ov` and `~/.local/share/ov`. These are shared across venvs; deleting the venv does not clear them.
+- To completely reset: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`.
+
 ## Method 1: Pip Install (Quickest)
 
 > **Note:** As of April 2026, pip only has IsaacSim up to v4.5.0.0.
 > For v5.x and v6.x, use the source build (Method 2) or editable install (Method 3).
+
+Activate your venv first (see [Virtual Environment](#virtual-environment-strongly-recommended)), then:
 
 ```bash
 pip install isaacsim
@@ -75,6 +115,8 @@ cd _build/linux-x86_64/release
 ```
 
 ## Method 3: Pip Editable Install from Source
+
+Activate your venv first (see [Virtual Environment](#virtual-environment-strongly-recommended)), then:
 
 ```bash
 git clone https://github.com/isaac-sim/IsaacSim.git
