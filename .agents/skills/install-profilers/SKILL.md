@@ -1,6 +1,6 @@
 ---
 name: install-profilers
-description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (nsys CLI), Tracy Profiler (csvexport, capture), and sqlite3 for nsys SQLite exports. Use when setting up a profiling environment, when nsys/tracy/csvexport/sqlite3 are missing, or before running the profiling or nsys-analyze skills.
+description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (nsys CLI), Tracy Profiler (`csvexport`, `tracy-capture`), and sqlite3 for nsys SQLite exports. Use when setting up a profiling environment, when nsys/tracy/csvexport/sqlite3 are missing, or before running the profiling or nsys-analyze skills.
 ---
 
 # Install Profilers for Omniverse / Kit Apps
@@ -142,7 +142,7 @@ GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
 
 ---
 
-## 3. Tracy Profiler Tools (csvexport, capture)
+## 3. Tracy Profiler Tools (`csvexport`, `tracy-capture`)
 
 Tracy is used by Kit/Isaac Sim when `--/app/profilerBackend=tracy` is set.
 You need two tools: `tracy-capture` (record traces) and `csvexport` (export to CSV for analysis).
@@ -187,15 +187,20 @@ Not available on Ubuntu 22.04/24.04 from default repos.
 ### Tracy capture usage
 
 ```bash
-# Start the Isaac Sim benchmark with Tracy backend, then capture:
-tracy-capture -o trace.tracy -f -p 8086 &
-CAPTURE_PID=$!
-
+# Start the Isaac Sim benchmark first:
 ./python.sh benchmark_script.py \
   --/app/profilerBackend=tracy --/app/profileFromStart=true \
-  --/profiler/gpu/tracyInject/enabled=true
+  --/profiler/gpu/tracyInject/enabled=true &
+APP_PID=$!
 
-wait $CAPTURE_PID
+# Wait for the Tracy port, then attach the recorder:
+for i in $(seq 1 60); do
+  ss -tlnp | grep -q :8086 && break
+  sleep 2
+done
+
+tracy-capture -o trace.tracy -f -p 8086
+wait $APP_PID
 ```
 
 ### Tracy CSV export usage

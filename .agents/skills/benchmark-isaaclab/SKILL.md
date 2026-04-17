@@ -45,7 +45,7 @@ All in `scripts/benchmarks/`. Run via `./isaaclab.sh -p scripts/benchmarks/<scri
 **Passing Kit args** (for profiling, output control, etc.):
 ```bash
 ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-    --task=Isaac-Ant-Direct-v0 --headless --num_envs=4096 \
+    --task=Isaac-Ant-Direct-v0 --viz none --num_envs=4096 \
     --kit_args "--/app/profilerBackend=tracy --/log/file=/tmp/kit.log"
 ```
 

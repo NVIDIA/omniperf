@@ -40,8 +40,11 @@ Tracy capture is error-prone. Follow this exact sequence to avoid port conflicts
 #### Step-by-step:
 ```bash
 # 1. Kill any existing Tracy-related processes hogging the port
-pkill -f capture || true
+pkill -f '(^|/)(tracy-capture|capture)( |$)' || true
 ss -tlnp | grep :8086  # verify port is free
+
+TRACY_CAPTURE_BIN=$(command -v tracy-capture || command -v capture)
+[ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing Tracy capture binary"; exit 1; }
 
 # 2. Start the application FIRST (in background)
 nohup ./python.sh <benchmark_script> <args> \
@@ -56,7 +59,7 @@ for i in $(seq 1 60); do
 done
 
 # 4. Start capture AFTER port is confirmed open
-capture -o trace_output.tracy -f -p 8086
+"$TRACY_CAPTURE_BIN" -o trace_output.tracy -f -p 8086
 
 # 5. Wait for app to finish — capture auto-disconnects and saves
 # DO NOT kill capture manually! It saves data only on clean disconnect.
@@ -79,6 +82,7 @@ Patch BEFORE running any benchmark:
 #   Source build: source/extensions/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
 #   Build output: _build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
 # NOTE: `find -path` may fail in some environments (dots in dir names). Use glob instead:
+shopt -s globstar nullglob
 SIM_APP=$(echo <package_path>/**/isaacsim/simulation_app/simulation_app.py | tr ' ' '\n' | grep -v __pycache__ | head -1)
 # Or explicit known paths:
 # SIM_APP=<package_path>/_build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py

@@ -85,8 +85,10 @@ import json, sys
 data = json.load(sys.stdin)
 for phase in data:
     for m in phase.get('measurements', []):
-        if 'fps' in m.get('metric','').lower() or 'time' in m.get('metric','').lower():
-            print(f\"{phase['phase_name']}: {m['metric']} = {m['value']:.2f}\")
+        metric = m.get('name') or m.get('metric', '')
+        value = m.get('data', m.get('value'))
+        if isinstance(metric, str) and ('fps' in metric.lower() or 'time' in metric.lower()) and value is not None:
+            print(f\"{phase['phase_name']}: {metric} = {value:.2f}\")
 "
 ```
 
