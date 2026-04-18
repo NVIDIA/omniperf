@@ -29,6 +29,8 @@ cd omniperf
 
 Requires Python 3 (for the built-in HTTP server). No build step or dependencies needed.
 
+> **Note:** The default clone skips the benchmark preview images (~1.5 GB) to keep clones lightweight. To also download them, run `git lfs pull --exclude=""` after cloning.
+
 ### Data Format
 
 Benchmark data lives in `docs/data/`. The `manifest.json` file lists available GPU datasets:
