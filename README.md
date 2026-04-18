@@ -29,7 +29,7 @@ cd omniperf
 
 Requires Python 3 (for the built-in HTTP server). No build step or dependencies needed.
 
-> **Note:** The default clone skips the benchmark preview images (~1.5 GB) to keep clones lightweight. To also download them, run `git lfs pull --include="docs/data/previews/**" --exclude=""` after cloning.
+> **Note:** The default clone skips the benchmark preview images (~1.5 GB) to keep clones lightweight. To also download them, run `git lfs pull --exclude=""` after cloning.
 
 ### Data Format
 
