@@ -29,6 +29,12 @@ jobs:
         with:
           lfs: true
 
+      # .lfsconfig excludes docs/data/previews/** from default LFS fetch
+      # so regular `git clone` stays lightweight. Pages build still needs
+      # the preview images, so pull them explicitly here.
+      - name: Pull LFS previews for Pages build
+        run: git lfs pull --include="docs/data/previews/**"
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
