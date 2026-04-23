@@ -55,7 +55,7 @@ Each GPU data file contains an array of benchmark runs with commit metadata, run
 
 ### Adding New Data
 
-1. Generate the benchmark JSON using the [omniperf-benchmark](https://gitlab-master.nvidia.com/omniverse/benchmark/omniperf-benchmark) tooling
+1. Generate the benchmark JSON using the [omniperf](https://github.com/NVIDIA/omniperf) tooling
 2. Place the JSON file in `docs/data/`
 3. Update `docs/data/manifest.json` to reference the new file
 4. Commit and push — GitHub Pages will automatically deploy
