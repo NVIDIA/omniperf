@@ -1,6 +1,6 @@
 ---
 name: profiling
-description: Profile and capture performance data using Tracy and Nsight Systems. Use when the user asks to profile, capture traces, or measure performance overhead.
+description: Capture performance traces using Tracy and Nsight Systems for Kit-based applications (Isaac Sim, Isaac Lab, Kit SDK). Covers Tracy capture sequence (port management, os._exit patch, shutdown hang workaround), nsys profile commands, Kit args for each backend, CPU governor setup, and the COLD/WARM/TRACY methodology. Use when running profiling captures, setting up trace collection, or troubleshooting capture failures. NOT for adding profiling zones to code (use profiling-api skill) or analyzing captured traces (use nsys-analyze skill).
 ---
 
 # Profiling Guide

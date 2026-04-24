@@ -1,12 +1,12 @@
 ---
-name: instrument-profiling
-description: Add profiling instrumentation to Kit-based C++ and Python code. Covers Carbonite profiling macros (CARB_PROFILE_ZONE, CARB_PROFILE_FUNCTION, GPU zones), Python profiler API (decorators, begin/end), profiler masks, channels, Tracy plot data, event annotations, and automatic Python function capture (CARB_PROFILING_PYTHON). Use when a developer asks how to add profiling spans to their code, needs to understand mask/channel configuration, wants to record custom metrics as Tracy plots, or needs to annotate traces with event markers.
+name: profiling-api
+description: Add profiling zones, metrics, and annotations to Kit-based C++ and Python code. Covers Carbonite macros (CARB_PROFILE_ZONE, CARB_PROFILE_FUNCTION, GPU zones), Python profiler API (decorators, begin/end), profiler masks, channels, Tracy plot data, event annotations, and automatic Python function capture (CARB_PROFILING_PYTHON). Use when a developer asks how to add profiling spans to their code, needs to understand mask/channel configuration, wants to record custom metrics as Tracy plots, or needs to annotate traces with event markers. NOT for capturing traces (use profiling skill) or analyzing them (use nsys-analyze skill).
 ---
 
-# Profiling Instrumentation for Kit-Based Applications
+# Profiling API — Instrumenting Kit-Based Code
 
 How to add profiling zones, metrics, and annotations to C++ and Python code in the Carbonite/Kit ecosystem.
-For *capturing* and *analyzing* traces, see the `profiling` and `nsys-analyze` skills.
+For *capturing* traces, see the `profiling` skill. For *analyzing* them, see `nsys-analyze`.
 
 ## C++ Profiling Macros
 
