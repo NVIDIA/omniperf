@@ -1,6 +1,6 @@
 ---
 name: diagnose-perf
-description: First-responder performance triage for Isaac Sim and Isaac Lab. Use when a user reports slow FPS, stuttering, high latency, or wants a quick health check before profiling.
+description: First-responder performance triage for Isaac Sim and Isaac Lab. Identifies bottleneck category (GPU-bound, CPU-bound, VRAM, loading) using nvidia-smi and system tools without profiling. Use when a user reports slow FPS, stuttering, high latency, or wants a quick health check before profiling. NOT for applying specific fixes (use perf-tuning), capturing traces (use profiling), or analyzing traces (use nsys-analyze).
 ---
 
 # Performance Diagnosis Guide
@@ -120,78 +120,20 @@ Without profiling, check these heuristics:
 - **Camera/lidar-heavy scene** (multiple render products): likely render-bound
 - **Both**: profile to separate — use `profiling` skill with NVTX markers
 
-## Phase 4 — Quick Wins Checklist
+## Phase 4 — Quick Wins (apply before profiling)
 
-These are the most common performance improvements, in order of impact:
+For detailed settings and commands, see the `perf-tuning` skill. In order of typical impact:
 
-### 1. Headless Mode (biggest win for non-visual workloads)
-```bash
-# Isaac Sim v5.x
-./isaac-sim.sh --headless
+1. **Headless mode** — 2-10x FPS if no screen output needed
+2. **Fabric** — `--/physics/fabricEnabled=true` for USD-heavy scenes
+3. **Disable debug viz** — `--/physics/debugDraw=false`
+4. **CPU governor** — set to `performance`
+5. **RTX quality** — DLSS execMode, preset tuning (see `perf-tuning`)
+6. **PhysX solver** — PGS for speed, TGS for accuracy
+7. **Collision geometry** — check for "Falling back to CPU PhysX" in Kit logs
+8. **waitIdle / async rendering** — CPU-GPU pipelining
 
-# Isaac Sim v6.x
-./isaac-sim.sh --enable isaacsim.core.experimental.headless
-
-# Isaac Lab (Python script)
-python train.py --headless
-# Note: --headless flag is deprecated in Isaac Sim v6; use --enable ext instead
-```
-**Impact:** 2-10x FPS improvement by skipping viewport rendering.
-
-### 2. Fabric (USD acceleration)
-```
---/physics/fabricEnabled=true
-```
-Or in Python:
-```python
-sim_cfg = SimulationCfg(use_fabric=True)
-```
-**Impact:** Significant for scenes with many USD prims. Fabric bypasses the USD stage for physics data.
-
-### 3. Disable Physics Debug Visualization
-```
---/physics/debugDraw=false
---/physics/visualizationDisplayJoints=false
-```
-These are sometimes left on accidentally and cost GPU time.
-
-### 4. Rate Limiting / Fixed Timestep
-```
---/app/runLoops/main/rateLimitEnabled=true
---/app/runLoops/main/rateLimitFrequency=60
-```
-If FPS is uncapped and GPU is at 100%, the app may be doing unnecessary work.
-
-### 5. Async Rendering
-```
---/app/asyncRendering=true
---/app/asyncRenderingLowLatency=false
-```
-Allows physics and rendering to overlap. Small FPS gain, but may add one frame of latency.
-
-### 6. PhysX Solver Tuning
-```
---/physics/physxScene/solverType=1          # TGS (more accurate, slightly slower)
---/physics/physxScene/solverType=0          # PGS (faster, less accurate)
---/physics/physxScene/gpuMaxRigidContactCount=524288
---/physics/physxScene/gpuMaxRigidPatchCount=81920
-```
-If you see PhysX warnings about "exceeding max contacts", increase these buffers.
-If physics fidelity isn't critical, try PGS solver (type 0).
-
-### 7. Convex Hull / Collision Geometry
-Check Kit logs for warnings like:
-```bash
-grep -i "convex\|collision\|trianglemesh\|falling back to CPU" /tmp/isaac_logs/*.log 2>/dev/null
-```
-**Red flag:** "Falling back to CPU PhysX" means a collision mesh couldn't run on GPU — simplify the collision geometry or use convex decomposition.
-
-### 8. Rendering Quality Tradeoffs
-```
---/rtx/post/aa/op=0                                    # Disable anti-aliasing
---/rtx/ecoMode/enabled=true                            # Lower-quality but faster rendering
---/rtx/directLighting/sampledLighting/enabled=false     # Simpler lighting
-```
+If quick wins aren't enough → escalate to full profiling.
 
 ## Triage Report Template
 
@@ -229,31 +171,12 @@ After running Phases 1-3, summarize findings in this format:
 
 ## Kit Settings Reference
 
-### Where to Find Settings
-- `.kit` files in `apps/` directory of Isaac Sim installation
-- Runtime overrides via command line: `--/setting/path=value`
-- Python API: `carb.settings.get_settings().set("/setting/path", value)`
+For the full performance settings reference (physics, rendering, app loop), see the `perf-tuning` skill.
 
-### Key Performance Settings
-```
-# Physics
-/physics/fabricEnabled                    # true = Fabric acceleration
-/physics/physxScene/solverType            # 0=PGS, 1=TGS
-/physics/physxScene/gpuMaxRigidContactCount
-/physics/physxScene/gpuMaxRigidPatchCount
-/physics/physxScene/broadPhaseType        # 0=SAP, 1=MBP, 2=ABP, 3=GPU
-/physics/debugDraw                        # false for production
-
-# Rendering
-/app/asyncRendering                       # true = overlap physics+render
-/app/asyncRenderingLowLatency             # false = more overlap
-/rtx/ecoMode/enabled                      # true = lower quality, faster
-/rtx/post/aa/op                           # 0 = no AA
-
-# App loop
-/app/runLoops/main/rateLimitEnabled       # true = cap FPS
-/app/runLoops/main/rateLimitFrequency     # target FPS cap
-```
+Settings can be applied via:
+- `.kit` files in `apps/` directory
+- CLI: `--/setting/path=value`
+- Python: `carb.settings.get_settings().set("/setting/path", value)`
 
 ## When to Escalate to Full Profiling
 

@@ -6,7 +6,7 @@ description: Run Isaac Lab benchmarks. Covers setup, RL training, environment st
 # Isaac Lab Benchmarking
 
 > **Parameter references may be outdated.** Always verify with `./isaaclab.sh -p <script> --help`.
-> For profiling details (Tracy, Nsight, CPU governor), see the `profiling` skill.
+> For profiling details (Tracy, Nsight), see the `profiling` skill.
 > For installation, see the `install-isaaclab` skill.
 
 ## Setup
@@ -16,7 +16,7 @@ See the `install-isaaclab` skill for installation (clone, conda env, Isaac Sim l
 ## Before Running Any Benchmark
 
 1. **Apply the `os._exit(0)` patch** on Isaac Sim — see `profiling` skill
-2. **Set CPU governor to performance** — see `profiling` skill
+2. **Set CPU governor to performance** — see `perf-tuning` skill
 
 ## Benchmark Scripts
 

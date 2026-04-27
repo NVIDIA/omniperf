@@ -1,6 +1,6 @@
 ---
 name: nsys-analyze
-description: Analyze profiling data from Kit-based apps. Covers Omniverse-specific NVTX zone interpretation, phase detection using sqlite3/csvexport queries, and two-version comparison methodology. Use after capturing profiles with the profiling skill.
+description: Analyze profiling data from Kit-based apps. Covers Omniverse-specific NVTX zone interpretation, phase detection using sqlite3/csvexport queries, and two-version comparison methodology. Use after capturing profiles with the profiling skill. NOT for capturing traces (use profiling), adding zones to code (use profiling-api), or applying fixes (use perf-tuning).
 ---
 
 # Profile Analysis for Omniverse / Kit-based Apps

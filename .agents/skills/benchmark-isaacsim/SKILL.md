@@ -6,7 +6,7 @@ description: Run Isaac Sim benchmarks. Covers setup, known pitfalls, and perform
 # Isaac Sim Benchmarking
 
 > **Parameter references may be outdated.** Always verify with `./python.sh <script> --help`.
-> For profiling details (Tracy, Nsight, CPU governor), see the `profiling` skill.
+> For profiling details (Tracy, Nsight), see the `profiling` skill.
 
 ## Setup
 
@@ -15,7 +15,7 @@ See the `install-isaacsim` skill for installation (pip, source build, Docker).
 ## Before Running Any Benchmark
 
 1. **Apply the `os._exit(0)` patch** — see `profiling` skill. Prevents shutdown hang.
-2. **Set CPU governor to performance** — see `profiling` skill.
+2. **Set CPU governor to performance** — see `perf-tuning` skill.
 3. **Set Nucleus auth** if using Nucleus-hosted assets — see `install-isaacsim` skill.
 
 ## Benchmark Scripts
@@ -60,7 +60,9 @@ WRONG:   --num_cameras 8  (silently uses default=1!)
 Always verify result JSON to confirm params were applied.
 
 ### Headless viewport wastes ~35% frame time
-Even with `headless=True`, Kit creates a default viewport. Destroy it after sensor setup:
+Even with `headless=True`, Kit creates a default viewport. Destroy it after sensor setup.
+See the `perf-tuning` skill for headless mode and viewport optimization details.
+
 ```python
 import omni.kit.viewport.utility as vp_util
 import carb
