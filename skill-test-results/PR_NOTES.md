@@ -212,12 +212,12 @@ User requested testing files match Anthropic's Agent Skills convention. Changed 
 - Added `.agents/skills/<skill>/evals/evals.json` for all 12 skills.
 - Each eval file includes realistic prompts, expected outputs, and objective assertions.
 - Added `scripts/skill_evals.py` to validate frontmatter plus eval files and generate an eval inventory.
-- Moved runnable validation helpers from `skill-test-results/run_phase*.py` to `scripts/skill_phase*.py`; `skill-test-results/` now contains generated reports, not authored test logic.
+- Removed legacy Phase 2/3/4 committed reports and harness scripts; future runtime eval artifacts should live in external eval workspaces, not as authored repo files.
 - Updated `TEST_PLAN.md` and `SUMMARY.md` to point at `evals/evals.json` as the source for authored eval cases.
 
 Validation after the layout change:
 
 - `python3 scripts/skill_evals.py evals-summary`: 12 skills, 24 eval cases, 89 assertions.
 - `python3 scripts/skill_evals.py phase0-phase1`: 12/12 skills pass static validation, with the same 7 expected privileged/risky warnings.
-- Phase 3 and Phase 4 harnesses still run from `scripts/` and keep the same expected pass/block status.
+- Removed legacy Phase 2/3/4 committed reports and harness scripts; future eval results should live in an external eval workspace, not as authored repo files.
 

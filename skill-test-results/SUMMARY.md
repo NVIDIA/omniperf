@@ -1,19 +1,21 @@
 # OmniPerf Agent Skills Test Summary
 
-Status: completed through Phase 4 on 2026-04-28 UTC
+Status: eval manifests migrated on 2026-04-28 UTC
 
 Test plan: `.agents/skills/TEST_PLAN.md`
 Eval cases: `.agents/skills/<skill>/evals/evals.json`
 
 ## Phase Status
 
+- Legacy committed Phase 2/3/4 reports and harness scripts have been removed; authored evals now live beside skills.
+
 | Phase | Status | Notes |
 |---|---|---|
 | Phase 0 — Static Skill Validation | pass_with_warnings | 12/12 skills valid; repo copies now match installed local skill copies. Privileged examples are flagged for review where expected. |
 | Phase 1 — Host Prerequisite Snapshot | pass | Ubuntu 22.04, NVIDIA L40, driver 570.158.01, ~162G free. |
-| Phase 2 — Prompt / Selection Smoke Tests | pass_with_warnings | 10 pass, 2 warnings, 0 fail before fixes. Warnings were converted into doc patches. |
-| Phase 3 — Tooling Smoke Tests | pass_with_warnings | `nsys`, `sqlite3`, Tracy `csvexport`/`capture`, and Python `nvtx` now work. CPU IP/backtrace sampling still blocked by `perf_event_paranoid=4`. |
-| Phase 4 — Per-Skill Thorough Tests | pass_with_expected_blocks | Install/profiling/nsys/nvtx/profiling-api/diagnose checks pass. Isaac Lab tiny benchmark passes; Isaac Sim standalone scripts and Tracy allocator wrapper are still unavailable. Real tuning before/after evidence remains approval-gated. |
+| Phase 2 — Eval Manifests | pass | Authored prompts now live in per-skill `evals/evals.json` files. |
+| Phase 3 — Runtime / Tooling Checks | removed | Legacy committed smoke reports and harness scripts were removed; run new checks from external eval workspaces if needed. |
+| Phase 4 — Per-Skill Thorough Tests | moved_to_evals | Thorough cases now belong in each skill's `evals/evals.json`; generated artifacts should not be committed. |
 | Phase 5 — Isaac Sim Smoke Benchmark | blocked_missing_prereq | Pip Isaac Sim import works via `/home/horde/venvs/isaacsim45/python.sh`, but this pip install does not include `standalone_examples/benchmarks` scripts. |
 | Phase 6 — Isaac Lab Smoke Benchmark | pass_with_warnings | Tiny Cartpole non-RL benchmark passes with 16 envs / 10 frames. Long RL/convergence runs remain approval-gated. |
 | Phase 7 — Real Profiling Capture | partial | Tiny Python Nsight traces and nsys-analyze SQLite export pass. Full Kit/benchmark traces need an approved workload. |
@@ -26,9 +28,6 @@ Eval cases: `.agents/skills/<skill>/evals/evals.json`
 - Phase 0 summary: `skill-test-results/phase0-static-validation.md`
 - Phase 1 summary: `skill-test-results/phase1-host-prereqs.md`
 - Eval inventory: `skill-test-results/evals-summary.md`
-- Phase 2 historical/manual smoke summary: `skill-test-results/phase2-prompt-smoke/SUMMARY.md`
-- Phase 3 summary: `skill-test-results/phase3-tooling-smoke/phase3-tooling-smoke.md`
-- Phase 4 summary: `skill-test-results/phase4-thorough/SUMMARY.md`
 
 ## Host Facts
 
@@ -55,7 +54,7 @@ Eval cases: `.agents/skills/<skill>/evals/evals.json`
 
 ## Findings Fixed in This PR
 
-- Skill eval prompts were moved to the Anthropic/Agent Skills convention: each skill now owns `.agents/skills/<skill>/evals/evals.json`; helper scripts live under `scripts/`, while generated reports remain under `skill-test-results/`.
+- Skill eval prompts were moved to the Anthropic/Agent Skills convention: each skill now owns `.agents/skills/<skill>/evals/evals.json`; only stable helper scripts and summary reports remain in the repo.
 
 - `profiling`: Nsight Systems examples now try non-sudo first, gate `sudo -E`, include container-safe `--sample=none` mode, and mention container/GPU metrics permission failures.
 - `tracy-memory`: LD_PRELOAD path now uses a discovery command; capture/update binaries are PATH-resolved instead of hard-coded `./tracy/...` paths; missing `liballocwrapper.so` is treated as a hard prerequisite, not a capture to fake.
