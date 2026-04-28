@@ -104,10 +104,12 @@ pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cu128
 # Latest compatible full install for the active Python.
 pip install 'isaacsim[all,extscache]' --extra-index-url https://pypi.nvidia.com
 
-# Or pin to a specific release family. Match the Python version matrix above.
-pip install 'isaacsim[all,extscache]==4.5.0' --extra-index-url https://pypi.nvidia.com   # Python 3.10
-pip install 'isaacsim[all,extscache]==5.1.0' --extra-index-url https://pypi.nvidia.com   # Python 3.11
-pip install 'isaacsim[all,extscache]==6.0.0' --extra-index-url https://pypi.nvidia.com   # Python 3.12
+# Or pin to a specific release. Match the Python version matrix above.
+# Isaac Sim wheels are published in 4-segment form (e.g. 4.5.0.0, 4.2.0.2);
+# pin all four segments so patch releases like 4.2.0.2 are matched explicitly.
+pip install 'isaacsim[all,extscache]==4.5.0.0' --extra-index-url https://pypi.nvidia.com   # Python 3.10
+pip install 'isaacsim[all,extscache]==5.1.0.0' --extra-index-url https://pypi.nvidia.com   # Python 3.11
+pip install 'isaacsim[all,extscache]==6.0.0.0' --extra-index-url https://pypi.nvidia.com   # Python 3.12
 ```
 
 Verify:
