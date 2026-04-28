@@ -3,6 +3,7 @@
 Status: completed through Phase 4 on 2026-04-28 UTC
 
 Test plan: `.agents/skills/TEST_PLAN.md`
+Eval cases: `.agents/skills/<skill>/evals/evals.json`
 
 ## Phase Status
 
@@ -24,7 +25,8 @@ Test plan: `.agents/skills/TEST_PLAN.md`
 - PR notes / improvement backlog: `skill-test-results/PR_NOTES.md`
 - Phase 0 summary: `skill-test-results/phase0-static-validation.md`
 - Phase 1 summary: `skill-test-results/phase1-host-prereqs.md`
-- Phase 2 summary: `skill-test-results/phase2-prompt-smoke/SUMMARY.md`
+- Eval inventory: `skill-test-results/evals-summary.md`
+- Phase 2 historical/manual smoke summary: `skill-test-results/phase2-prompt-smoke/SUMMARY.md`
 - Phase 3 summary: `skill-test-results/phase3-tooling-smoke/phase3-tooling-smoke.md`
 - Phase 4 summary: `skill-test-results/phase4-thorough/SUMMARY.md`
 
@@ -52,6 +54,8 @@ Test plan: `.agents/skills/TEST_PLAN.md`
 - Isaac Lab: `/home/horde/.openclaw/workspace/IsaacLab`; `./isaaclab.sh -p -c "import isaaclab"` passes
 
 ## Findings Fixed in This PR
+
+- Skill eval prompts were moved to the Anthropic/Agent Skills convention: each skill now owns `.agents/skills/<skill>/evals/evals.json`; helper scripts live under `scripts/`, while generated reports remain under `skill-test-results/`.
 
 - `profiling`: Nsight Systems examples now try non-sudo first, gate `sudo -E`, include container-safe `--sample=none` mode, and mention container/GPU metrics permission failures.
 - `tracy-memory`: LD_PRELOAD path now uses a discovery command; capture/update binaries are PATH-resolved instead of hard-coded `./tracy/...` paths; missing `liballocwrapper.so` is treated as a hard prerequisite, not a capture to fake.

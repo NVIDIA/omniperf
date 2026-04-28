@@ -1,0 +1,27 @@
+{
+  "skill_name": "install-isaacsim",
+  "evals": [
+    {
+      "id": "plan-pip-install-5-1",
+      "prompt": "Plan a pip-based Isaac Sim install for version 5.1 on Ubuntu. Do not install.",
+      "expected_output": "Gives a non-mutating install plan with Python-version selection, venv activation, EULA env, full extras install, and verification commands.",
+      "assertions": [
+        "Uses Python 3.11 for Isaac Sim 5.1",
+        "Uses an isolated venv/uv/conda env rather than system Python",
+        "Includes OMNI_KIT_ACCEPT_EULA=YES before verification",
+        "Installs full isaacsim[all,extscache], not bare isaacsim",
+        "Does not run install commands"
+      ]
+    },
+    {
+      "id": "existing-venv-system-python-fails",
+      "prompt": "System python cannot import isaacsim, but /home/me/venvs/isaacsim/python.sh exists. Should I reinstall?",
+      "expected_output": "Explains that system Python failure does not prove Isaac Sim is absent and verifies the isolated environment first.",
+      "assertions": [
+        "Checks or uses the discovered python.sh before reinstalling",
+        "Avoids destructive cleanup unless explicitly approved",
+        "Mentions pip installs may lack standalone benchmark scripts"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "skill_name": "install-isaaclab",
+  "evals": [
+    {
+      "id": "plan-linked-install",
+      "prompt": "Plan an Isaac Lab install linked to an existing Isaac Sim. Do not install.",
+      "expected_output": "Provides a safe install plan that selects full Isaac Sim-backed mode, discovers existing installs, avoids shell startup mutation, and verifies with isaaclab.sh.",
+      "assertions": [
+        "Chooses full Isaac Sim-backed mode for performance benchmarking unless told otherwise",
+        "Checks for existing isaaclab.sh first",
+        "Avoids conda init",
+        "Approval-gates dependency installs and env removal"
+      ]
+    },
+    {
+      "id": "kitless-boundary",
+      "prompt": "I only need Isaac Lab 3.0 Newton workflows without Isaac Sim. What install path should I use?",
+      "expected_output": "Routes to the kit-less/Newton mode and states what Isaac Sim-backed features are not available.",
+      "assertions": [
+        "Identifies kit-less/Newton as appropriate only for workflows not needing Isaac Sim features",
+        "Warns not to use kit-less mode for PhysX/ROS/importers/Omniverse visualization",
+        "Includes a verification step"
+      ]
+    }
+  ]
+}

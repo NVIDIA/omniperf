@@ -69,11 +69,13 @@ Expected output:
 - `skill-test-results/phase1-host-prereqs.md`
 - `skill-test-results/phase1-host-prereqs.json`
 
-## Phase 2 — Prompt / Selection Smoke Tests
+## Phase 2 — Eval Cases / Prompt Selection Smoke Tests
 
 Dry-run only. Do not install, use sudo, run benchmarks, or start heavy GPU workloads.
 
-Representative prompts:
+Anthropic Agent Skills convention: authored eval cases live beside each skill at `.agents/skills/<skill>/evals/evals.json`. Each case has `id`, `prompt`, `expected_output`, and `assertions`. Generated reports still live under `skill-test-results/` for PR review.
+
+Representative prompts now captured in `evals/evals.json` files:
 
 - `install-profilers`: “Check what profiler tools are installed and tell me the missing install steps. Do not install anything.”
 - `install-isaacsim`: “Plan a pip-based Isaac Sim install for version 5.1 on Ubuntu. Do not install.”
@@ -88,10 +90,12 @@ Representative prompts:
 - `tracy-memory`: “Plan a Tracy memory capture and explain required `LD_PRELOAD` handling.”
 - `perf-tuning`: “Given PresentFrame stalls and GPU saturation, recommend measurable fixes.”
 
-Expected output:
+Expected authored eval files and generated summaries:
 
-- `skill-test-results/phase2-prompt-smoke/SUMMARY.md`
-- one report per skill under `skill-test-results/phase2-prompt-smoke/`
+- `.agents/skills/<skill>/evals/evals.json` for every skill
+- `skill-test-results/evals-summary.md`
+- `skill-test-results/evals-summary.json`
+- optional historical/manual smoke reports under `skill-test-results/phase2-prompt-smoke/`
 
 ## Phase 3 — Tooling Smoke Tests
 
@@ -394,8 +398,10 @@ Use collected artifacts to validate:
 
 Maintain:
 
+- `.agents/skills/<skill>/evals/evals.json` — authored eval cases, Anthropic/Agent Skills convention
+- `skill-test-results/evals-summary.md` — generated eval inventory
 - `skill-test-results/SUMMARY.md`
 - `skill-test-results/PR_NOTES.md`
 - `skill-test-results/phase4-thorough/SUMMARY.md`
 
-Use `PR_NOTES.md` as the running backlog for doc fixes and follow-up PRs.
+Use `PR_NOTES.md` as the running backlog for doc fixes and follow-up PRs. Keep scripts under `scripts/`; keep generated results under `skill-test-results/`.

@@ -1,0 +1,26 @@
+{
+  "skill_name": "tracy-memory",
+  "evals": [
+    {
+      "id": "memory-capture-plan",
+      "prompt": "Plan a Tracy memory capture and explain required LD_PRELOAD handling.",
+      "expected_output": "Provides LD_PRELOAD discovery, Kit memory flags, capture binary isolation, and strip-test verification.",
+      "assertions": [
+        "Discovers liballocwrapper.so and fails fast if missing",
+        "Sets LD_PRELOAD only for the Kit workload",
+        "Unsets LD_PRELOAD before running Tracy capture binary",
+        "Includes update -s M strip test and explains file-size interpretation"
+      ]
+    },
+    {
+      "id": "missing-allocwrapper",
+      "prompt": "liballocwrapper.so is not present in my pip Isaac Sim install. Can I still validate memory tracing?",
+      "expected_output": "Treats missing allocator wrapper as a blocked prerequisite and does not fake a memory capture.",
+      "assertions": [
+        "States pip Isaac Sim may lack liballocwrapper.so",
+        "Marks real memory capture blocked_missing_prereq",
+        "Suggests Packman/source Kit package that includes the wrapper"
+      ]
+    }
+  ]
+}

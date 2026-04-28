@@ -1,19 +1,19 @@
 # Phase 0 — Static Skill Validation
 
-| Skill | Status | Installed copy | Issues | Warnings |
-|---|---|---|---|---|
-| `benchmark-isaaclab` | pass | match | - | - |
-| `benchmark-isaacsim` | pass | match | - | - |
-| `diagnose-perf` | pass | match | - | contains_risky_or_privileged_commands_review_required |
-| `install-isaaclab` | pass | match | - | contains_risky_or_privileged_commands_review_required |
-| `install-isaacsim` | pass | match | - | contains_risky_or_privileged_commands_review_required |
-| `install-profilers` | pass | match | - | contains_risky_or_privileged_commands_review_required |
-| `nsys-analyze` | pass | match | - | - |
-| `nvtx-python` | pass | match | - | - |
-| `perf-tuning` | pass | match | - | contains_risky_or_privileged_commands_review_required |
-| `profiling` | pass | match | - | contains_risky_or_privileged_commands_review_required |
-| `profiling-api` | pass | match | - | - |
-| `tracy-memory` | pass | match | - | contains_risky_or_privileged_commands_review_required |
+| Skill | Status | Installed copy | Evals | Issues | Warnings |
+|---|---|---|---|---|---|
+| `benchmark-isaaclab` | pass | match | present | - | - |
+| `benchmark-isaacsim` | pass | match | present | - | - |
+| `diagnose-perf` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
+| `install-isaaclab` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
+| `install-isaacsim` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
+| `install-profilers` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
+| `nsys-analyze` | pass | match | present | - | - |
+| `nvtx-python` | pass | match | present | - | - |
+| `perf-tuning` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
+| `profiling` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
+| `profiling-api` | pass | match | present | - | - |
+| `tracy-memory` | pass | match | present | - | contains_risky_or_privileged_commands_review_required |
 
 ## Risky / privileged command matches needing review
 

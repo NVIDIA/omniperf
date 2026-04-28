@@ -1,0 +1,26 @@
+{
+  "skill_name": "perf-tuning",
+  "evals": [
+    {
+      "id": "presentframe-gpu-bound",
+      "prompt": "Given PresentFrame stalls and GPU saturation, recommend measurable fixes.",
+      "expected_output": "Recommends evidence-backed GPU/rendering fixes with before/after measurement and rollback plan.",
+      "assertions": [
+        "Starts from evidence and does not tune blindly",
+        "Mentions GPU backpressure and RTX tuning options",
+        "Includes measurement plan and rollback",
+        "Keeps host-level changes approval-gated"
+      ]
+    },
+    {
+      "id": "governor-in-container",
+      "prompt": "CPU governor is schedutil but I am in a container and cannot change it. What should I do?",
+      "expected_output": "Records governor limitation, treats benchmark numbers as exploratory, and avoids privileged workaround attempts.",
+      "assertions": [
+        "Does not force sudo governor changes in a container",
+        "Marks results exploratory/lower-confidence",
+        "Suggests host-approved governor tuning only when available"
+      ]
+    }
+  ]
+}

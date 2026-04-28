@@ -1,0 +1,26 @@
+{
+  "skill_name": "profiling-api",
+  "evals": [
+    {
+      "id": "kit-zones-examples",
+      "prompt": "Show minimal C++ and Python profiling-zone examples for Kit.",
+      "expected_output": "Shows correct Carbonite macro/API usage, masks/channels, and exception-safe begin/end patterns.",
+      "assertions": [
+        "C++ example includes carb/profiler/Profile.h and CARB_PROFILE_ZONE or CARB_PROFILE_FUNCTION",
+        "Python example imports carb.profiler in a Kit/Isaac environment",
+        "Manual begin/end uses try/finally or scoped RAII guidance",
+        "Mentions masks/channels"
+      ]
+    },
+    {
+      "id": "plain-python-import-fails",
+      "prompt": "I tried import carb.profiler in plain Python and it failed. Is the API broken?",
+      "expected_output": "Explains carb.profiler requires Kit/Isaac Carbonite library paths or a running Kit app and gives environment-path guidance.",
+      "assertions": [
+        "Does not claim carb.profiler works in arbitrary Python",
+        "Mentions PYTHONPATH and LD_LIBRARY_PATH for pip Isaac Sim smoke tests",
+        "Suggests nvtx-python for non-Kit Python tracing"
+      ]
+    }
+  ]
+}

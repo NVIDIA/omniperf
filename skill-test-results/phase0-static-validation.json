@@ -1,5 +1,5 @@
 {
-  "timestamp": 1777364254.128042,
+  "timestamp": 1777365595.1731374,
   "repo": "/home/horde/.openclaw/workspace/omniperf",
   "skills": [
     {
@@ -11,7 +11,8 @@
       "issues": [],
       "warnings": [],
       "risky_matches": [],
-      "path": ".agents/skills/benchmark-isaaclab/SKILL.md"
+      "path": ".agents/skills/benchmark-isaaclab/SKILL.md",
+      "evals_path": ".agents/skills/benchmark-isaaclab/evals/evals.json"
     },
     {
       "directory": "benchmark-isaacsim",
@@ -22,7 +23,8 @@
       "issues": [],
       "warnings": [],
       "risky_matches": [],
-      "path": ".agents/skills/benchmark-isaacsim/SKILL.md"
+      "path": ".agents/skills/benchmark-isaacsim/SKILL.md",
+      "evals_path": ".agents/skills/benchmark-isaacsim/evals/evals.json"
     },
     {
       "directory": "diagnose-perf",
@@ -41,7 +43,8 @@
           "snippet": "sudo cpupower frequency-set -g performance"
         }
       ],
-      "path": ".agents/skills/diagnose-perf/SKILL.md"
+      "path": ".agents/skills/diagnose-perf/SKILL.md",
+      "evals_path": ".agents/skills/diagnose-perf/evals/evals.json"
     },
     {
       "directory": "install-isaaclab",
@@ -60,7 +63,8 @@
           "snippet": "conda env remove -n env_isaaclab"
         }
       ],
-      "path": ".agents/skills/install-isaaclab/SKILL.md"
+      "path": ".agents/skills/install-isaaclab/SKILL.md",
+      "evals_path": ".agents/skills/install-isaaclab/evals/evals.json"
     },
     {
       "directory": "install-isaacsim",
@@ -174,7 +178,8 @@
           "snippet": "- To completely reset, only after explicit approval: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`."
         }
       ],
-      "path": ".agents/skills/install-isaacsim/SKILL.md"
+      "path": ".agents/skills/install-isaacsim/SKILL.md",
+      "evals_path": ".agents/skills/install-isaacsim/evals/evals.json"
     },
     {
       "directory": "install-profilers",
@@ -323,7 +328,8 @@
           "snippet": "sudo apt-get install -y tracy-csvexport tracy-capture"
         }
       ],
-      "path": ".agents/skills/install-profilers/SKILL.md"
+      "path": ".agents/skills/install-profilers/SKILL.md",
+      "evals_path": ".agents/skills/install-profilers/evals/evals.json"
     },
     {
       "directory": "nsys-analyze",
@@ -334,7 +340,8 @@
       "issues": [],
       "warnings": [],
       "risky_matches": [],
-      "path": ".agents/skills/nsys-analyze/SKILL.md"
+      "path": ".agents/skills/nsys-analyze/SKILL.md",
+      "evals_path": ".agents/skills/nsys-analyze/evals/evals.json"
     },
     {
       "directory": "nvtx-python",
@@ -345,7 +352,8 @@
       "issues": [],
       "warnings": [],
       "risky_matches": [],
-      "path": ".agents/skills/nvtx-python/SKILL.md"
+      "path": ".agents/skills/nvtx-python/SKILL.md",
+      "evals_path": ".agents/skills/nvtx-python/evals/evals.json"
     },
     {
       "directory": "perf-tuning",
@@ -369,7 +377,8 @@
           "snippet": "echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         }
       ],
-      "path": ".agents/skills/perf-tuning/SKILL.md"
+      "path": ".agents/skills/perf-tuning/SKILL.md",
+      "evals_path": ".agents/skills/perf-tuning/evals/evals.json"
     },
     {
       "directory": "profiling",
@@ -428,7 +437,8 @@
           "snippet": "For host-only CPU sampling/GPU metrics, add `--sample=system-wide --gpu-metrics-devices=all --gpuctxsw=true` only when the host allows it. Use `sudo -E` only if the non-sudo command fails because CPU sampling is blocked and you have approva"
         }
       ],
-      "path": ".agents/skills/profiling/SKILL.md"
+      "path": ".agents/skills/profiling/SKILL.md",
+      "evals_path": ".agents/skills/profiling/evals/evals.json"
     },
     {
       "directory": "profiling-api",
@@ -439,7 +449,8 @@
       "issues": [],
       "warnings": [],
       "risky_matches": [],
-      "path": ".agents/skills/profiling-api/SKILL.md"
+      "path": ".agents/skills/profiling-api/SKILL.md",
+      "evals_path": ".agents/skills/profiling-api/evals/evals.json"
     },
     {
       "directory": "tracy-memory",
@@ -513,7 +524,8 @@
           "snippet": "- LD_PRELOAD bleeding into capture binary \u2192 corrupt capture"
         }
       ],
-      "path": ".agents/skills/tracy-memory/SKILL.md"
+      "path": ".agents/skills/tracy-memory/SKILL.md",
+      "evals_path": ".agents/skills/tracy-memory/evals/evals.json"
     }
   ],
   "summary": {

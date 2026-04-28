@@ -1,0 +1,26 @@
+{
+  "skill_name": "install-profilers",
+  "evals": [
+    {
+      "id": "check-existing-tools-no-install",
+      "prompt": "Check what profiler tools are installed and tell me the missing install steps. Do not install anything.",
+      "expected_output": "Reports existing nsys/sqlite3/Tracy tools, lists only missing install steps, and does not run privileged or mutating commands.",
+      "assertions": [
+        "Uses non-mutating version/path checks before any install guidance",
+        "Separates nsys, sqlite3, capture/capture-release/tracy-capture, csvexport, and update/tracy-update",
+        "Says privileged package installs, symlinks, and sysctl changes require approval",
+        "Mentions container-safe fallback when perf/GPU counter permissions are unavailable"
+      ]
+    },
+    {
+      "id": "container-perf-blocked",
+      "prompt": "I am inside a container with perf_event_paranoid=4 and GPU counter permissions blocked. How should I set up profiling tools?",
+      "expected_output": "Explains that CPU sampling/GPU metrics may be unavailable, recommends safe tool checks/install steps, and points to container-safe profiling mode rather than forcing sysctl changes.",
+      "assertions": [
+        "Does not instruct the agent to force sysctl changes inside the container",
+        "Mentions nsys can still collect NVTX/CUDA/Vulkan traces without CPU sampling",
+        "Approval-gates host-level sysctl or package changes"
+      ]
+    }
+  ]
+}

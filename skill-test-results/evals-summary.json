@@ -1,0 +1,94 @@
+{
+  "timestamp": 1777365591.1859586,
+  "summary": {
+    "skill_count": 12,
+    "eval_count": 24,
+    "assertion_count": 89
+  },
+  "skills": [
+    {
+      "skill": "benchmark-isaaclab",
+      "path": ".agents/skills/benchmark-isaaclab/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 8,
+      "issues": []
+    },
+    {
+      "skill": "benchmark-isaacsim",
+      "path": ".agents/skills/benchmark-isaacsim/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 8,
+      "issues": []
+    },
+    {
+      "skill": "diagnose-perf",
+      "path": ".agents/skills/diagnose-perf/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "install-isaaclab",
+      "path": ".agents/skills/install-isaaclab/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "install-isaacsim",
+      "path": ".agents/skills/install-isaacsim/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 8,
+      "issues": []
+    },
+    {
+      "skill": "install-profilers",
+      "path": ".agents/skills/install-profilers/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "nsys-analyze",
+      "path": ".agents/skills/nsys-analyze/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "nvtx-python",
+      "path": ".agents/skills/nvtx-python/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "perf-tuning",
+      "path": ".agents/skills/perf-tuning/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "profiling",
+      "path": ".agents/skills/profiling/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 9,
+      "issues": []
+    },
+    {
+      "skill": "profiling-api",
+      "path": ".agents/skills/profiling-api/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    },
+    {
+      "skill": "tracy-memory",
+      "path": ".agents/skills/tracy-memory/evals/evals.json",
+      "eval_count": 2,
+      "assertion_count": 7,
+      "issues": []
+    }
+  ]
+}
