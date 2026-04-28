@@ -90,6 +90,9 @@ pkill -9 -f "capture" 2>/dev/null || true
 export TRACY_PORT="${TRACY_PORT:-8086}"  # use 8087 for Isaac Sim 6.0+ when needed
 ss -tlnp | grep ":$TRACY_PORT" || true  # verify the intended port is free
 
+BENCH_SCRIPT="standalone_examples/benchmarks/benchmark_camera.py"
+RESULT_DIR="/tmp/isaacsim-profile-results"
+
 TRACY_CAPTURE_BIN="${TRACY_CAPTURE_BIN:-}"
 if [ -z "$TRACY_CAPTURE_BIN" ]; then
   TRACY_CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
@@ -97,7 +100,8 @@ fi
 [ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing Tracy capture binary"; exit 1; }
 
 # 2. Start the application FIRST (in background)
-nohup ./python.sh <benchmark_script> <args> \
+nohup ./python.sh "$BENCH_SCRIPT" \
+  --num-cameras 1 --num-frames 600 \
   --/app/profilerBackend=tracy --/app/profileFromStart=true \
   --/profiler/enabled=true --/profiler/gpu=true \
   --/profiler/gpu/tracyInject/enabled=true --/app/profilerMask=1 \
@@ -107,7 +111,8 @@ nohup ./python.sh <benchmark_script> <args> \
   --/profiler/gpu/tracyInject/msBetweenClockCalibration=0 \
   --/rtx/addTileGpuAnnotations=true \
   --/plugins/carb.profiler-tracy.plugin/instantEventsAsMessages=true \
-  ... > /tmp/app.log 2>&1 &
+  --/exts/isaacsim.benchmark.services/metrics/metrics_output_folder="$RESULT_DIR" \
+  > /tmp/app.log 2>&1 &
 APP_PID=$!
 
 # 3. Poll until Tracy port is open (app needs time to initialize)
@@ -121,7 +126,7 @@ done
 CAPTURE_PID=$!
 
 # 5. Wait for benchmark result files, not graceful Isaac Sim shutdown
-until ls <result_path>/kpis_*.json >/dev/null 2>&1; do sleep 5; done
+until ls "$RESULT_DIR"/kpis_*.json >/dev/null 2>&1; do sleep 5; done
 
 # 6. Isaac Sim can hang during Tracy shutdown. Force-kill after outputs exist.
 kill -9 "$APP_PID" "$CAPTURE_PID" 2>/dev/null || true
@@ -150,9 +155,10 @@ Prefer first to use the force-kill sequence above after results are complete. Pa
 #   Build output: _build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
 # NOTE: `find -path` may fail in some environments (dots in dir names). Use glob instead:
 shopt -s globstar nullglob
-SIM_APP=$(echo <package_path>/**/isaacsim/simulation_app/simulation_app.py | tr ' ' '\n' | grep -v __pycache__ | head -1)
+PACKAGE_PATH="/path/to/IsaacSim-or-pip-package"
+SIM_APP=$(echo "$PACKAGE_PATH"/**/isaacsim/simulation_app/simulation_app.py | tr ' ' '\n' | grep -v __pycache__ | head -1)
 # Or explicit known paths:
-# SIM_APP=<package_path>/_build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
+# SIM_APP="$PACKAGE_PATH"/_build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
 echo "Found: $SIM_APP"
 
 # Idempotent patch with a restore point.
@@ -194,9 +200,13 @@ If ALL expected output files exist with non-zero size, and the process is
 still running after 2+ minutes with no new output, it is probably hung. Follow the guide sequence and force-kill the app and capture processes:
 
 ```bash
-ls -la <result_path>/kpis_*.json <result_path>/*.tracy 2>/dev/null
+RESULT_DIR="/tmp/isaacsim-profile-results"
+APP_PID=12345
+CAPTURE_PID=12346
+
+ls -la "$RESULT_DIR"/kpis_*.json "$RESULT_DIR"/*.tracy 2>/dev/null
 # If files exist and size > 0:
-kill -9 <app_pid> <capture_pid> 2>/dev/null || true
+kill -9 "$APP_PID" "$CAPTURE_PID" 2>/dev/null || true
 ```
 
 ## Nsight Systems Profiling
@@ -224,17 +234,21 @@ sudo dpkg -i nsight-systems-*.deb
 ### Nsys Command
 ```bash
 export CARB_PROFILING_PYTHON=1
+NSYS_OUTPUT="kit_profile"
 
 sudo nsys profile \
   --force-overwrite=true \
-  --output=<output_name> \
+  --output="$NSYS_OUTPUT" \
   --sample=system-wide \
   --trace=cuda,nvtx,vulkan,osrt \
   --gpu-metrics-devices=all \
   --gpuctxsw=true \
   --cuda-memory-usage=true \
   --cuda-graph-trace=graph:host-and-device \
-  <APPLICATION_COMMAND_WITH_NVTX_KIT_ARGS>
+  ./python.sh standalone_examples/benchmarks/benchmark_camera.py \
+  --num-cameras 1 --num-frames 100 --headless \
+  --/app/profileFromStart=true --/profiler/enabled=true \
+  --/app/profilerBackend=nvtx --/app/profilerMask=1
 ```
 
 ### Windows nsys Differences
@@ -305,33 +319,13 @@ sudo OMNI_KIT_ALLOW_ROOT=1 DISPLAY=:0 \
   --kit_args "--/app/profileFromStart=true --/profiler/enabled=true --/app/profilerBackend=nvtx --/app/profilerMask=1 --/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false --/profiler/channels/carb.events/enabled=false --/profiler/channels/carb.tasking/enabled=false"
 ```
 
-### nsys SQLite Export (when nsys stats fails or custom queries needed)
+### Export Handoff
+
+Export traces here, then use `nsys-analyze` for SQL queries, zone ranking, phase detection, and interpretation.
+
 ```bash
 nsys export --type=sqlite -o profile.sqlite profile.nsys-rep
-```
-
-**NVTX_EVENTS gotcha:** There is NO `name` column. Use `text` (inline) or join `textId` to `StringIds`:
-```sql
-sqlite3 profile.sqlite "
-SELECT COALESCE(e.text, s.value) as zone_name,
-       COUNT(*) as cnt,
-       ROUND(AVG(e.end - e.start) / 1e6, 2) as avg_ms,
-       ROUND(SUM(e.end - e.start) / 1e6, 2) as total_ms
-FROM NVTX_EVENTS e
-LEFT JOIN StringIds s ON e.textId = s.id
-WHERE e.start > 25000000000
-  AND e.end IS NOT NULL AND (e.end - e.start) > 0
-GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
-"
-```
-
-**CUDA Kernels = 0 is normal** for Kit/Isaac Sim — RTX uses its own GPU pipeline, not CUDA API. NVTX zones are the only analysis source.
-
-### Tracy CSV Export (alternative analysis path)
-```bash
 csvexport profile.tracy > zones.csv
-# Columns: name, src_file, src_line, total_ns, total_perc, counts, mean_ns, min_ns, max_ns, std_ns
-sort -t',' -k4 -rn zones.csv | head -50
 ```
 
 ---

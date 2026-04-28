@@ -50,8 +50,8 @@ Only Kit should use the interposer. The Tracy capture binary must NOT inherit it
 ```bash
 # After launching Kit with LD_PRELOAD in background
 unset LD_PRELOAD
-TRACY_CAPTURE_BIN=$(command -v tracy-capture || command -v capture)
-[ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing tracy-capture/capture binary"; exit 1; }
+TRACY_CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
+[ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing capture/capture-release/tracy-capture binary"; exit 1; }
 "$TRACY_CAPTURE_BIN" -o memtrace.tracy -f -p "${TRACY_PORT:-8086}"
 ```
 
@@ -61,8 +61,8 @@ Do not rely on Kit log lines alone. Verify actual memory data in the output:
 
 ```bash
 # Strip memory events and compare file sizes
-TRACY_UPDATE_BIN=$(command -v tracy-update || command -v update)
-[ -n "$TRACY_UPDATE_BIN" ] || { echo "Missing tracy-update/update binary; see install-profilers"; exit 1; }
+TRACY_UPDATE_BIN=$(command -v update || command -v tracy-update)
+[ -n "$TRACY_UPDATE_BIN" ] || { echo "Missing update/tracy-update binary; see install-profilers"; exit 1; }
 "$TRACY_UPDATE_BIN" -s M memtrace.tracy memtrace_no_mem.tracy
 
 # Good:   67 MB → 44 MB (~23 MB of memory data)

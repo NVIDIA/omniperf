@@ -60,24 +60,8 @@ WRONG:   --num_cameras 8  (silently uses default=1!)
 ```
 Always verify result JSON to confirm params were applied.
 
-### Headless viewport wastes ~35% frame time
-Even with `headless=True`, Kit creates a default viewport. Destroy it after sensor setup.
-See the `perf-tuning` skill for headless mode and viewport optimization details.
-
-```python
-import omni.kit.viewport.utility as vp_util
-import carb
-vp_window = vp_util.get_active_viewport_window()
-if vp_window:
-    vp_window.visible = False
-    vp_api = vp_util.get_active_viewport()
-    if vp_api:
-        vp_api.updates_enabled = False
-    vp_window.destroy()
-settings = carb.settings.get_settings()
-settings.set("/app/hydraEngine/waitIdle", False)
-settings.set("/app/renderer/skipWhileMinimized", True)
-```
+### Headless and viewport validation
+When comparing benchmark outputs, record whether the run used `--non-headless`, `--viewport-updates`, render products, or camera sensors. Do not change viewport code or settings from this skill; if extra viewport work appears to affect results, hand off to `perf-tuning`.
 
 ### JWT token expiry = silent black renders
 Expired `OMNI_PASS` tokens cause silent asset loading failure. See `install-isaacsim` skill for the expiry check command.
@@ -89,26 +73,9 @@ Kit log: `~/.nvidia-omniverse/logs/Kit/isaacsim*/kit.log` or `--/log/file=/tmp/k
 ### Hung processes after results are written
 If `kpis_*.json` and `*.tracy` exist with non-zero size and the process has not exited after 2 minutes with no new output, follow the `profiling` skill's guide-aligned shutdown handling and force-kill the app and capture processes.
 
-## Multi-Camera Optimization
+## Optimization Handoff
 
-```
-Creating viewports per camera?
-├─ YES → Remove per-camera viewports (keep render_products only) → +50-60% FPS
-└─ NO → Each camera a separate render_product?
-         ├─ YES → Replace with TiledCameraSensor (N RPs → 1) → +150-200% FPS
-         └─ NO → Already tiled → destroy default viewport → +7-11% FPS
-```
-
-### TiledCameraSensor
-```python
-from isaacsim.sensors.experimental.camera import TiledCameraSensor
-sensor = TiledCameraSensor(
-    camera_paths,          # List[str]
-    resolution=(H, W),     # NOTE: (Height, Width) — NOT (W, H)
-    annotators=["rgb"],
-)
-data, info = sensor.get_data("rgb")  # warp array on GPU, shape (N, H, W, C)
-```
+If results indicate per-camera viewport overhead, too many render products, default viewport work in headless mode, or poor multi-GPU scaling, do not apply fixes here. Summarize the benchmark evidence and use `perf-tuning` for the configuration changes.
 
 ## Output Files
 

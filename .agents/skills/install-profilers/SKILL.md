@@ -122,23 +122,14 @@ sudo apt-get install -y sqlite3
 sqlite3 --version
 ```
 
-### Key usage with nsys
+### Export smoke test
 
 ```bash
 # Export .nsys-rep to SQLite
 nsys export --type=sqlite -o profile.sqlite profile.nsys-rep
 
-# Query top NVTX zones
-sqlite3 profile.sqlite "
-SELECT COALESCE(e.text, s.value) as zone_name,
-       COUNT(*) as cnt,
-       ROUND(AVG(e.end - e.start) / 1e6, 2) as avg_ms,
-       ROUND(SUM(e.end - e.start) / 1e6, 2) as total_ms
-FROM NVTX_EVENTS e
-LEFT JOIN StringIds s ON e.textId = s.id
-WHERE e.end IS NOT NULL AND (e.end - e.start) > 0
-GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
-"
+# Confirm SQLite can read the export
+sqlite3 profile.sqlite ".tables"
 ```
 
 ### SQLite schema reference (key tables)
@@ -215,40 +206,7 @@ sudo apt-get install -y tracy-csvexport tracy-capture
 
 Not available on Ubuntu 22.04/24.04 from default repos.
 
-### Tracy capture usage
-
-```bash
-# Start the Isaac Sim benchmark first:
-./python.sh benchmark_script.py \
-  --/app/profilerBackend=tracy --/app/profileFromStart=true \
-  --/profiler/enabled=true --/profiler/gpu=true \
-  --/profiler/gpu/tracyInject/enabled=true &
-APP_PID=$!
-
-# Wait for the Tracy port, then attach the recorder:
-export TRACY_PORT="${TRACY_PORT:-8086}"  # use 8087 for Isaac Sim 6.0+ when needed
-for i in $(seq 1 60); do
-  ss -tlnp | grep -q ":$TRACY_PORT" && break
-  sleep 2
-done
-
-TRACY_CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
-"$TRACY_CAPTURE_BIN" -o trace.tracy -f -p "$TRACY_PORT" &
-CAPTURE_PID=$!
-
-# Wait for benchmark result files, then avoid known Isaac Sim/Tracy shutdown hangs.
-until ls <result_path>/kpis_*.json >/dev/null 2>&1; do sleep 5; done
-kill -9 "$APP_PID" "$CAPTURE_PID" 2>/dev/null || true
-```
-
-### Tracy CSV export usage
-
-```bash
-csvexport trace.tracy > zones.csv
-# Columns: name, src_file, src_line, total_ns, total_perc, counts, mean_ns, min_ns, max_ns, std_ns
-# Sort by total time descending:
-sort -t',' -k4 -rn zones.csv | head -50
-```
+For Tracy capture, CSV export usage, shutdown handling, and analysis handoff, use the `profiling` skill. This skill only installs and verifies the capture/export binaries.
 
 ---
 

@@ -65,6 +65,23 @@ Always check Tracy GPU zones to verify only intended cameras are rendering:
 - Verify resolution in zone names matches intent (e.g., `rtaTexturesMC_3_RP_1920x1080`)
 - In headless mode, check that unnecessary viewport textures aren't rendering in background
 
+### Common Multi-Camera Fixes
+
+- Remove per-camera viewports; keep render products only.
+- Replace separate camera render products with `TiledCameraSensor` when the workflow supports it.
+- Destroy or disable the default viewport after sensor setup in headless benchmark/simulation runs.
+
+```python
+from isaacsim.sensors.experimental.camera import TiledCameraSensor
+
+sensor = TiledCameraSensor(
+    camera_paths,          # List[str]
+    resolution=(H, W),     # Height, Width
+    annotators=["rgb"],
+)
+data, info = sensor.get_data("rgb")
+```
+
 ## PhysX Tuning
 
 ### Expose Full PhysX Detail

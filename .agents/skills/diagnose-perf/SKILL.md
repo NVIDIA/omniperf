@@ -104,15 +104,15 @@ awk 'NR>2 && $1!="#" {sm+=$5; mem+=$6; n++} END {printf "Avg SM: %.0f%%  Avg MEM
 
 ### Decision Tree
 
-| SM Util | Mem Util | VRAM | CPU | Diagnosis | Next Steps |
+| SM Util | Mem Util | VRAM | CPU | Diagnosis | Handoff |
 |---------|----------|------|-----|-----------|------------|
 | >80% | Low | OK | Low | **GPU compute-bound** (rendering or physics) | Profile with nsys to separate RTX vs PhysX zones |
-| Low | >80% | High | Low | **VRAM bandwidth-bound** | Reduce texture resolution, simplify materials, check Fabric |
-| Low | Low | >95% | Low | **VRAM capacity-bound** (near OOM) | Reduce scene complexity, lower render resolution |
-| Low | Low | OK | >80% | **CPU-bound** | Check Python GIL, reduce USD stage queries, enable Fabric |
+| Low | >80% | High | Low | **VRAM bandwidth-bound** | Use `perf-tuning` for texture/material/Fabric options |
+| Low | Low | >95% | Low | **VRAM capacity-bound** (near OOM) | Use `perf-tuning` for scene/render-resolution options |
+| Low | Low | OK | >80% | **CPU-bound** | Use `perf-tuning` for Python/USD/Fabric options |
 | High | Low | OK | High | **Balanced load** (good!) | Already well-utilized — micro-optimize with profiler |
 | Low | Low | OK | Low | **Idle/waiting** | Check if rate-limited, sleeping, or blocked on I/O |
-| Spiky | Any | Growing | Any | **Loading-bound** | Scene loading dominates — see Phase 4 Quick Wins |
+| Spiky | Any | Growing | Any | **Loading-bound** | Use `profiling`/`nsys-analyze` if the loading source is unclear |
 
 ### Physics vs Rendering (if GPU compute-bound)
 Without profiling, check these heuristics:
@@ -120,20 +120,15 @@ Without profiling, check these heuristics:
 - **Camera/lidar-heavy scene** (multiple render products): likely render-bound
 - **Both**: profile to separate — use `profiling` skill with NVTX markers
 
-## Phase 4 — Quick Wins (apply before profiling)
+## Phase 4 — Triage Handoff
 
-For detailed settings and commands, see the `perf-tuning` skill. In order of typical impact:
+Do not apply fixes from this skill. Use the bottleneck classification above to choose the next skill:
 
-1. **Headless mode** — 2-10x FPS if no screen output needed
-2. **Fabric** — `--/physics/fabricEnabled=true` for USD-heavy scenes
-3. **Disable debug viz** — `--/physics/debugDraw=false`
-4. **CPU governor** — set to `performance`
-5. **RTX quality** — DLSS execMode, preset tuning (see `perf-tuning`)
-6. **PhysX solver** — TGS may help in some scenarios; verify with WARM benchmark results
-7. **Collision geometry** — check for "Falling back to CPU PhysX" in Kit logs
-8. **waitIdle / async rendering** — CPU-GPU pipelining
+1. **Need likely fixes now:** use `perf-tuning` with the red flags and bottleneck category.
+2. **Need exact hotspot attribution:** use `profiling` to capture traces, then `nsys-analyze`.
+3. **Need a benchmark comparison:** use `benchmark-isaacsim` or `benchmark-isaaclab` for WARM results.
 
-If quick wins aren't enough → escalate to full profiling.
+Common handoff topics for `perf-tuning`: headless/viewport work, Fabric, debug visualization, CPU governor, RTX quality, PhysX settings, collision geometry, and waitIdle/async rendering.
 
 ## Triage Report Template
 

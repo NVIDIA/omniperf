@@ -41,16 +41,18 @@ See the `install-isaacsim` skill. You need a working Isaac Sim before proceeding
 Conda is the most common path; uv is also supported by recent Isaac Lab versions.
 
 ```bash
-# Conda / Miniconda
-which conda && echo "CONDA OK" || {
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
-  bash /tmp/miniconda.sh -b -p ~/miniconda3
-  ~/miniconda3/bin/conda init bash
-  source ~/.bashrc
-}
+# Prefer an existing environment manager.
+command -v conda >/dev/null && echo "CONDA OK" || echo "CONDA MISSING"
+command -v uv >/dev/null && echo "UV OK" || echo "UV MISSING (needed for ./isaaclab.sh -u)"
+```
 
-# Optional uv path
-which uv && echo "UV OK" || echo "Install uv if you plan to use ./isaaclab.sh -u"
+If neither `conda` nor `uv` is available, ask before installing one. Do not run `conda init` from this skill; it mutates user shell startup files. If the user approves a local Miniconda install, use a non-mutating activation path:
+
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+bash /tmp/miniconda.sh -b -p "$HOME/miniconda3"
+source "$HOME/miniconda3/etc/profile.d/conda.sh"
+conda --version
 ```
 
 ### Step 3: Clone Isaac Lab
