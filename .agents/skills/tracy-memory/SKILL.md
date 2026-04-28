@@ -1,6 +1,6 @@
 ---
 name: tracy-memory
-description: Profile CPU and GPU memory allocations using Tracy in Kit-based applications. Covers LD_PRELOAD setup for liballocwrapper.so, Kit flags for CPU/GPU memory channels, capture binary isolation (unset LD_PRELOAD), strip test verification, and debug symbol requirements. Use when investigating memory leaks, allocation hotspots, or VRAM growth in Isaac Sim, Isaac Lab, or Kit apps via Tracy's Memory tab.
+description: Profile CPU and GPU memory allocations using Tracy in Kit-based applications after Tracy capture tooling is installed. Covers LD_PRELOAD setup for liballocwrapper.so, Kit memory-channel flags, capture binary isolation (unset LD_PRELOAD), tracy-update strip-test verification, Tracy Memory tab analysis, and debug symbol requirements. Use when investigating memory leaks, allocation hotspots, or VRAM growth in Isaac Sim, Isaac Lab, or Kit apps. Requires profiling capture setup plus install-profilers. NOT for generic trace capture (use profiling) or non-memory trace analysis (use nsys-analyze).
 ---
 
 # Tracy Memory Profiling for Kit-Based Applications
@@ -50,7 +50,9 @@ Only Kit should use the interposer. The Tracy capture binary must NOT inherit it
 ```bash
 # After launching Kit with LD_PRELOAD in background
 unset LD_PRELOAD
-./tracy/capture -o memtrace.tracy -f
+TRACY_CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
+[ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing capture/capture-release/tracy-capture binary"; exit 1; }
+"$TRACY_CAPTURE_BIN" -o memtrace.tracy -f -p "${TRACY_PORT:-8086}"
 ```
 
 ## Step 4: Verify — Strip Test (MANDATORY)
@@ -59,7 +61,9 @@ Do not rely on Kit log lines alone. Verify actual memory data in the output:
 
 ```bash
 # Strip memory events and compare file sizes
-./tracy/update -s M memtrace.tracy memtrace_no_mem.tracy
+TRACY_UPDATE_BIN=$(command -v update || command -v tracy-update)
+[ -n "$TRACY_UPDATE_BIN" ] || { echo "Missing update/tracy-update binary; see install-profilers"; exit 1; }
+"$TRACY_UPDATE_BIN" -s M memtrace.tracy memtrace_no_mem.tracy
 
 # Good:   67 MB → 44 MB (~23 MB of memory data)
 # Broken: 18 MB → 18 MB (zero memory data — LD_PRELOAD failed)

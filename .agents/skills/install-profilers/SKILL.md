@@ -1,6 +1,6 @@
 ---
 name: install-profilers
-description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (nsys CLI), Tracy Profiler (`csvexport`, `tracy-capture`), and sqlite3 for nsys SQLite exports. Use when setting up a profiling environment, when nsys/tracy/csvexport/sqlite3 are missing, or before running the profiling or nsys-analyze skills.
+description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (`nsys` CLI), `sqlite3`, Tracy `csvexport`, canonical Tracy `capture`/`capture-release`, and `update` for memory strip tests, with optional `tracy-capture`/`tracy-update` aliases. Use when setting up a profiling environment, when nsys/sqlite3/csvexport/capture/update tools are missing, or before running profiling, nsys-analyze, or tracy-memory.
 ---
 
 # Install Profilers for Omniverse / Kit Apps
@@ -10,7 +10,10 @@ description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based appli
 ```bash
 nsys --version 2>/dev/null && echo "nsys: OK" || echo "nsys: MISSING"
 csvexport --help 2>/dev/null && echo "csvexport: OK" || echo "csvexport: MISSING"
-which tracy-capture >/dev/null 2>&1 && echo "tracy-capture: OK" || echo "tracy-capture: MISSING"
+CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
+[ -n "$CAPTURE_BIN" ] && echo "capture: OK ($CAPTURE_BIN)" || echo "capture: MISSING"
+UPDATE_BIN=$(command -v update || command -v tracy-update)
+[ -n "$UPDATE_BIN" ] && echo "update: OK ($UPDATE_BIN)" || echo "update: MISSING (optional; needed for memory strip tests)"
 sqlite3 --version 2>/dev/null && echo "sqlite3: OK" || echo "sqlite3: MISSING"
 ```
 
@@ -22,7 +25,25 @@ Install only what's missing.
 
 The `nsys` CLI captures GPU/CPU traces and exports `.nsys-rep` → SQLite.
 
-### Option A: From NVIDIA CUDA apt repo (recommended on Ubuntu)
+### Option A: Standalone installer from NVIDIA (recommended)
+
+The profiling guide recommends the latest standalone Nsight Systems package because CUDA Toolkit packages may lag behind.
+
+```bash
+# Check the latest version at https://developer.nvidia.com/nsight-systems
+wget https://developer.nvidia.com/downloads/assets/tools/secure/nsight-systems/2026_2/nsight-systems-2026.2.1_2026.2.1.210-1_amd64.deb
+sudo dpkg -i nsight-systems-*.deb
+nsys --version
+```
+
+For non-Debian Linux, use the standalone `.run` installer from the same download page:
+
+```bash
+chmod +x NsightSystems-linux-public-*.run
+sudo ./NsightSystems-linux-public-*.run --accept
+```
+
+### Option B: From NVIDIA CUDA apt repo (fallback)
 
 If the CUDA apt repo is already configured (check `ls /etc/apt/sources.list.d/*cuda*`):
 
@@ -30,9 +51,10 @@ If the CUDA apt repo is already configured (check `ls /etc/apt/sources.list.d/*c
 # List available versions
 apt-cache search nsight-systems-20 | sort -V
 
-# Install latest (or pick a specific version)
+# Install the newest available package from the repo
 sudo apt-get update
-sudo apt-get install -y nsight-systems-2025.6.3   # adjust version
+NSYS_PKG="nsight-systems-<version-from-apt-cache>"
+sudo apt-get install -y "$NSYS_PKG"
 
 # Verify
 nsys --version
@@ -45,7 +67,7 @@ It typically creates a symlink at `/usr/local/bin/nsys`, but if not:
 sudo ln -sf /opt/nvidia/nsight-systems/*/bin/nsys /usr/local/bin/nsys
 ```
 
-### Option B: Add CUDA repo first (if not present)
+### Option C: Add CUDA repo first (if not present)
 
 ```bash
 # Ubuntu 22.04 x86_64
@@ -53,22 +75,14 @@ wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/
 sudo dpkg -i cuda-keyring_1.1-1_all.deb
 sudo apt-get update
 
-# Then install as in Option A
-sudo apt-get install -y nsight-systems-2025.6.3
+# Then install the newest available package as in Option B
+apt-cache search nsight-systems-20 | sort -V
+NSYS_PKG="nsight-systems-<version-from-apt-cache>"
+sudo apt-get install -y "$NSYS_PKG"
 ```
 
 For other distros, replace `ubuntu2204/x86_64` with your platform.
 See: https://developer.nvidia.com/cuda-downloads (select "deb (network)").
-
-### Option C: Standalone .run installer
-
-Download from https://developer.nvidia.com/nsight-systems — requires NVIDIA developer account login.
-
-```bash
-chmod +x NsightSystems-linux-public-*.run
-sudo ./NsightSystems-linux-public-*.run --accept
-# Installs to /opt/nvidia/nsight-systems/
-```
 
 ### Option D: CLI-only (headless servers)
 
@@ -108,23 +122,14 @@ sudo apt-get install -y sqlite3
 sqlite3 --version
 ```
 
-### Key usage with nsys
+### Export smoke test
 
 ```bash
 # Export .nsys-rep to SQLite
 nsys export --type=sqlite -o profile.sqlite profile.nsys-rep
 
-# Query top NVTX zones
-sqlite3 profile.sqlite "
-SELECT COALESCE(e.text, s.value) as zone_name,
-       COUNT(*) as cnt,
-       ROUND(AVG(e.end - e.start) / 1e6, 2) as avg_ms,
-       ROUND(SUM(e.end - e.start) / 1e6, 2) as total_ms
-FROM NVTX_EVENTS e
-LEFT JOIN StringIds s ON e.textId = s.id
-WHERE e.end IS NOT NULL AND (e.end - e.start) > 0
-GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
-"
+# Confirm SQLite can read the export
+sqlite3 profile.sqlite ".tables"
 ```
 
 ### SQLite schema reference (key tables)
@@ -142,40 +147,57 @@ GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
 
 ---
 
-## 3. Tracy Profiler Tools (`csvexport`, `tracy-capture`)
+## 3. Tracy Profiler Tools (`csvexport`, `capture`, `update`)
 
 Tracy is used by Kit/Isaac Sim when `--/app/profilerBackend=tracy` is set.
-You need two tools: `tracy-capture` (record traces) and `csvexport` (export to CSV for analysis).
+You need two tools for the standard flow: `capture` (record traces) and `csvexport` (export to CSV for analysis). For memory profiling strip tests, also expose Tracy's `update` tool. `tracy-capture` and `tracy-update` are acceptable local aliases, but `capture` / `capture-release` / `update` are the source-guide names.
 
-### Option A: Build from source (recommended — gets latest)
+### Option A: Use the bundled Kit binary (best protocol match)
+
+Building Isaac Sim from source, or another Kit-based app, downloads `omni.kit.profiler.tracy`, which ships a matching Tracy `capture` binary. Look under:
+
+- `exts/omni.kit.profiler.tracy/`
+- `extscore/omni.kit.profiler.tracy/`
+- `extscache/omni.kit.profiler.tracy/`
+
+Using the bundled binary guarantees version compatibility with the Tracy protocol embedded in Kit.
+
+### Option B: Build Tracy 0.11.1 from source (recommended fallback)
 
 ```bash
 sudo apt-get install -y build-essential cmake git libcapstone-dev
 
 git clone https://github.com/wolfpld/tracy.git
 cd tracy
-git checkout v0.11.1   # or latest stable tag
+git checkout v0.11.1
 
 # Build csvexport (headless, no GUI deps)
 cmake -B csvexport/build -S csvexport -DCMAKE_BUILD_TYPE=Release -DNO_ISA_EXTENSIONS=ON
 cmake --build csvexport/build --parallel
 sudo cp csvexport/build/csvexport /usr/local/bin/csvexport
 
-# Build capture (headless trace recorder)
-cmake -B capture/build -S capture -DCMAKE_BUILD_TYPE=Release
-cmake --build capture/build --parallel
-sudo cp capture/build/tracy-capture /usr/local/bin/tracy-capture
+# Build capture using the source-guide path
+make -C capture/build/unix release
+sudo cp capture/build/unix/capture-release /usr/local/bin/capture
+sudo ln -sf /usr/local/bin/capture /usr/local/bin/tracy-capture  # optional compatibility alias
+
+# Build update (optional; required by the tracy-memory strip test)
+cmake -B update/build -S update -DCMAKE_BUILD_TYPE=Release
+cmake --build update/build --parallel
+sudo cp update/build/update /usr/local/bin/update
+sudo ln -sf /usr/local/bin/update /usr/local/bin/tracy-update  # optional compatibility alias
 
 # Verify
 csvexport --help
-tracy-capture --help
+capture --help
+update --help
 ```
 
 > **Note:** The GUI profiler (`tracy-profiler`) requires `libglfw3-dev libdbus-1-dev libfreetype-dev`
 > and a display. Skip on headless servers — `csvexport` + `sqlite3` queries are sufficient for
 > automated analysis.
 
-### Option B: Ubuntu 25.04+ packages (if available)
+### Option C: Ubuntu 25.04+ packages (if available)
 
 ```bash
 # Available in Ubuntu 25.04+ universe repo
@@ -184,33 +206,7 @@ sudo apt-get install -y tracy-csvexport tracy-capture
 
 Not available on Ubuntu 22.04/24.04 from default repos.
 
-### Tracy capture usage
-
-```bash
-# Start the Isaac Sim benchmark first:
-./python.sh benchmark_script.py \
-  --/app/profilerBackend=tracy --/app/profileFromStart=true \
-  --/profiler/gpu/tracyInject/enabled=true &
-APP_PID=$!
-
-# Wait for the Tracy port, then attach the recorder:
-for i in $(seq 1 60); do
-  ss -tlnp | grep -q :8086 && break
-  sleep 2
-done
-
-tracy-capture -o trace.tracy -f -p 8086
-wait $APP_PID
-```
-
-### Tracy CSV export usage
-
-```bash
-csvexport trace.tracy > zones.csv
-# Columns: name, src_file, src_line, total_ns, total_perc, counts, mean_ns, min_ns, max_ns, std_ns
-# Sort by total time descending:
-sort -t',' -k4 -rn zones.csv | head -50
-```
+For Tracy capture, CSV export usage, shutdown handling, and analysis handoff, use the `profiling` skill. This skill only installs and verifies the capture/export binaries.
 
 ---
 
@@ -223,12 +219,16 @@ echo "=== Profiling Toolchain ==="
 nsys --version 2>/dev/null        || echo "MISSING: nsys"
 sqlite3 --version 2>/dev/null     || echo "MISSING: sqlite3"
 csvexport --help 2>&1 | head -1   || echo "MISSING: csvexport (Tracy)"
-tracy-capture --help 2>&1 | head -1 || echo "MISSING: tracy-capture"
+CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
+[ -n "$CAPTURE_BIN" ] && "$CAPTURE_BIN" --help 2>&1 | head -1 || echo "MISSING: capture"
+UPDATE_BIN=$(command -v update || command -v tracy-update)
+[ -n "$UPDATE_BIN" ] && "$UPDATE_BIN" --help 2>&1 | head -1 || echo "MISSING: update (optional; needed for tracy-memory)"
 echo "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo 'N/A')"
 ```
 
-All four tools are needed for the full profiling workflow:
+These tools are needed for the full profiling workflow:
 - `nsys` — capture Nsight Systems traces
 - `sqlite3` — query nsys SQLite exports
 - `csvexport` — export Tracy `.tracy` files to CSV
-- `tracy-capture` — record Tracy traces from Kit apps
+- `capture` / `capture-release` — record Tracy traces from Kit apps
+- `update` — strip/transform Tracy captures for memory-capture verification

@@ -1,59 +1,24 @@
 ---
 name: nvtx-python
-description: Profile Python functions with NVTX in non-Kit environments (Isaac Lab 3.0+ standalone, any Python app without Carbonite). Sets up sitecustomize.py with sys.setprofile hook, NVTX push/pop ranges, module include/exclude filtering, and Nsight Systems integration. Use when CARB_PROFILING_PYTHON doesn't work (no Kit/Carbonite runtime), when profiling standalone Isaac Lab scripts, or when you need per-function Python tracing in nsys captures outside Kit.
+description: Profile Python functions with NVTX in non-Kit environments (Isaac Lab 3.0+ standalone, any Python app without Carbonite). Uses a bundled PYTHONPATH-scoped sitecustomize.py with sys.setprofile hook, NVTX push/pop ranges, module include/exclude filtering, and Nsight Systems integration. Use when CARB_PROFILING_PYTHON doesn't work (no Kit/Carbonite runtime), when profiling standalone Isaac Lab scripts, or when you need per-function Python tracing in nsys captures outside Kit.
 ---
 
 # NVTX Python Function Profiling (Non-Kit Environments)
 
-For Isaac Lab 3.0+ standalone mode and other Python apps without Kit/Carbonite, `CARB_PROFILING_PYTHON` doesn't work. This skill sets up a `sys.setprofile()` hook with NVTX ranges instead.
+For Isaac Lab 3.0+ standalone mode and other Python apps without Kit/Carbonite, `CARB_PROFILING_PYTHON` doesn't work. This skill uses the bundled `scripts/sitecustomize.py` helper to install a `sys.setprofile()` hook with NVTX ranges.
+
+Do not write into an environment's existing `sitecustomize.py`. Load the bundled helper with `PYTHONPATH` so disabling it is just unsetting `PYTHONPATH` or `NVTX_PROFILE_PYTHON`.
 
 ## Setup
 
 ```bash
 # From the Isaac Lab directory (or any Python project with uv/pip)
-
-# 1. Install nvtx
 uv pip install nvtx
 
-# 2. Create sitecustomize.py (auto-loaded at interpreter startup)
-SITE_PACKAGES=$(uv run python -c "import site; print(site.getsitepackages()[0])")
-cat > "$SITE_PACKAGES/sitecustomize.py" << 'PYEOF'
-import os
-if os.environ.get('NVTX_PROFILE_PYTHON') == '1':
-    import sys
-    try:
-        import threading, nvtx
-        _inc = tuple(filter(None, os.environ.get('NVTX_PROFILE_INCLUDE', '').split(',')))
-        _exc = tuple(filter(None, os.environ.get('NVTX_PROFILE_EXCLUDE', 'importlib').split(',')))
-        _cache = {}
-        _tls = threading.local()
-
-        def _cb(f, ev, a):
-            if ev == 'call':
-                m = f.f_globals.get('__name__', '')
-                r = _cache.get(m)
-                if r is None:
-                    if any(m.startswith(e) for e in _exc):
-                        r = False
-                    else:
-                        r = not _inc or any(m.startswith(i) for i in _inc)
-                    _cache[m] = r
-                if r:
-                    if not hasattr(_tls, 'd'): _tls.d = 0
-                    nvtx.push_range(f"{m}.{f.f_code.co_name}")
-                    _tls.d += 1
-            elif ev == 'return' and hasattr(_tls, 'd') and _tls.d > 0:
-                nvtx.pop_range()
-                _tls.d -= 1
-            return _cb
-
-        sys.setprofile(_cb)
-        threading.setprofile(_cb)
-        print(f"[NVTX] Python profiling enabled (include={_inc or 'all'}, exclude={_exc})", file=sys.stderr)
-    except Exception as e:
-        print(f"[NVTX] Failed: {e}", file=sys.stderr)
-PYEOF
-echo "Created: $SITE_PACKAGES/sitecustomize.py"
+# Resolve this skill's directory, then put its scripts/ directory on PYTHONPATH.
+# Replace the path if the skills directory is installed somewhere else.
+NVTX_SKILL_DIR=/Users/abaillet/src/omniperf/.agents/skills/nvtx-python
+export PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}"
 ```
 
 ## Environment Variables
@@ -68,12 +33,16 @@ echo "Created: $SITE_PACKAGES/sitecustomize.py"
 
 ```bash
 # Capture all Python modules
+NVTX_SKILL_DIR=/Users/abaillet/src/omniperf/.agents/skills/nvtx-python
+PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}" \
 NVTX_PROFILE_PYTHON=1 \
 nsys profile -t nvtx,cuda,osrt \
 uv run python scripts/reinforcement_learning/skrl/train.py \
   --task=Isaac-Velocity-Flat-Anymal-C-v0 --num_envs=1024 --max_iterations=10
 
 # Capture specific modules only (recommended — reduces overhead)
+NVTX_SKILL_DIR=/Users/abaillet/src/omniperf/.agents/skills/nvtx-python
+PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}" \
 NVTX_PROFILE_PYTHON=1 NVTX_PROFILE_INCLUDE=isaaclab,skrl \
 nsys profile -t nvtx,cuda,osrt \
 uv run python scripts/reinforcement_learning/skrl/train.py \
@@ -84,7 +53,7 @@ uv run python scripts/reinforcement_learning/skrl/train.py \
 
 - **Every function call/return fires a callback** — significant overhead when tracing all modules
 - Use `NVTX_PROFILE_INCLUDE` to limit scope to modules of interest
-- To disable: unset `NVTX_PROFILE_PYTHON` or delete `sitecustomize.py`
+- To disable: unset `NVTX_PROFILE_PYTHON` or remove the skill's `scripts/` directory from `PYTHONPATH`
 
 ## Alternative: nsys Built-in Python Tracing
 

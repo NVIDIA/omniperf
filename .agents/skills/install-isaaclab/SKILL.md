@@ -1,29 +1,61 @@
 ---
 name: install-isaaclab
-description: Install Isaac Lab with conda, link Isaac Sim, and verify the setup. Use when the user asks to install, set up, or build Isaac Lab.
+description: Install Isaac Lab for Isaac Sim-backed workflows or Isaac Lab 3.0+ kit-less/Newton workflows, then verify the setup. Use when the user asks to install, set up, or build Isaac Lab.
 ---
 
 # Install Isaac Lab
 
 **Repo:** https://github.com/isaac-sim/IsaacLab.git
-**Requires:** Isaac Sim (installed first) + Miniconda/Conda
+**Modes:** Isaac Sim-backed full install, or Isaac Lab 3.0+ kit-less/Newton install.
 
-## Step 1: Install Isaac Sim
+## Choose Install Mode
+
+- **Full Isaac Sim-backed install:** use for PhysX, ROS, URDF/MJCF importers, Omniverse visualization, and most benchmarking/profiling work. This requires Isaac Sim first.
+- **Kit-less/Newton install (Isaac Lab 3.0+):** use only when the user explicitly wants core Isaac Lab/Newton workflows that do not require Isaac Sim features.
+
+If the user does not specify, default to the full Isaac Sim-backed install for performance benchmarking.
+
+## Kit-less / Newton Quick Install (Isaac Lab 3.0+)
+
+Use this path only when Isaac Sim features are not needed.
+
+```bash
+git clone https://github.com/isaac-sim/IsaacLab.git
+cd IsaacLab
+git checkout develop   # or a specific commit/tag
+
+# Installs core Isaac Lab packages plus the Newton backend.
+./isaaclab.sh -i
+```
+
+Do not use this mode for PhysX, ROS, URDF/MJCF importers, or Omniverse visualizers.
+
+## Full Isaac Sim-Backed Install
+
+### Step 1: Install Isaac Sim
 
 See the `install-isaacsim` skill. You need a working Isaac Sim before proceeding.
 
-## Step 2: Install Miniconda (if not present)
+### Step 2: Install an Environment Manager (if not present)
+
+Conda is the most common path; uv is also supported by recent Isaac Lab versions.
 
 ```bash
-which conda && echo "CONDA OK" || {
-  wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
-  bash /tmp/miniconda.sh -b -p ~/miniconda3
-  ~/miniconda3/bin/conda init bash
-  source ~/.bashrc
-}
+# Prefer an existing environment manager.
+command -v conda >/dev/null && echo "CONDA OK" || echo "CONDA MISSING"
+command -v uv >/dev/null && echo "UV OK" || echo "UV MISSING (needed for ./isaaclab.sh -u)"
 ```
 
-## Step 3: Clone Isaac Lab
+If neither `conda` nor `uv` is available, ask before installing one. Do not run `conda init` from this skill; it mutates user shell startup files. If the user approves a local Miniconda install, use a non-mutating activation path:
+
+```bash
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
+bash /tmp/miniconda.sh -b -p "$HOME/miniconda3"
+source "$HOME/miniconda3/etc/profile.d/conda.sh"
+conda --version
+```
+
+### Step 3: Clone Isaac Lab
 
 ```bash
 git clone https://github.com/isaac-sim/IsaacLab.git
@@ -31,7 +63,7 @@ cd IsaacLab
 git checkout develop   # or a specific commit/tag
 ```
 
-## Step 4: Link Isaac Sim
+### Step 4: Link Isaac Sim
 
 ```bash
 # If Isaac Sim was source-built:
@@ -42,13 +74,18 @@ ln -s /path/to/IsaacSim/_build/linux-x86_64/release _isaac_sim
 # Check: ./isaaclab.sh -p -c "import isaacsim; print('OK')"
 ```
 
-## Step 5: Create Conda Environment
+### Step 5: Create Environment
 
 ```bash
-./isaaclab.sh -c isaaclab_env
+# Choose one. Default environment name is env_isaaclab if omitted.
+# Conda:
+./isaaclab.sh -c env_isaaclab
+
+# uv on supported versions:
+./isaaclab.sh -u env_isaaclab
 ```
 
-This creates a conda env with the correct Python version and base dependencies.
+This creates an environment with the correct Python version and base dependencies.
 The default name (if you omit the argument) is `env_isaaclab`.
 
 > **Note:** You may need to accept conda channel TOS first if this is a fresh install:
@@ -57,11 +94,16 @@ The default name (if you omit the argument) is `env_isaaclab`.
 > conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 > ```
 
-## Step 6: Install Dependencies
+### Step 6: Install Dependencies
 
 ```bash
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate isaaclab_env
+# Conda
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate env_isaaclab
+
+# Or uv
+# source env_isaaclab/bin/activate
+
 ./isaaclab.sh -i
 ```
 
@@ -71,8 +113,8 @@ conda activate isaaclab_env
 ## Verify
 
 ```bash
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate isaaclab_env
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate env_isaaclab
 cd IsaacLab
 
 # Quick import check
@@ -80,7 +122,7 @@ cd IsaacLab
 
 # Run a minimal benchmark (few frames)
 ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-  --task=Isaac-Cartpole-Direct-v0 --num_frames 10 --num_envs=16
+  --task=Isaac-Cartpole-Direct-v0 --viz none --num_frames 10 --num_envs=16
 ```
 
 > **Note:** `--headless` is deprecated in recent versions. Omit `--viz` for headless mode,
@@ -89,8 +131,8 @@ cd IsaacLab
 ## Day-to-Day Activation
 
 ```bash
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate isaaclab_env
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate env_isaaclab
 cd IsaacLab
 ```
 
@@ -105,8 +147,8 @@ ls -la _isaac_sim/
 
 ### Conda env already exists
 ```bash
-conda env remove -n isaaclab_env
-./isaaclab.sh -c isaaclab_env
+conda env remove -n env_isaaclab
+./isaaclab.sh -c env_isaaclab
 ```
 
 ### GPU not found / CUDA errors

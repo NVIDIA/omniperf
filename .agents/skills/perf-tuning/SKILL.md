@@ -65,6 +65,23 @@ Always check Tracy GPU zones to verify only intended cameras are rendering:
 - Verify resolution in zone names matches intent (e.g., `rtaTexturesMC_3_RP_1920x1080`)
 - In headless mode, check that unnecessary viewport textures aren't rendering in background
 
+### Common Multi-Camera Fixes
+
+- Remove per-camera viewports; keep render products only.
+- Replace separate camera render products with `TiledCameraSensor` when the workflow supports it.
+- Destroy or disable the default viewport after sensor setup in headless benchmark/simulation runs.
+
+```python
+from isaacsim.sensors.experimental.camera import TiledCameraSensor
+
+sensor = TiledCameraSensor(
+    camera_paths,          # List[str]
+    resolution=(H, W),     # Height, Width
+    annotators=["rgb"],
+)
+data, info = sensor.get_data("rgb")
+```
+
 ## PhysX Tuning
 
 ### Expose Full PhysX Detail
@@ -93,9 +110,11 @@ for prim in stage.Traverse():
 Applicable when previous-frame physics results are acceptable (RL training, SDG).
 
 ### Solver Type
-PGS (type 0) = faster, less accurate. TGS (type 1) = more accurate, slightly slower.
-```bash
---/physics/physxScene/solverType=0  # PGS for speed
+The default solver is PGS. The profiling guide calls out switching `PhysxSceneAPI.solverType` to TGS as a scenario-dependent tuning option; verify with a WARM benchmark before keeping it.
+
+```python
+api = PhysxSchema.PhysxSceneAPI.Apply(physics_scene_prim)
+api.CreateSolverTypeAttr().Set("TGS")
 ```
 
 ## Extension Change Detection (fsWatcher)
