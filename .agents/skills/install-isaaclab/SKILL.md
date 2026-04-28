@@ -6,7 +6,7 @@ description: Install Isaac Lab for Isaac Sim-backed workflows or Isaac Lab 3.0+ 
 # Install Isaac Lab
 
 **Repo:** https://github.com/isaac-sim/IsaacLab.git
-**Modes:** Isaac Sim-backed full install, or Isaac Lab 3.0+ kit-less/Newton install.
+**Modes:** Isaac Sim-backed full install, or Isaac Lab 3.0+ kit-less/Newton install. Conda is the most common setup path for full installs, while newer Isaac Lab versions can also use `uv`/pip virtual environments.
 
 ## Choose Install Mode
 

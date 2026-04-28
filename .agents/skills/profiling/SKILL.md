@@ -232,11 +232,14 @@ sudo dpkg -i nsight-systems-*.deb
 ```
 
 ### Nsys Command
+
+Try without `sudo` first. Use `sudo -E` only when `perf_event_paranoid` blocks CPU sampling or system-wide OS runtime data, and only after confirming it is acceptable for the machine. In containers, `sudo` may not exist and GPU metrics may require extra host privileges.
+
 ```bash
 export CARB_PROFILING_PYTHON=1
 NSYS_OUTPUT="kit_profile"
 
-sudo nsys profile \
+nsys profile \
   --force-overwrite=true \
   --output="$NSYS_OUTPUT" \
   --sample=system-wide \
@@ -253,6 +256,8 @@ sudo nsys profile \
   --/profiler/channels/carb.events/enabled=false \
   --/profiler/channels/carb.tasking/enabled=false
 ```
+
+If `--gpu-metrics-devices=all` fails with `ERR_NVGPUCTRPERM` or permission errors, rerun without GPU metrics or fix the container/host permissions first. See `install-profilers` for setup notes.
 
 ### Windows nsys Differences
 - `-t osrt` is NOT supported on Windows (use `-t wddm`)
@@ -311,7 +316,7 @@ sudo prlimit --nofile=65536:65536 /bin/bash -c \
 
 **Isaac Lab with Nsight:**
 ```bash
-sudo OMNI_KIT_ALLOW_ROOT=1 DISPLAY=:0 \
+OMNI_KIT_ALLOW_ROOT=1 DISPLAY=:0 \
   TRACY_NO_SYS_TRACE=1 TRACY_NO_CALLSTACK=1 CARB_PROFILING_PYTHON=1 \
   nsys profile --force-overwrite=true --output=isaaclab_profile \
   --sample=system-wide --trace=cuda,nvtx,vulkan,osrt \
@@ -322,11 +327,14 @@ sudo OMNI_KIT_ALLOW_ROOT=1 DISPLAY=:0 \
   --kit_args "--/app/profileFromStart=true --/profiler/enabled=true --/app/profilerBackend=nvtx --/app/profilerMask=1 --/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false --/profiler/channels/carb.events/enabled=false --/profiler/channels/carb.tasking/enabled=false"
 ```
 
+Use `sudo -E` only if the non-sudo command fails because CPU sampling is blocked and you have approval to run privileged profiling.
+
 ### Export Handoff
 
 Export traces here, then use `nsys-analyze` for SQL queries, Tracy Statistics/Range Limit comparison, zone ranking, phase detection, and interpretation.
 Tracy `capture` already applies LZ4 compression. For sharing very large `.tracy` files, optionally recompress with `update -z 1`.
 
+### nsys SQLite Export (when nsys stats fails or custom queries needed)
 ```bash
 nsys export --type=sqlite -o profile.sqlite profile.nsys-rep
 csvexport profile.tracy > zones.csv
