@@ -1,6 +1,6 @@
 ---
 name: profiling
-description: Capture performance traces using Tracy and Nsight Systems for Kit-based applications (Isaac Sim, Isaac Lab, Kit SDK). Covers Tracy capture sequence (port management, os._exit patch, shutdown hang workaround), nsys profile commands, Kit args for each backend, CPU governor setup, and the COLD/WARM/TRACY methodology. Use when running profiling captures, setting up trace collection, or troubleshooting capture failures. NOT for adding profiling zones to code (use profiling-api skill) or analyzing captured traces (use nsys-analyze skill).
+description: Capture performance traces using Tracy and Nsight Systems for Kit-based applications (Isaac Sim, Isaac Lab, Kit SDK). Covers Tracy capture sequence (port management, last-resort shutdown workaround), nsys profile commands, Kit args for each backend, CPU governor setup, and the COLD/WARM/TRACE methodology. Use when running profiling captures, setting up trace collection, or troubleshooting capture failures. NOT for adding profiling zones to code (use profiling-api skill) or analyzing captured traces (use nsys-analyze skill).
 ---
 
 # Profiling Guide
@@ -8,13 +8,25 @@ description: Capture performance traces using Tracy and Nsight Systems for Kit-b
 This is the canonical reference for profiling Kit-based applications (Isaac Sim, Isaac Lab, Kit SDK).
 Other skills reference this one for profiling details — keep this up to date.
 
+## Benchmark Accuracy: COLD / WARM / TRACE
+
+Profilers add overhead. Keep measurement and diagnosis as separate runs:
+
+1. **COLD:** first run after a fresh install/cache state. Use this to expose startup and shader-cache effects, not as the steady-state performance number.
+2. **WARM:** same workload with caches already populated and profiling disabled. This is the authoritative FPS/frametime benchmark run.
+3. **TRACE:** Tracy or nsys enabled for attribution. Use this to explain bottlenecks, not as the headline performance number.
+
+Only enable high-overhead Python function capture (`CARB_PROFILING_PYTHON=1`) in TRACE runs when Python call-level attribution is needed.
+
 ## Tracy Profiling
 
 ### Environment Setup
 ```bash
-export CARB_PROFILING_PYTHON=1
 export TRACY_NO_SYS_TRACE=1
 export TRACY_NO_CALLSTACK=1
+
+# Optional, high overhead. Do not set during WARM benchmark measurement.
+# export CARB_PROFILING_PYTHON=1
 ```
 
 ### Kit Args (common for all Kit-based products)
@@ -72,10 +84,16 @@ wait $APP_PID
 - **Always check for zombie processes** on port 8086 before starting.
 - **v6.0.0 shutdown hang:** v6.0.0 with Tracy may hang during shutdown. If the app doesn't exit within ~2 min after benchmark completes, kill the app process (not capture).
 
-### MANDATORY: Apply `os._exit(0)` close patch (prevents shutdown hang)
+### Last Resort: Scoped `os._exit(0)` Close Patch
 
-Isaac Sim's `simulation_app.py` `close()` method hangs during shutdown, especially with Tracy.
-Patch BEFORE running any benchmark:
+Do **not** patch installed Isaac Sim files by default. Normal shutdown is preferred because it runs cleanup code and keeps the install reproducible.
+
+Use this workaround only when all of the following are true:
+- The workload repeatedly hangs during Tracy shutdown.
+- Expected benchmark and trace outputs already exist with non-zero size.
+- The install is disposable or you can restore the original file immediately after capture.
+
+Prefer first to let the app exit normally. If it hangs after results are complete, kill the **app process**, not the Tracy capture process. Patch only when repeated hangs prevent clean capture completion.
 
 ```bash
 # Find simulation_app.py — path varies between source and build layouts:
@@ -88,30 +106,50 @@ SIM_APP=$(echo <package_path>/**/isaacsim/simulation_app/simulation_app.py | tr 
 # SIM_APP=<package_path>/_build/linux-x86_64/release/exts/isaacsim.simulation_app/isaacsim/simulation_app/simulation_app.py
 echo "Found: $SIM_APP"
 
-# Insert os._exit(0) as first line of the close() method body.
-# The docstring varies across versions so we match the method signature instead.
-sed -i '/def close(self[^)]*)/a\        import os; os._exit(0)' "$SIM_APP"
+# Idempotent patch with a restore point.
+cp -n "$SIM_APP" "$SIM_APP.bak.codex-tracy-close"
+python3 - "$SIM_APP" <<'PY'
+from pathlib import Path
+import re, sys
+
+path = Path(sys.argv[1])
+text = path.read_text()
+marker = "CODEX_TRACY_CLOSE_BYPASS"
+if marker in text:
+    print(f"Already patched: {path}")
+    raise SystemExit(0)
+
+patched, count = re.subn(
+    r"(^\s*def close\(self[^)]*\):\n)",
+    r"\1        # CODEX_TRACY_CLOSE_BYPASS: last-resort workaround for Tracy shutdown hangs.\n        import os; os._exit(0)\n",
+    text,
+    count=1,
+    flags=re.MULTILINE,
+)
+if count != 1:
+    raise SystemExit(f"Could not find close() in {path}")
+path.write_text(patched)
+print(f"Patched: {path}")
+PY
 
 # Verify the patch applied
-grep -n 'os._exit(0)' "$SIM_APP"
+grep -n 'CODEX_TRACY_CLOSE_BYPASS' "$SIM_APP"
+
+# Restore after the capture
+cp "$SIM_APP.bak.codex-tracy-close" "$SIM_APP"
 ```
 
-> **Why not sed on the docstring?** The docstring text differs between v5 (`"""Close the running
-> Omniverse Toolkit application."""` — multi-line) and v6, and the old single-line pattern
-> `"""Close the running Omniverse Toolkit."""` silently fails on both. Matching the `def close`
-> signature is robust across versions.
-
-Must be applied to EVERY fresh install.
-
-### MANDATORY: Force-kill hung benchmarks when results exist
+### Last Resort: Force-kill Hung Benchmarks When Results Exist
 
 If ALL expected output files exist with non-zero size, and the process is
-still running after 2+ minutes with no new output, it is HUNG. Force-kill it:
+still running after 2+ minutes with no new output, it is probably hung. Kill the app process, not the Tracy capture process:
 
 ```bash
 ls -la <result_path>/kpis_*.json <result_path>/*.tracy 2>/dev/null
 # If files exist and size > 0:
-kill -9 <pid>
+kill <app_pid>
+sleep 10
+kill -9 <app_pid> 2>/dev/null || true
 ```
 
 ## Nsight Systems Profiling
@@ -137,7 +175,8 @@ sudo dpkg -i nsight-systems-*.deb
 
 ### Nsys Command
 ```bash
-export CARB_PROFILING_PYTHON=1
+# Optional, high overhead. Use only when Python call-level attribution is needed.
+# export CARB_PROFILING_PYTHON=1
 
 sudo -E nsys profile \
   -t nvtx,cuda,osrt \
@@ -178,7 +217,7 @@ For NVTX zone interpretation and phase detection config, see the `nsys-analyze` 
 sudo -E nsys profile -t nvtx,cuda,osrt --gpu-metrics-devices=all \
   --gpuctxsw=true --cuda-memory-usage=true --python-backtrace=cuda \
   ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-  --task=Isaac-Cartpole-RGB-Camera-Direct-v0 --num_frames 100 --headless --enable_cameras --num_envs=512 \
+  --task=Isaac-Cartpole-RGB-Camera-Direct-v0 --num_frames 100 --viz none --enable_cameras --num_envs=512 \
   --kit_args "--/app/profileFromStart=true --/profiler/enabled=true --/app/profilerBackend=nvtx --/app/profilerMask=1"
 ```
 

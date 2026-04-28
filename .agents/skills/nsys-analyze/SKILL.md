@@ -93,10 +93,12 @@ frame_med AS (
   SELECT dur_ns as med FROM frames ORDER BY dur_ns
   LIMIT 1 OFFSET (SELECT COUNT(*)/2 FROM frames)
 ),
-runtime_bounds AS (
-  -- Use the span of runtime frames (≤5x median) as the analysis window
-  SELECT MIN(f.start) as t_start, MAX(f.end) as t_end
-  FROM frames f, frame_med m WHERE f.dur_ns <= m.med * 5
+runtime_frames AS (
+  -- Keep only frames classified as steady-state runtime. Do not collapse to
+  -- one min/max span, because loading spikes can occur between runtime frames.
+  SELECT f.start, f.end
+  FROM frames f, frame_med m
+  WHERE f.dur_ns <= m.med * 5
 )
 SELECT
   COALESCE(e.text, s.value) as zone_name,
@@ -106,8 +108,10 @@ SELECT
   ROUND(MAX(e.end - e.start)/1e6, 3) as max_ms
 FROM NVTX_EVENTS e
 LEFT JOIN StringIds s ON e.textId = s.id
-CROSS JOIN runtime_bounds rb
-WHERE e.start >= rb.t_start AND e.start <= rb.t_end
+WHERE EXISTS (
+    SELECT 1 FROM runtime_frames rf
+    WHERE e.start >= rf.start AND e.start < rf.end
+  )
   AND e.end IS NOT NULL AND (e.end - e.start) > 0
   AND COALESCE(e.text, s.value) NOT LIKE '%Thread waiting%'
   AND COALESCE(e.text, s.value) NOT LIKE 'Carbonite::%'

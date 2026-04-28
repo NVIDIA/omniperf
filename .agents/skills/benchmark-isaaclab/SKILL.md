@@ -15,8 +15,9 @@ See the `install-isaaclab` skill for installation (clone, conda env, Isaac Sim l
 
 ## Before Running Any Benchmark
 
-1. **Apply the `os._exit(0)` patch** on Isaac Sim — see `profiling` skill
+1. **Use a WARM run for headline FPS/frametime** — see the COLD/WARM/TRACE method in the `profiling` skill
 2. **Set CPU governor to performance** — see `perf-tuning` skill
+3. **Do not patch Isaac Sim shutdown by default.** If Tracy shutdown hangs after outputs are complete, use the scoped last-resort guidance in the `profiling` skill
 
 ## Benchmark Scripts
 

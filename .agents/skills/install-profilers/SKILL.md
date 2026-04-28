@@ -1,6 +1,6 @@
 ---
 name: install-profilers
-description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (nsys CLI), Tracy Profiler (`csvexport`, `tracy-capture`), and sqlite3 for nsys SQLite exports. Use when setting up a profiling environment, when nsys/tracy/csvexport/sqlite3 are missing, or before running the profiling or nsys-analyze skills.
+description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (nsys CLI), Tracy Profiler (`csvexport`, `tracy-capture`, optional `tracy-update`), and sqlite3 for nsys SQLite exports. Use when setting up a profiling environment, when nsys/tracy/csvexport/sqlite3 are missing, or before running the profiling or nsys-analyze skills.
 ---
 
 # Install Profilers for Omniverse / Kit Apps
@@ -11,6 +11,7 @@ description: Install profiling tools for Isaac Sim / Isaac Lab / Kit-based appli
 nsys --version 2>/dev/null && echo "nsys: OK" || echo "nsys: MISSING"
 csvexport --help 2>/dev/null && echo "csvexport: OK" || echo "csvexport: MISSING"
 which tracy-capture >/dev/null 2>&1 && echo "tracy-capture: OK" || echo "tracy-capture: MISSING"
+which tracy-update >/dev/null 2>&1 && echo "tracy-update: OK" || echo "tracy-update: MISSING (optional; needed for memory strip tests)"
 sqlite3 --version 2>/dev/null && echo "sqlite3: OK" || echo "sqlite3: MISSING"
 ```
 
@@ -145,7 +146,7 @@ GROUP BY zone_name ORDER BY total_ms DESC LIMIT 30;
 ## 3. Tracy Profiler Tools (`csvexport`, `tracy-capture`)
 
 Tracy is used by Kit/Isaac Sim when `--/app/profilerBackend=tracy` is set.
-You need two tools: `tracy-capture` (record traces) and `csvexport` (export to CSV for analysis).
+You need two tools for the standard flow: `tracy-capture` (record traces) and `csvexport` (export to CSV for analysis). For memory profiling strip tests, also expose Tracy's `update` tool as `tracy-update`.
 
 ### Option A: Build from source (recommended — gets latest)
 
@@ -166,9 +167,15 @@ cmake -B capture/build -S capture -DCMAKE_BUILD_TYPE=Release
 cmake --build capture/build --parallel
 sudo cp capture/build/tracy-capture /usr/local/bin/tracy-capture
 
+# Build update (optional; required by the tracy-memory strip test)
+cmake -B update/build -S update -DCMAKE_BUILD_TYPE=Release
+cmake --build update/build --parallel
+sudo cp update/build/update /usr/local/bin/tracy-update
+
 # Verify
 csvexport --help
 tracy-capture --help
+tracy-update --help
 ```
 
 > **Note:** The GUI profiler (`tracy-profiler`) requires `libglfw3-dev libdbus-1-dev libfreetype-dev`
@@ -224,11 +231,13 @@ nsys --version 2>/dev/null        || echo "MISSING: nsys"
 sqlite3 --version 2>/dev/null     || echo "MISSING: sqlite3"
 csvexport --help 2>&1 | head -1   || echo "MISSING: csvexport (Tracy)"
 tracy-capture --help 2>&1 | head -1 || echo "MISSING: tracy-capture"
+tracy-update --help 2>&1 | head -1 || echo "MISSING: tracy-update (optional; needed for tracy-memory)"
 echo "perf_event_paranoid: $(cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo 'N/A')"
 ```
 
-All four tools are needed for the full profiling workflow:
+These tools are needed for the full profiling workflow:
 - `nsys` — capture Nsight Systems traces
 - `sqlite3` — query nsys SQLite exports
 - `csvexport` — export Tracy `.tracy` files to CSV
 - `tracy-capture` — record Tracy traces from Kit apps
+- `tracy-update` — strip/transform Tracy captures for memory-capture verification

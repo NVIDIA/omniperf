@@ -90,23 +90,30 @@ conda activate isaacsim
 
 ## Method 1: Pip Install (Quickest)
 
-> **Note:** As of April 2026, PyPI ships `isaacsim` up through `6.0.0.0`. Pick the version that matches your venv's Python (see the [matrix](#python-version-matrix)); `pip install isaacsim` without a pin will resolve to the newest compatible wheel.
+> **Note:** As of April 2026, NVIDIA's pip install flow uses PyPI plus the NVIDIA package index, installs PyTorch first, and installs the full Isaac Sim extras plus the extension cache. A bare `pip install isaacsim` installs only the metapackage and can pass an import check while missing app, benchmark, or extension-cache components.
 
 Activate your venv first (see [Virtual Environment](#virtual-environment-strongly-recommended)), then:
 
 ```bash
-# Latest compatible with the active Python
-pip install isaacsim
+# Accept the Omniverse EULA non-interactively for scripts/CI.
+export OMNI_KIT_ACCEPT_EULA=YES
 
-# Or pin to a specific release
-pip install 'isaacsim==4.5.0.0'   # Python 3.10
-pip install 'isaacsim==5.1.0.0'   # Python 3.11
-pip install 'isaacsim==6.0.0.0'   # Python 3.12
+# Isaac Sim 6.0 docs use PyTorch 2.10.0; choose the CUDA wheel index for your platform.
+pip install torch==2.10.0 --index-url https://download.pytorch.org/whl/cu128
+
+# Latest compatible full install for the active Python.
+pip install 'isaacsim[all,extscache]' --extra-index-url https://pypi.nvidia.com
+
+# Or pin to a specific release family. Match the Python version matrix above.
+pip install 'isaacsim[all,extscache]==4.5.0' --extra-index-url https://pypi.nvidia.com   # Python 3.10
+pip install 'isaacsim[all,extscache]==5.1.0' --extra-index-url https://pypi.nvidia.com   # Python 3.11
+pip install 'isaacsim[all,extscache]==6.0.0' --extra-index-url https://pypi.nvidia.com   # Python 3.12
 ```
 
 Verify:
 ```bash
 python -c "import isaacsim; print('OK')"
+python -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; print('SimulationApp OK')"
 ```
 
 ## Method 2: Source Build from GitHub
@@ -122,10 +129,15 @@ docker ps > /dev/null 2>&1 && echo "DOCKER OK" || echo "NEED INSTALL"
 # Install Docker (Ubuntu/Debian)
 sudo apt-get update && sudo apt-get install -y docker.io
 sudo systemctl start docker && sudo systemctl enable docker
-sudo usermod -aG docker $USER && newgrp docker
+sudo usermod -aG docker $USER
 
-# If docker ps still fails after group add:
-sudo chmod 666 /var/run/docker.sock
+# Start a new login session, or run this shell-only refresh:
+newgrp docker
+
+# If docker ps still fails, use `sudo docker ...` for the current command
+# or ask an administrator to fix Docker group/session setup.
+# Do NOT chmod /var/run/docker.sock: it grants root-equivalent Docker access
+# to every local user.
 ```
 
 ### Build
@@ -189,7 +201,8 @@ print(f'Expires: {datetime.fromtimestamp(d.get(\"exp\", 0))}')"
 ```bash
 sudo usermod -aG docker $USER
 newgrp docker
-# If still fails: sudo chmod 666 /var/run/docker.sock
+# If still fails in this shell: use `sudo docker ps` to verify Docker works,
+# then start a fresh login session so group membership is applied.
 ```
 
 ### No DISPLAY / Vulkan init fails
@@ -201,6 +214,6 @@ export DISPLAY=:99
 ```
 
 ### Shutdown hangs
-Apply the `os._exit(0)` patch before running benchmarks — see the `profiling` skill.
+Do not patch installed Isaac Sim files by default. For repeated Tracy shutdown hangs, use the scoped last-resort workaround in the `profiling` skill, and restore the original file afterward.
 
 ---
