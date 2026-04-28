@@ -25,7 +25,7 @@ Agent skills for performance engineering across the NVIDIA Omniverse stack (Isaa
 |---|---|
 | [profiling](profiling/) | Capture CPU ChromeTrace, Tracy, and nsys/NVTX traces and hand off exports for analysis |
 | [profiling-api](profiling-api/) | Add profiling zones to C++/Python code (macros, API, masks, channels) |
-| [nsys-analyze](nsys-analyze/) | Analyze captured traces (NVTX zones, phase detection, version comparison) |
+| [nsys-analyze](nsys-analyze/) | Analyze captured traces (NVTX zones, Tracy Statistics, phase detection, version comparison) |
 | [tracy-memory](tracy-memory/) | Profile CPU/GPU memory allocations via Tracy memory channels |
 | [nvtx-python](nvtx-python/) | Python function tracing with NVTX for non-Kit environments |
 
@@ -57,7 +57,7 @@ Specialized profiling:
 Routing boundaries:
 - Use **benchmark-*** skills to run benchmark scripts and read benchmark outputs, not to diagnose or fix bottlenecks.
 - Use **diagnose-perf** for first-pass bottleneck triage before full profiling.
-- Use **profiling** to follow the guide-aligned COLD/WARM/TRACY method and capture CPU ChromeTrace, Tracy, or nsys/NVTX traces; use **nsys-analyze** for deeper trace analysis.
+- Use **profiling** to follow the guide-aligned COLD/WARM/TRACY method and capture CPU ChromeTrace, Tracy, or nsys/NVTX traces; use **nsys-analyze** for Tracy Statistics/Range Limit and deeper trace analysis.
 - Use **perf-tuning** only after the bottleneck category or trace evidence is known.
 
 ## Adding Skills

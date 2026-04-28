@@ -984,7 +984,7 @@ sudo OMNI_KIT_ALLOW_ROOT=1 DISPLAY=:0 \
     --cuda-memory-usage=true \
     --cuda-graph-trace=graph:host-and-device \
     ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-    --task=Isaac-Cartpole-Direct-v0 --headless --num_frames 100 \
+    --task=Isaac-Cartpole-Direct-v0 --viz none --num_frames 100 \
     --kit_args="--/app/profileFromStart=true --/profiler/enabled=true \
     --/app/profilerBackend=nvtx --/app/profilerMask=1 \
     --/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false \
@@ -1191,6 +1191,23 @@ When **viewport textures and camera textures render simultaneously**, GPU load d
 > - [ ] Does the number of textures rendering in GPU zones match the intended camera count?
 > - [ ] Does each texture's resolution match the intended resolution?
 > - [ ] Are unnecessary viewport textures rendering in the background?
+
+**Common fixes when extra viewport/camera textures are confirmed:**
+
+- Remove per-camera viewports and keep only the render products needed by the workload.
+- Replace separate camera render products with `TiledCameraSensor` when the workflow supports tiled capture.
+- Destroy or disable the default viewport after sensor setup in headless benchmark or simulation runs.
+
+```python
+from isaacsim.sensors.experimental.camera import TiledCameraSensor
+
+sensor = TiledCameraSensor(
+    camera_paths,          # List[str]
+    resolution=(H, W),     # Height, Width
+    annotators=["rgb"],
+)
+data, info = sensor.get_data("rgb")
+```
 
 ### 14.5 PhysX Overhead
 
@@ -1587,6 +1604,7 @@ The first revision of this guide listed only the Kit flags and skipped the items
 Isaac Lab 3.0 and later has preset combinations that do not use Kit. In those cases, the Carbonite-based Python profiling environment variable (`CARB_PROFILING_PYTHON`) does not work, so profiling all Python functions requires a separate hook using `sys.setprofile()` and NVTX.
 
 This method is similar to Carbonite's Python capture but operates at the Python level, so it has higher overhead than the Carbonite approach.
+Use a project-local or skill-bundled `sitecustomize.py` via `PYTHONPATH`; do not overwrite an environment's existing `site-packages/sitecustomize.py`.
 
 ### Setup
 
@@ -1595,9 +1613,10 @@ This method is similar to Carbonite's Python capture but operates at the Python 
 # 1. Install nvtx
 uv pip install nvtx
 
-# 2. Create sitecustomize.py (auto-loaded at interpreter startup)
-SITE_PACKAGES=$(uv run python -c "import site; print(site.getsitepackages()[0])")
-cat > "$SITE_PACKAGES/sitecustomize.py" << 'EOF'
+# 2. Create a project-local sitecustomize.py (auto-loaded via PYTHONPATH)
+NVTX_HOOK_DIR="$PWD/.profiling/nvtx-python"
+mkdir -p "$NVTX_HOOK_DIR"
+cat > "$NVTX_HOOK_DIR/sitecustomize.py" << 'EOF'
 import os
 if os.environ.get('NVTX_PROFILE_PYTHON') == '1':
     import sys
@@ -1633,7 +1652,8 @@ if os.environ.get('NVTX_PROFILE_PYTHON') == '1':
     except Exception as e:
         print(f"[NVTX] Failed: {e}", file=sys.stderr)
 EOF
-echo "Created: $SITE_PACKAGES/sitecustomize.py"
+echo "Created: $NVTX_HOOK_DIR/sitecustomize.py"
+echo "Use with: PYTHONPATH=\"$NVTX_HOOK_DIR:\${PYTHONPATH:-}\""
 ```
 
 ### Environment Variables
@@ -1650,12 +1670,16 @@ Running with Nsight Systems:
 
 ```bash
 # Capture all Python modules
+NVTX_HOOK_DIR="$PWD/.profiling/nvtx-python"
+PYTHONPATH="$NVTX_HOOK_DIR:${PYTHONPATH:-}" \
 NVTX_PROFILE_PYTHON=1 \
 nsys profile -t nvtx,cuda,osrt \
 uv run python scripts/reinforcement_learning/skrl/train.py \
   --task=Isaac-Velocity-Flat-Anymal-C-v0 --num_envs=1024 --max_iterations=10
 
 # Capture specific modules only (reduces overhead)
+NVTX_HOOK_DIR="$PWD/.profiling/nvtx-python"
+PYTHONPATH="$NVTX_HOOK_DIR:${PYTHONPATH:-}" \
 NVTX_PROFILE_PYTHON=1 NVTX_PROFILE_INCLUDE=isaaclab,skrl \
 nsys profile -t nvtx,cuda,osrt \
 uv run python scripts/reinforcement_learning/skrl/train.py \
@@ -1665,7 +1689,7 @@ uv run python scripts/reinforcement_learning/skrl/train.py \
 ### Performance Considerations
 
 - Tracing all Python functions incurs **a callback on every function call/return**, causing significant overhead. Use `NVTX_PROFILE_INCLUDE` to limit tracing to modules of interest.
-- To disable, run without the `NVTX_PROFILE_PYTHON` environment variable, or delete `sitecustomize.py`.
+- To disable, run without the `NVTX_PROFILE_PYTHON` environment variable, or remove the hook directory from `PYTHONPATH`.
 
 > **Note:** If you already know which Python modules and functions to trace, you can also use the Nsight Systems built-in feature `nsys --python-functions-trace`. See the [Nsight Systems User Guide](https://docs.nvidia.com/nsight-systems/UserGuide/index.html) for details.
 

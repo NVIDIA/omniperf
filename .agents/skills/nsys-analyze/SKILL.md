@@ -1,14 +1,14 @@
 ---
 name: nsys-analyze
-description: Analyze profiling data from Kit-based apps. Covers Omniverse-specific NVTX zone interpretation, phase detection using sqlite3/csvexport queries, and two-version comparison methodology. Use after capturing profiles with the profiling skill. NOT for capturing traces (use profiling), adding zones to code (use profiling-api), or applying fixes (use perf-tuning).
+description: Analyze profiling data from Kit-based apps. Covers Omniverse-specific NVTX zone interpretation, phase detection using sqlite3, Tracy Statistics/Range Limit analysis, csvexport fallback queries, and two-version comparison methodology. Use after capturing profiles with the profiling skill. NOT for capturing traces (use profiling), adding zones to code (use profiling-api), or applying fixes (use perf-tuning).
 ---
 
 # Profile Analysis for Omniverse / Kit-based Apps
 
-Analyze profiling data from Kit, Isaac Sim, and Isaac Lab using `sqlite3` (for `.nsys-rep`) and `csvexport` (for `.tracy`).
+Analyze profiling data from Kit, Isaac Sim, and Isaac Lab using `sqlite3` (for `.nsys-rep`), Tracy Statistics/Range Limit (primary `.tracy` path), and `csvexport` (automated `.tracy` fallback).
 For capturing profiles and installing tools, see the `profiling` and `install-profilers` skills.
 
-**Required tools:** `nsys`, `sqlite3`, `csvexport` — see `install-profilers` skill.
+**Required tools:** `nsys`, `sqlite3`, `csvexport`; Tracy GUI is needed for the primary `.tracy` Statistics workflow. See `install-profilers` skill.
 
 ## Omniverse NVTX Zone Reference
 
@@ -135,7 +135,21 @@ ORDER BY total_ms DESC LIMIT 30;
 
 ---
 
-## Analysis Path B: Tracy CSV (for .tracy files)
+## Analysis Path B: Tracy Statistics (primary path for .tracy files)
+
+Use Tracy GUI Statistics for `.tracy` files when the goal is hotspot ranking, regression analysis, or optimization comparison.
+
+1. Open the `.tracy` file in Tracy Profiler.
+2. Open **View -> Statistics**.
+3. Drag-select the steady-state interval on the timeline and set **Range Limit**.
+4. Record Mean, Median, Min, Max, Std Dev, Count, and Total Time for key zones.
+5. For before/after comparisons, use the same hardware, scene, parameters, and equal-length steady-state Range Limits.
+
+Do not compare a single frame unless the issue is known to occur in one frame and is reproduced across multiple runs.
+
+---
+
+## Analysis Path C: Tracy CSV (automated fallback for .tracy files)
 
 ```bash
 csvexport profile.tracy > zones.csv

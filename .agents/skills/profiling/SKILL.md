@@ -248,7 +248,10 @@ sudo nsys profile \
   ./python.sh standalone_examples/benchmarks/benchmark_camera.py \
   --num-cameras 1 --num-frames 100 --headless \
   --/app/profileFromStart=true --/profiler/enabled=true \
-  --/app/profilerBackend=nvtx --/app/profilerMask=1
+  --/app/profilerBackend=nvtx --/app/profilerMask=1 \
+  --/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false \
+  --/profiler/channels/carb.events/enabled=false \
+  --/profiler/channels/carb.tasking/enabled=false
 ```
 
 ### Windows nsys Differences
@@ -315,17 +318,21 @@ sudo OMNI_KIT_ALLOW_ROOT=1 DISPLAY=:0 \
   --gpu-metrics-devices=all --gpuctxsw=true \
   --cuda-memory-usage=true --cuda-graph-trace=graph:host-and-device \
   ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-  --task=Isaac-Cartpole-Direct-v0 --headless --num_frames 100 \
+  --task=Isaac-Cartpole-Direct-v0 --viz none --num_frames 100 \
   --kit_args "--/app/profileFromStart=true --/profiler/enabled=true --/app/profilerBackend=nvtx --/app/profilerMask=1 --/plugins/carb.profiler-tracy.plugin/fibersAsThreads=false --/profiler/channels/carb.events/enabled=false --/profiler/channels/carb.tasking/enabled=false"
 ```
 
 ### Export Handoff
 
-Export traces here, then use `nsys-analyze` for SQL queries, zone ranking, phase detection, and interpretation.
+Export traces here, then use `nsys-analyze` for SQL queries, Tracy Statistics/Range Limit comparison, zone ranking, phase detection, and interpretation.
+Tracy `capture` already applies LZ4 compression. For sharing very large `.tracy` files, optionally recompress with `update -z 1`.
 
 ```bash
 nsys export --type=sqlite -o profile.sqlite profile.nsys-rep
 csvexport profile.tracy > zones.csv
+
+TRACY_UPDATE_BIN=$(command -v update || command -v tracy-update || true)
+[ -n "$TRACY_UPDATE_BIN" ] && "$TRACY_UPDATE_BIN" -z 1 profile.tracy profile.recompressed.tracy
 ```
 
 ---
