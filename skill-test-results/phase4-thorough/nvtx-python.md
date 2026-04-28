@@ -19,7 +19,7 @@ Overall status: `pass`
     "returncode": 0,
     "stdout": "nvtx import OK",
     "stderr": "",
-    "duration_s": 0.024
+    "duration_s": 0.022
   }
 }
 ```

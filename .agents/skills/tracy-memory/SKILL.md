@@ -10,12 +10,15 @@ Prerequisite: Tracy capture setup (see `profiling` skill), `install-profilers` f
 
 ## Step 1: Environment Variables (Linux, required)
 
-The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**.
+The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**. Pip Isaac Sim installs may not ship this Packman/source-Kit library; if discovery fails, stop and install/use a Kit or Isaac Sim package that includes it.
 
 ```bash
-# Path varies by packman version. Discover it instead of guessing <version>.
+# Path varies by packman/source build version. Discover it instead of guessing <version>.
 ALLOC_WRAPPER=$(find ~/.cache/packman -name liballocwrapper.so 2>/dev/null | head -1)
-[ -n "$ALLOC_WRAPPER" ] || { echo "liballocwrapper.so not found"; exit 1; }
+if [ -z "$ALLOC_WRAPPER" ]; then
+  ALLOC_WRAPPER=$(find /home /opt /data -name liballocwrapper.so 2>/dev/null | head -1)
+fi
+[ -n "$ALLOC_WRAPPER" ] || { echo "liballocwrapper.so not found; memory tracing blocked"; exit 1; }
 
 export LD_PRELOAD="$ALLOC_WRAPPER"
 export TRACY_USE_LIB_UNWIND_FOR_BT=1   # libunwind-based backtrace

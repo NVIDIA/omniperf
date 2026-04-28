@@ -67,6 +67,23 @@ Enable GPU zones in Tracy:
 
 ## Python Profiling API
 
+Python `carb.profiler` examples must run inside a Kit/Isaac Python environment where Carbonite libraries are on `PYTHONPATH` and `LD_LIBRARY_PATH`. A plain system Python, and some pip `python.sh` invocations outside app startup, may fail with `ModuleNotFoundError: carb` or `ImportError: libcarb.so`.
+
+For quick smoke tests against a pip Isaac Sim environment, locate the Carbonite Python and library paths first:
+
+```bash
+SITE=$(python - <<'PY'
+import site
+print(site.getsitepackages()[0])
+PY
+)
+export PYTHONPATH="$SITE/omni/kernel/py:${PYTHONPATH:-}"
+export LD_LIBRARY_PATH="$SITE/omni:${LD_LIBRARY_PATH:-}"
+python -c "import carb.profiler; print('carb.profiler OK')"
+```
+
+Inside a running Kit app/extension, these paths are already configured.
+
 ### Decorator (simplest)
 
 ```python

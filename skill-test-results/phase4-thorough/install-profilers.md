@@ -1,6 +1,6 @@
 # install-profilers thorough test
 
-Overall status: `warning`
+Overall status: `pass`
 
 | Check | Status | Detail |
 |---|---|---|
@@ -15,7 +15,7 @@ Overall status: `warning`
 | CUDA apt repo check is non-mutating | `pass` | /etc/apt/sources.list.d/cuda-ubuntu2204-x86_64.list |
 | /opt Nsight check is non-mutating | `pass` | /opt/nvidia/nsight-systems/2025.6.3/target-linux-x64/nsys |
 | skill says install only missing tools | `pass` | looked for install-only-missing guidance |
-| privileged install commands present but documented | `warning` | sudo install examples require approval gating |
+| privileged install commands are approval-gated | `pass` | sudo install examples require approval gating |
 
 ## Evidence
 
@@ -27,7 +27,7 @@ Overall status: `warning`
       "returncode": 0,
       "stdout": "NVIDIA Nsight Systems version 2025.6.3.541-256337736014v0",
       "stderr": "",
-      "duration_s": 0.05
+      "duration_s": 0.072
     },
     "sqlite3": {
       "cmd": "sqlite3 --version 2>&1 | head -5",
@@ -48,21 +48,21 @@ Overall status: `warning`
       "returncode": 0,
       "stdout": "Usage: capture -o output.tracy [-a address] [-p port] [-f] [-s seconds] [-m memlimit]",
       "stderr": "",
-      "duration_s": 0.004
+      "duration_s": 0.003
     },
     "tracy-update": {
       "cmd": "tracy-update --version 2>&1 | head -5",
       "returncode": 0,
       "stdout": "Usage: update [options] input.tracy output.tracy\n\n  -4: enable LZ4 compression\n  -h: enable LZ4HC compression\n  -e: enable extreme LZ4HC compression (very slow)",
       "stderr": "",
-      "duration_s": 0.002
+      "duration_s": 0.003
     },
     "update": {
       "cmd": "update --version 2>&1 | head -5",
       "returncode": 0,
       "stdout": "Usage: update [options] input.tracy output.tracy\n\n  -4: enable LZ4 compression\n  -h: enable LZ4HC compression\n  -e: enable extreme LZ4HC compression (very slow)",
       "stderr": "",
-      "duration_s": 0.003
+      "duration_s": 0.002
     },
     "capture": {
       "cmd": "capture --version 2>&1 | head -5",

@@ -12,10 +12,10 @@ Test plan: `.agents/skills/TEST_PLAN.md`
 | Phase 1 — Host Prerequisite Snapshot | pass | Ubuntu 22.04, NVIDIA L40, driver 570.158.01, ~162G free. |
 | Phase 2 — Prompt / Selection Smoke Tests | pass_with_warnings | 10 pass, 2 warnings, 0 fail before fixes. Warnings were converted into doc patches. |
 | Phase 3 — Tooling Smoke Tests | pass_with_warnings | `nsys`, `sqlite3`, Tracy `csvexport`/`capture`, and Python `nvtx` now work. CPU IP/backtrace sampling still blocked by `perf_event_paranoid=4`. |
-| Phase 4 — Per-Skill Thorough Tests | pass_with_expected_blocks | Profiling/nsys/nvtx checks pass. Install/tuning skills retain approval-gated warnings. Isaac Sim/Lab imports pass, but heavy benchmark runs were not executed. |
+| Phase 4 — Per-Skill Thorough Tests | pass_with_expected_blocks | Install/profiling/nsys/nvtx/profiling-api/diagnose checks pass. Isaac Lab tiny benchmark passes; Isaac Sim standalone scripts and Tracy allocator wrapper are still unavailable. Real tuning before/after evidence remains approval-gated. |
 | Phase 5 — Isaac Sim Smoke Benchmark | blocked_missing_prereq | Pip Isaac Sim import works via `/home/horde/venvs/isaacsim45/python.sh`, but this pip install does not include `standalone_examples/benchmarks` scripts. |
-| Phase 6 — Isaac Lab Smoke Benchmark | blocked_needs_approval | Isaac Lab import and benchmark `--help` pass. Real benchmark run is still approval-gated. |
-| Phase 7 — Real Profiling Capture | partial | Tiny Python and Isaac import Nsight traces were captured/exported. Full Kit/benchmark traces need an approved workload. |
+| Phase 6 — Isaac Lab Smoke Benchmark | pass_with_warnings | Tiny Cartpole non-RL benchmark passes with 16 envs / 10 frames. Long RL/convergence runs remain approval-gated. |
+| Phase 7 — Real Profiling Capture | partial | Tiny Python Nsight traces and nsys-analyze SQLite export pass. Full Kit/benchmark traces need an approved workload. |
 | Phase 8 — Analysis + Tuning Review | partial | SQLite/NVTX analysis smoke passes. Real tuning review needs before/after benchmark evidence. |
 
 ## Artifacts
@@ -53,20 +53,21 @@ Test plan: `.agents/skills/TEST_PLAN.md`
 
 ## Findings Fixed in This PR
 
-- `profiling`: Nsight Systems examples now try non-sudo first, gate `sudo -E`, use `--viz none` instead of deprecated Isaac Lab `--headless`, and mention container/GPU metrics permission failures.
-- `tracy-memory`: LD_PRELOAD path now uses a discovery command; capture/update binaries are PATH-resolved instead of hard-coded `./tracy/...` paths.
+- `profiling`: Nsight Systems examples now try non-sudo first, gate `sudo -E`, include container-safe `--sample=none` mode, and mention container/GPU metrics permission failures.
+- `tracy-memory`: LD_PRELOAD path now uses a discovery command; capture/update binaries are PATH-resolved instead of hard-coded `./tracy/...` paths; missing `liballocwrapper.so` is treated as a hard prerequisite, not a capture to fake.
 - `install-isaaclab`: added a short uv/pip virtual environment alternative and clarified conda is the common path, not the only path.
 - `nsys-analyze`: added explicit guidance for empty CUDA kernel tables in Kit/RTX traces.
 - `nvtx-python`: removed hardcoded developer paths and warned not to overwrite `sitecustomize.py` in `site-packages`.
 - `profiling-api`: made manual begin/end examples exception-safe.
-- `benchmark-isaacsim` / `benchmark-isaaclab`: added install discovery gates before benchmarks.
-- `install-isaacsim` / `install-isaaclab`: added check-before-install and target-env verification guidance.
-- `install-profilers`: fixed Tracy 0.11.x CMake target names and robust Nsight Systems symlink discovery.
+- `benchmark-isaacsim` / `benchmark-isaaclab`: added install discovery gates before benchmarks; Isaac Sim now checks for source-tree benchmark scripts; Isaac Lab handles version-dependent `--headless` vs `--viz none`.
+- `install-isaacsim` / `install-isaaclab`: added check-before-install and target-env verification guidance, including pip runtime vs source benchmark-script distinction; destructive cleanup/env removal is explicitly approval-gated.
+- `install-profilers`: fixed Tracy 0.11.x CMake target names and robust Nsight Systems symlink discovery; privileged installs/sysctl changes are explicitly approval-gated.
+- `diagnose-perf` / `perf-tuning`: triage stays read-only; host-level governor/sysctl/persistence changes are opt-in and container limitations should be recorded instead of forced.
 
 ## Remaining Blocks / Warnings
 
 - Isaac Sim pip install lacks the source-tree `standalone_examples/benchmarks` scripts; use a source checkout or a package that includes benchmark scripts for Phase 5.
 - Tracy memory capture still lacks `liballocwrapper.so` under `~/.cache/packman` / pip Isaac Sim; memory profiling remains blocked until a Packman/source Kit install provides it.
-- `profiling-api` still lacks a real Kit SDK build/run artifact in this host validation pass.
-- Heavy Isaac Sim/Isaac Lab benchmark runs remain approval-gated.
+- Heavy Isaac Sim benchmark runs remain blocked until a source checkout or package with `standalone_examples/benchmarks` is available.
+- Heavy Isaac Lab RL/convergence runs remain approval-gated.
 - CPU governor remains `schedutil`; serious benchmark numbers should switch to `performance` first.

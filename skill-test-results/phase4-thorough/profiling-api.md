@@ -1,6 +1,6 @@
 # profiling-api thorough test
 
-Overall status: `blocked_missing_prereq`
+Overall status: `pass`
 
 | Check | Status | Detail |
 |---|---|---|
@@ -8,4 +8,18 @@ Overall status: `blocked_missing_prereq`
 | Python profiler API example | `pass` |  |
 | manual begin/end safety | `pass` | manual ranges should be exception-safe |
 | metrics/plots documented | `pass` |  |
-| Kit SDK build/run artifact test | `blocked_missing_prereq` | requires Kit SDK or buildable extension context |
+| Kit/Isaac runtime artifact test | `pass` | carb profiler runtime smoke 332833500 |
+
+## Evidence
+
+```json
+{
+  "carb_runtime_smoke": {
+    "cmd": "/home/horde/venvs/isaacsim45/python.sh /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/profiling-api-smoke/carb_profiler_runtime_smoke.py",
+    "returncode": 0,
+    "stdout": "carb profiler runtime smoke 332833500",
+    "stderr": "",
+    "duration_s": 0.07
+  }
+}
+```

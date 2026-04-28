@@ -198,7 +198,7 @@ Safe tests:
 
 - Inspect `scripts/benchmarks/` if Isaac Lab exists.
 - Run `benchmark_non_rl.py --help` if possible.
-- Validate `--viz none` / headless guidance.
+- Validate version-dependent headless guidance (`--headless` vs `--viz none`) by checking `--help`.
 - Validate tiny `--num_frames` / `--num_envs` smoke command.
 
 Artifact tests when install exists:
@@ -217,6 +217,7 @@ Safe tests:
 - Check `nsys` availability.
 - Check `perf_event_paranoid` read-only.
 - Validate non-sudo default and `sudo -E` gating.
+- Validate container-safe no-CPU-sampling mode (`--sample=none`) when perf/governor controls are unavailable.
 - Validate GPU metrics fallback guidance.
 - Validate Tracy port/capture sequencing instructions.
 

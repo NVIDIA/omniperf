@@ -1,6 +1,6 @@
 {
   "skill": "profiling-api",
-  "status": "blocked_missing_prereq",
+  "status": "pass",
   "checks": [
     {
       "name": "C++ macro header example",
@@ -23,10 +23,18 @@
       "detail": ""
     },
     {
-      "name": "Kit SDK build/run artifact test",
-      "status": "blocked_missing_prereq",
-      "detail": "requires Kit SDK or buildable extension context"
+      "name": "Kit/Isaac runtime artifact test",
+      "status": "pass",
+      "detail": "carb profiler runtime smoke 332833500"
     }
   ],
-  "extra": {}
+  "extra": {
+    "carb_runtime_smoke": {
+      "cmd": "/home/horde/venvs/isaacsim45/python.sh /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/profiling-api-smoke/carb_profiler_runtime_smoke.py",
+      "returncode": 0,
+      "stdout": "carb profiler runtime smoke 332833500",
+      "stderr": "",
+      "duration_s": 0.07
+    }
+  }
 }

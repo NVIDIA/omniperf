@@ -8,6 +8,8 @@ description: Resolve common Kit/Isaac Sim/Isaac Lab performance issues using spe
 Specific fixes for performance issues identified through profiling.
 Prerequisite: you should already know *where* the bottleneck is (from `diagnose-perf`, `profiling`, or `nsys-analyze` skills).
 
+**Approval gates:** Benchmark/app CLI flags are fine to test in a new run. Host-level changes (`sudo`, CPU governor, sysctl, persistence mode, package installs) require approval and may be unavailable in containers. If a container cannot change the host governor or perf settings, record that limitation instead of trying privileged workarounds.
+
 ## PresentFrame is Abnormally Slow
 
 Two causes:
@@ -173,14 +175,17 @@ Multi-GPU adds CPU overhead (job distribution, per-GPU setup, data gathering). O
 
 ## CPU Governor
 
+Host-only, approval-gated tuning for serious benchmark numbers:
+
 ```bash
-# Check
+# Check (safe/read-only)
 cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | sort | uniq -c
-# Fix
+
+# Fix only after approval, and only when the host exposes cpufreq controls
 echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 ```
 
-Real impact: `powersave` → `performance` saved ~4 ms/frame in measured cases.
+In containers, cpufreq may be read-only or absent. Do not treat that as a skill failure; mark results as exploratory and record the governor. Real impact: `powersave` → `performance` saved ~4 ms/frame in measured cases.
 
 ## RTX Tuning When GPU-Bound
 

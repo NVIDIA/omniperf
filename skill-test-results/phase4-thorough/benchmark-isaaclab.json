@@ -1,6 +1,6 @@
 {
   "skill": "benchmark-isaaclab",
-  "status": "blocked_needs_approval",
+  "status": "pass_with_warnings",
   "checks": [
     {
       "name": "benchmark scripts documented",
@@ -23,9 +23,14 @@
       "detail": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\nIsaac Lab OK"
     },
     {
+      "name": "tiny benchmark artifact run",
+      "status": "pass",
+      "detail": "2026-04-28 08:11:25 [10,177ms] [INFO] [isaacsim.benchmark.services.metrics.backend] LocalLogMetricsEvent::add_metrics TestPhase(phase_name='runtime', measurements=[DictMeasurement(name='Step Frametimes', value={'Environment step times': [43.234203, 49.244002, 4.376877, 3.562158, 3.320063, 3.317025, 3.292544, 3.370069, 3.454109, 3.497783], 'Environment step FPS': [23.129835422200337, 20.307041657580957, 228.4734069520345, 280.7287043415817, 301.19910375194684, 301.47496627248813, 303.7165182910236, 296.7298295672878, 289.5102615464654, 285.89538001642757], 'Environment step effective FPS': [370.0773667552054, 324.9126665212953, 3655.574511232552, 4491.659269465307, 4819.185660031149, 4823.59946035981, 4859.464292656377, 4747.677273076605, 4632.164184743447, 4574.326080262841]}, type='dict'), SingleMeasurement(name='Min Environment step times', value=3.292544, unit='ms', type='single'), SingleMeasurement(name='Max Environment step times', value=49.244002, unit='ms', type='single'), SingleMeasurement(name='Mean Environment step times', value=12.066883300000002, unit='ms', type='single'), SingleMeasurement(name='Min Environment step FPS', value=20.307041657580957, unit='ms', type='single'), SingleMeasurement(name='Max Environment step FPS', value=303.7165182910236, unit='ms', type='single'), SingleMeasurement(name='Mean Environment step FPS', value=233.11650478190373, unit='ms', type='single'), SingleMeasurement(name='Min Environment step effective FPS', value=324.9126665212953, unit='ms', type='single'), SingleMeasurement(name='Max Environment step effective FPS', value=4859.464292656377, unit='ms', type='single'), SingleMeasurement(name='Mean Environment step effective FPS', value=3729.8640765104597, unit='ms', type='single')], metadata=[StringMetadata(name='workflow_name', data='benchmark_non_rl', type='string'), StringMetadata(name='task', data='Isaac-Cartpole-Direct-v0', type='string'), IntMetadata(name='num_envs', data=16, type='int'), IntMetadata(name='num_frames', data=10, type='int'), StringMetadata(name='phase', data='runtime', type='string')])\n| Mean Environment step times: 12.066883300000002 ms |\n| Mean Environment step FPS: 233.11650478190373 ms   |\n| Mean Environment step effective FPS: 3729.8640765104597 ms |"
+    },
+    {
       "name": "long RL training not run",
-      "status": "blocked_needs_approval",
-      "detail": "requires installed Isaac Lab and explicit approval"
+      "status": "pass_with_warnings",
+      "detail": "long RL training/convergence tests intentionally skipped; tiny non-RL benchmark artifact passed"
     }
   ],
   "extra": {
@@ -35,15 +40,22 @@
         "returncode": 0,
         "stdout": "/home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh",
         "stderr": "",
-        "duration_s": 0.114
+        "duration_s": 0.109
       },
       "isaaclab_verify": {
         "cmd": "if [ -x /home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh ]; then env TERM=xterm bash -lc 'cd /home/horde/.openclaw/workspace/IsaacLab && ./isaaclab.sh -p -c \"import isaaclab; print(\\\"Isaac Lab OK\\\")\"'; else echo \"no known isaaclab.sh\"; exit 42; fi",
         "returncode": 0,
         "stdout": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\nIsaac Lab OK",
         "stderr": "",
-        "duration_s": 0.042
+        "duration_s": 0.039
       }
+    },
+    "tiny_benchmark": {
+      "cmd": "env TERM=xterm OMNI_KIT_ACCEPT_EULA=YES bash -lc 'cd /home/horde/.openclaw/workspace/IsaacLab && ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py --task=Isaac-Cartpole-Direct-v0 --headless --num_frames 10 --num_envs 16 --benchmark_backend LocalLogMetrics'",
+      "returncode": 0,
+      "stdout": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\n[INFO][AppLauncher]: Using device: cuda:0\n[INFO][AppLauncher]: Loading experience file: /home/horde/.openclaw/workspace/IsaacLab/apps/isaacsim_4_5/isaaclab.python.headless.kit\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Generating formatted report = True\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Using metrics backend = LocalLogMetrics\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Local folder location = /tmp\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Starting\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Test mode = False\n[INFO]: Parsing configuration from: isaaclab_tasks.direct.cartpole.cartpole_env:CartpoleEnvCfg\n[2026-04-28 08:11:21,059][isaaclab.envs.direct_rl_env][WARNING] - Seed not set for the environment. The environment creation may not be deterministic.\n\n\u001b[36m======================================================================================\u001b[0m\n\u001b[36m\u001b[1m[INFO][IsaacLab]: Logging to file: /tmp/isaaclab/logs/isaaclab_2026-04-28_08-11-21.log\u001b[0m\n\u001b[36m======================================================================================\u001b[0m\n\n\u001b[33m08:11:21 [stage.py] WARNING: Isaac Sim < 5.0 does not support thread-local stage contexts. Skipping use_stage().\u001b[0m\n\u001b[33m08:11:21 [simulation_context.py] WARNING: The `enable_external_forces_every_iteration` parameter in the PhysxCfg is set to False. If you are experiencing noisy velocities, consider enabling this flag. You may need to slightly increase the number of velocity iterations (setting it to 1 or 2 rather than 0), together with this flag, to improve the accuracy of velocity updates.\u001b[0m\n[INFO]: Base environment:\n\tEnvironment device    : cuda:0\n\tEnvironment seed      : None\n\tPhysics step-size     : 0.008333333333333333\n\tRendering step-size   : 0.016666666666666666\n\tEnvironment step-size : 0.016666666666666666\n[INFO]: Time taken for scene creation : 0.619895 seconds\n[INFO]: Scene manager:  <class InteractiveScene>\n\tNumber of environments: 16\n\tEnvironment spacing   : 4.0\n\tSource prim name      : /World/envs/env_0\n\tGlobal prim paths     : []\n\tReplicate physics     : True\n[I\n... [truncated in committed report]",
+      "stderr": "",
+      "duration_s": 11.123
     }
   }
 }

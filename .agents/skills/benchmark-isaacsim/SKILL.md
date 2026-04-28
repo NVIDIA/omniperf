@@ -25,12 +25,30 @@ python -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; p
   2>/dev/null || echo "Not usable in current Python env"
 ```
 
-If neither is found, Isaac Sim must be installed first (see `install-isaacsim`). If Isaac Sim is installed in a venv, activate that venv before checking; a system `python3` import failure does not rule out an isolated install. Do not proceed with benchmarks until one of these checks succeeds.
+If neither is found, Isaac Sim must be installed first (see `install-isaacsim`). If Isaac Sim is installed in a venv, activate that venv before checking; a system `python3` import failure does not rule out an isolated install.
+
+Also verify the benchmark scripts exist. A pip Isaac Sim install can provide `SimulationApp` and benchmark services without shipping the source-tree `standalone_examples/benchmarks/*.py` scripts:
+
+```bash
+# Source checkout / source build layout
+find /path/to/IsaacSim -path '*/standalone_examples/benchmarks/*.py' 2>/dev/null | head -20
+
+# Pip installs may include benchmark extension tests but not runnable standalone scripts.
+python - <<'PY'
+import pathlib, site
+for root in site.getsitepackages():
+    hits = list(pathlib.Path(root).glob('**/standalone_examples/benchmarks/*.py'))
+    if hits:
+        print('\n'.join(map(str, hits[:20])))
+PY
+```
+
+Do not proceed with Isaac Sim standalone benchmarks until both the runtime and the benchmark script path are available. If only pip runtime is available, use Isaac Lab benchmarks or install/clone an Isaac Sim source tree that includes `standalone_examples/benchmarks`.
 
 ## Before Running Any Benchmark
 
 1. **Use a WARM run for headline FPS/frametime** — see the COLD/WARM/TRACY method in the `profiling` skill.
-2. **Set CPU governor to performance** — see `perf-tuning` skill.
+2. **Set CPU governor to performance when the host allows it** — see `perf-tuning` skill. In containers where governor control is unavailable, record that limitation instead of trying privileged changes.
 3. **Set Nucleus auth** if using Nucleus-hosted assets — see `install-isaacsim` skill.
 4. **Do not patch Isaac Sim shutdown by default.** If Tracy shutdown hangs after outputs are complete, use the scoped last-resort guidance in the `profiling` skill.
 

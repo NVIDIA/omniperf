@@ -35,7 +35,7 @@
     {
       "name": "real memory capture artifact test",
       "status": "blocked_missing_prereq",
-      "detail": "requires Kit app + Tracy tools"
+      "detail": "requires Kit app + Tracy tools + liballocwrapper.so"
     }
   ],
   "extra": {
@@ -44,7 +44,7 @@
       "returncode": 0,
       "stdout": "",
       "stderr": "",
-      "duration_s": 0.287
+      "duration_s": 0.316
     }
   }
 }

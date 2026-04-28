@@ -1,11 +1,11 @@
 {
   "skill": "diagnose-perf",
-  "status": "warning",
+  "status": "pass",
   "checks": [
     {
       "name": "GPU snapshot command works",
       "status": "pass",
-      "detail": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.26 W, 300.00 W"
+      "detail": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.38 W, 300.00 W"
     },
     {
       "name": "CPU governor snapshot works",
@@ -24,7 +24,7 @@
     },
     {
       "name": "governor changes require approval",
-      "status": "warning",
+      "status": "pass",
       "detail": "mutating fix must be gated"
     }
   ],
@@ -33,16 +33,16 @@
       "nvidia_smi": {
         "cmd": "nvidia-smi --query-gpu=name,driver_version,memory.total,memory.used,temperature.gpu,pstate,clocks_throttle_reasons.active,utilization.gpu,power.draw,power.limit --format=csv,noheader",
         "returncode": 0,
-        "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.26 W, 300.00 W",
+        "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.38 W, 300.00 W",
         "stderr": "",
-        "duration_s": 0.048
+        "duration_s": 0.044
       },
       "cpu_governor": {
         "cmd": "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unavailable",
         "returncode": 0,
         "stdout": "schedutil",
         "stderr": "",
-        "duration_s": 0.002
+        "duration_s": 0.001
       }
     }
   }

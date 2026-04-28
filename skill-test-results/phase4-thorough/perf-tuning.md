@@ -1,6 +1,6 @@
 # perf-tuning thorough test
 
-Overall status: `warning`
+Overall status: `blocked_needs_approval`
 
 | Check | Status | Detail |
 |---|---|---|
@@ -10,5 +10,5 @@ Overall status: `warning`
 | synthetic evidence case documented: fsWatcher | `pass` |  |
 | synthetic evidence case documented: CPU governor | `pass` |  |
 | measurement-before-fix posture | `pass` |  |
-| system setting changes present and approval-gated | `warning` |  |
+| system setting changes are approval-gated | `pass` |  |
 | real before/after artifact test | `blocked_needs_approval` | requires workload and approval to apply tuning |

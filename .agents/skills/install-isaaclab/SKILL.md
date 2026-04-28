@@ -22,6 +22,8 @@ find /home /opt /data -maxdepth 5 -name isaaclab.sh 2>/dev/null | head -20
 
 If an existing installation is found, activate the intended conda/uv/venv environment and verify it works before reinstalling.
 
+**Safety gates:** Environment creation is usually safe; environment removal, package-manager installs, and shell-startup mutations are not. Do not run `conda init`; ask/obtain approval before deleting environments or installing system packages.
+
 ### Mode Selection
 
 - **Full Isaac Sim-backed install:** use for PhysX, ROS, URDF/MJCF importers, Omniverse visualization, and most benchmarking/profiling work. This requires Isaac Sim first.
@@ -134,13 +136,16 @@ cd IsaacLab
 # Quick import check
 ./isaaclab.sh -p -c "import isaaclab; print('OK')"
 
-# Run a minimal benchmark (few frames)
+# Run a minimal benchmark (few frames). Headless flag is version-dependent:
+HELP=$(./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py --help 2>&1)
+if echo "$HELP" | grep -q -- '--viz'; then HEADLESS_ARG="--viz none"; else HEADLESS_ARG="--headless"; fi
+
 ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-  --task=Isaac-Cartpole-Direct-v0 --viz none --num_frames 10 --num_envs=16
+  --task=Isaac-Cartpole-Direct-v0 $HEADLESS_ARG --num_frames 10 --num_envs=16
 ```
 
-> **Note:** `--headless` is deprecated in recent versions. Omit `--viz` for headless mode,
-> or use `--viz none` to force headless when visualizers are configured.
+> **Note:** Check `--help` before choosing headless flags. Some Isaac Lab versions expose
+> `--headless`; newer versions may expose `--viz none`.
 
 ## Day-to-Day Activation
 
@@ -160,6 +165,7 @@ ls -la _isaac_sim/
 ```
 
 ### Conda env already exists
+Only remove an environment after confirming it is the intended target and approval is granted:
 ```bash
 conda env remove -n env_isaaclab
 ./isaaclab.sh -c env_isaaclab

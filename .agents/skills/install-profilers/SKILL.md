@@ -19,6 +19,8 @@ sqlite3 --version 2>/dev/null && echo "sqlite3: OK" || echo "sqlite3: MISSING"
 
 Install only what's missing.
 
+**Approval gates:** Commands that install packages, write `/usr/local/bin`, change `/proc/sys/kernel/perf_event_paranoid`, or create system symlinks are host mutations. Check first, then ask/obtain approval before running the `sudo` examples. In containers where sysctl or GPU-counter access is unavailable, do not fight the host: use the container-safe capture mode in the `profiling` skill.
+
 ---
 
 ## 1. Nsight Systems (nsys CLI)
@@ -95,13 +97,15 @@ sudo apt-get install -y nsight-systems-cli
 
 ### Post-install: perf_event_paranoid
 
-`nsys` needs sampling access. Check and fix:
+CPU IP/backtrace sampling needs perf access. Check first; change only on a host where privileged profiling is approved:
 
 ```bash
 cat /proc/sys/kernel/perf_event_paranoid
-# If > 2:
+
+# Host-only, approval-gated fix if > 2 and CPU sampling is required:
 sudo sh -c 'echo 2 > /proc/sys/kernel/perf_event_paranoid'
-# Persistent (survives reboot):
+
+# Persistent host-only fix, also approval-gated:
 sudo sh -c 'echo kernel.perf_event_paranoid=2 > /etc/sysctl.d/99-nsys.conf'
 ```
 

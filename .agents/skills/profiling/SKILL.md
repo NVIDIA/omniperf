@@ -239,6 +239,8 @@ Try without `sudo` first. Use `sudo -E` only when `perf_event_paranoid` blocks C
 
 Use this mode when running inside a container where you cannot change `perf_event_paranoid`, cannot switch CPU governor, or do not have host-level perf privileges. Do not burn time fighting CPU sampling in that environment: capture NVTX zones, Vulkan activity, CUDA/Warp/PyTorch activity if present, and OS runtime where available. Treat the run as trace-structure evidence, not a final CPU bottleneck study.
 
+If the host lacks Isaac Sim `standalone_examples/benchmarks` scripts (common with pip-only installs), substitute a verified Isaac Lab benchmark command or another local Kit workload; do not assume `benchmark_camera.py` exists just because `SimulationApp` imports.
+
 ```bash
 export CARB_PROFILING_PYTHON=1
 NSYS_OUTPUT="kit_profile_container"
@@ -266,7 +268,7 @@ Notes:
 
 #### Full host mode: CPU sampling and GPU metrics enabled
 
-Use this only on hosts where CPU sampling and GPU metrics are allowed.
+Use this only on hosts where CPU sampling and GPU metrics are allowed. If the host lacks Isaac Sim `standalone_examples/benchmarks` scripts, substitute a verified local Kit/Isaac Lab workload.
 
 ```bash
 export CARB_PROFILING_PYTHON=1

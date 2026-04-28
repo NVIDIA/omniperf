@@ -172,3 +172,21 @@ User asked to keep trying because skills should provide install paths for missin
 - Isaac Sim pip install docs correctly need full `[all,extscache]`; bare `pip install isaacsim` installed only the metapackage and failed `SimulationApp` import.
 - The install skills should emphasize activating the target venv (and `OMNI_KIT_ACCEPT_EULA=YES`) before import verification; system Python checks are misleading after isolated installs.
 
+## 2026-04-28 follow-up: container-safe validation and approval gates
+
+Latest Phase 4 feedback was used to make expected blockers more explicit and reduce false-positive warnings:
+
+- `install-profilers`: added an approval-gates note before privileged package installs, `/usr/local/bin` writes, symlink creation, and `perf_event_paranoid` changes. Clarified that sysctl changes are host-only and not worth fighting in containers.
+- `install-isaacsim`: added safety gates for `sudo apt-get`, Docker service/group mutations, and cleanup commands. Full reset with `rm -rf` is now explicitly approval-only.
+- `install-isaaclab`: added safety gates for environment removal and system/package-manager changes; `conda init` remains explicitly avoided.
+- `diagnose-perf`: clarified it is read-only triage; persistence mode / governor changes are not applied by this skill.
+- `perf-tuning`: added approval gates for host-level tuning and container limitations; CPU governor section now says to record read-only/container limitations instead of attempting privileged workarounds.
+- `tracy-memory`: documented that pip Isaac Sim may lack `liballocwrapper.so`, expanded discovery beyond `~/.cache/packman`, and tells the agent to stop when the allocator wrapper is missing instead of producing a false memory capture.
+- `profiling-api`: added Carbonite `PYTHONPATH`/`LD_LIBRARY_PATH` smoke-test guidance for pip Isaac Sim where `carb.profiler` is present but not importable in a plain Python environment.
+
+Validation after these changes:
+
+- Phase 0/1: 12/12 skills pass static validation; 7 expected privileged/risky-command warnings remain for human review.
+- Phase 3: tooling smoke passes (`nsys`, `sqlite3`, Tracy tools, Python `nvtx`). CPU sampling still blocked by `perf_event_paranoid=4`.
+- Phase 4: install skills, profiling, nsys-analyze, nvtx-python, profiling-api, and diagnose-perf pass. `benchmark-isaaclab` passes with warnings after a tiny Cartpole non-RL benchmark. `benchmark-isaacsim` remains blocked because pip Isaac Sim lacks `standalone_examples/benchmarks`. `tracy-memory` remains blocked because no `liballocwrapper.so` is available. `perf-tuning` remains blocked for real before/after evidence because applying tuning and running heavier workloads need approval.
+

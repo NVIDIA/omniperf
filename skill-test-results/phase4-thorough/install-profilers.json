@@ -1,6 +1,6 @@
 {
   "skill": "install-profilers",
-  "status": "warning",
+  "status": "pass",
   "checks": [
     {
       "name": "tool on PATH: nsys",
@@ -58,8 +58,8 @@
       "detail": "looked for install-only-missing guidance"
     },
     {
-      "name": "privileged install commands present but documented",
-      "status": "warning",
+      "name": "privileged install commands are approval-gated",
+      "status": "pass",
       "detail": "sudo install examples require approval gating"
     }
   ],
@@ -70,7 +70,7 @@
         "returncode": 0,
         "stdout": "NVIDIA Nsight Systems version 2025.6.3.541-256337736014v0",
         "stderr": "",
-        "duration_s": 0.05
+        "duration_s": 0.072
       },
       "sqlite3": {
         "cmd": "sqlite3 --version 2>&1 | head -5",
@@ -91,21 +91,21 @@
         "returncode": 0,
         "stdout": "Usage: capture -o output.tracy [-a address] [-p port] [-f] [-s seconds] [-m memlimit]",
         "stderr": "",
-        "duration_s": 0.004
+        "duration_s": 0.003
       },
       "tracy-update": {
         "cmd": "tracy-update --version 2>&1 | head -5",
         "returncode": 0,
         "stdout": "Usage: update [options] input.tracy output.tracy\n\n  -4: enable LZ4 compression\n  -h: enable LZ4HC compression\n  -e: enable extreme LZ4HC compression (very slow)",
         "stderr": "",
-        "duration_s": 0.002
+        "duration_s": 0.003
       },
       "update": {
         "cmd": "update --version 2>&1 | head -5",
         "returncode": 0,
         "stdout": "Usage: update [options] input.tracy output.tracy\n\n  -4: enable LZ4 compression\n  -h: enable LZ4HC compression\n  -e: enable extreme LZ4HC compression (very slow)",
         "stderr": "",
-        "duration_s": 0.003
+        "duration_s": 0.002
       },
       "capture": {
         "cmd": "capture --version 2>&1 | head -5",

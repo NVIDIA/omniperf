@@ -10,7 +10,7 @@ Overall status: `blocked_missing_prereq`
 | Tracy update binary available | `pass` |  |
 | LD_PRELOAD unset before capture | `pass` |  |
 | strip test documented | `pass` |  |
-| real memory capture artifact test | `blocked_missing_prereq` | requires Kit app + Tracy tools |
+| real memory capture artifact test | `blocked_missing_prereq` | requires Kit app + Tracy tools + liballocwrapper.so |
 
 ## Evidence
 
@@ -21,7 +21,7 @@ Overall status: `blocked_missing_prereq`
     "returncode": 0,
     "stdout": "",
     "stderr": "",
-    "duration_s": 0.287
+    "duration_s": 0.316
   }
 }
 ```

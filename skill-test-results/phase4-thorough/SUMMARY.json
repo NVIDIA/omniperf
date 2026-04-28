@@ -1,9 +1,9 @@
 {
-  "timestamp": 1777361919.5819173,
+  "timestamp": 1777363890.5674596,
   "results": {
     "install-profilers": {
       "skill": "install-profilers",
-      "status": "warning",
+      "status": "pass",
       "checks": [
         {
           "name": "tool on PATH: nsys",
@@ -61,8 +61,8 @@
           "detail": "looked for install-only-missing guidance"
         },
         {
-          "name": "privileged install commands present but documented",
-          "status": "warning",
+          "name": "privileged install commands are approval-gated",
+          "status": "pass",
           "detail": "sudo install examples require approval gating"
         }
       ],
@@ -73,7 +73,7 @@
             "returncode": 0,
             "stdout": "NVIDIA Nsight Systems version 2025.6.3.541-256337736014v0",
             "stderr": "",
-            "duration_s": 0.05
+            "duration_s": 0.072
           },
           "sqlite3": {
             "cmd": "sqlite3 --version 2>&1 | head -5",
@@ -94,21 +94,21 @@
             "returncode": 0,
             "stdout": "Usage: capture -o output.tracy [-a address] [-p port] [-f] [-s seconds] [-m memlimit]",
             "stderr": "",
-            "duration_s": 0.004
+            "duration_s": 0.003
           },
           "tracy-update": {
             "cmd": "tracy-update --version 2>&1 | head -5",
             "returncode": 0,
             "stdout": "Usage: update [options] input.tracy output.tracy\n\n  -4: enable LZ4 compression\n  -h: enable LZ4HC compression\n  -e: enable extreme LZ4HC compression (very slow)",
             "stderr": "",
-            "duration_s": 0.002
+            "duration_s": 0.003
           },
           "update": {
             "cmd": "update --version 2>&1 | head -5",
             "returncode": 0,
             "stdout": "Usage: update [options] input.tracy output.tracy\n\n  -4: enable LZ4 compression\n  -h: enable LZ4HC compression\n  -e: enable extreme LZ4HC compression (very slow)",
             "stderr": "",
-            "duration_s": 0.003
+            "duration_s": 0.002
           },
           "capture": {
             "cmd": "capture --version 2>&1 | head -5",
@@ -129,7 +129,7 @@
     },
     "install-isaacsim": {
       "skill": "install-isaacsim",
-      "status": "warning",
+      "status": "pass",
       "checks": [
         {
           "name": "Python version matrix present",
@@ -152,13 +152,13 @@
           "detail": "/usr/bin/docker\nDocker version 29.1.3, build 29.1.3-0ubuntu3~22.04.1"
         },
         {
-          "name": "sudo/package install examples are present and need approval",
-          "status": "warning",
+          "name": "sudo/package install examples are approval-gated",
+          "status": "pass",
           "detail": ""
         },
         {
-          "name": "cleanup command is documented",
-          "status": "warning",
+          "name": "cleanup command is approval-gated",
+          "status": "pass",
           "detail": "cleanup must stay approval-gated"
         }
       ],
@@ -169,21 +169,21 @@
             "returncode": 0,
             "stdout": "/home/horde/venvs/isaacsim45/isaac-sim.sh\n/home/horde/venvs/isaacsim45/python.sh",
             "stderr": "",
-            "duration_s": 0.181
+            "duration_s": 0.188
           },
           "python_import_isaacsim": {
             "cmd": "python3 - <<\"PY\"\ntry:\n import isaacsim\n print(\"isaacsim import OK\")\nexcept Exception as e:\n print(type(e).__name__ + \": \" + str(e))\n raise SystemExit(42)\nPY",
             "returncode": 42,
             "stdout": "ModuleNotFoundError: No module named 'isaacsim'",
             "stderr": "",
-            "duration_s": 0.012
+            "duration_s": 0.011
           },
           "isaacsim_python_sh_verify": {
             "cmd": "if [ -x /home/horde/venvs/isaacsim45/python.sh ]; then OMNI_KIT_ACCEPT_EULA=YES /home/horde/venvs/isaacsim45/python.sh - <<\"PY\"\nimport isaacsim\nfrom isaacsim.simulation_app import SimulationApp\nprint(\"Isaac Sim OK\")\nPY\nelse echo \"no known isaacsim python.sh\"; exit 42; fi",
             "returncode": 0,
             "stdout": "Isaac Sim OK",
             "stderr": "",
-            "duration_s": 0.109
+            "duration_s": 0.112
           },
           "docker": {
             "cmd": "command -v docker && docker --version",
@@ -197,7 +197,7 @@
     },
     "install-isaaclab": {
       "skill": "install-isaaclab",
-      "status": "warning",
+      "status": "pass",
       "checks": [
         {
           "name": "mode selection documented",
@@ -230,8 +230,8 @@
           "detail": ""
         },
         {
-          "name": "env removal example needs approval",
-          "status": "warning",
+          "name": "env removal example is approval-gated",
+          "status": "pass",
           "detail": ""
         }
       ],
@@ -242,35 +242,35 @@
             "returncode": 0,
             "stdout": "/home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh",
             "stderr": "",
-            "duration_s": 0.114
+            "duration_s": 0.109
           },
           "isaaclab_verify": {
             "cmd": "if [ -x /home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh ]; then env TERM=xterm bash -lc 'cd /home/horde/.openclaw/workspace/IsaacLab && ./isaaclab.sh -p -c \"import isaaclab; print(\\\"Isaac Lab OK\\\")\"'; else echo \"no known isaaclab.sh\"; exit 42; fi",
             "returncode": 0,
             "stdout": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\nIsaac Lab OK",
             "stderr": "",
-            "duration_s": 0.042
+            "duration_s": 0.039
           },
           "conda": {
             "cmd": "command -v conda && conda --version",
             "returncode": 0,
             "stdout": "/usr/local/bin/conda\nconda 26.1.1",
             "stderr": "",
-            "duration_s": 0.53
+            "duration_s": 0.522
           },
           "uv": {
             "cmd": "command -v uv && uv --version",
             "returncode": 0,
             "stdout": "/home/horde/.local/bin/uv\nuv 0.11.8 (x86_64-unknown-linux-gnu)",
             "stderr": "",
-            "duration_s": 0.006
+            "duration_s": 0.005
           }
         }
       }
     },
     "benchmark-isaacsim": {
       "skill": "benchmark-isaacsim",
-      "status": "blocked_needs_approval",
+      "status": "blocked_missing_prereq",
       "checks": [
         {
           "name": "benchmark scripts documented",
@@ -310,28 +310,28 @@
             "returncode": 0,
             "stdout": "/home/horde/venvs/isaacsim45/isaac-sim.sh\n/home/horde/venvs/isaacsim45/python.sh",
             "stderr": "",
-            "duration_s": 0.181
+            "duration_s": 0.188
           },
           "isaacsim_python_sh_verify": {
             "cmd": "if [ -x /home/horde/venvs/isaacsim45/python.sh ]; then OMNI_KIT_ACCEPT_EULA=YES /home/horde/venvs/isaacsim45/python.sh - <<\"PY\"\nimport isaacsim\nfrom isaacsim.simulation_app import SimulationApp\nprint(\"Isaac Sim OK\")\nPY\nelse echo \"no known isaacsim python.sh\"; exit 42; fi",
             "returncode": 0,
             "stdout": "Isaac Sim OK",
             "stderr": "",
-            "duration_s": 0.109
+            "duration_s": 0.112
           },
           "isaacsim_benchmark_scripts": {
             "cmd": "find /home/horde/venvs/isaacsim45 /home/horde/.openclaw/workspace -maxdepth 8 -path \"*standalone_examples/benchmarks*\" -type f 2>/dev/null | head -50",
             "returncode": 0,
             "stdout": "",
             "stderr": "",
-            "duration_s": 0.31
+            "duration_s": 0.328
           }
         }
       }
     },
     "benchmark-isaaclab": {
       "skill": "benchmark-isaaclab",
-      "status": "blocked_needs_approval",
+      "status": "pass_with_warnings",
       "checks": [
         {
           "name": "benchmark scripts documented",
@@ -354,9 +354,14 @@
           "detail": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\nIsaac Lab OK"
         },
         {
+          "name": "tiny benchmark artifact run",
+          "status": "pass",
+          "detail": "2026-04-28 08:11:25 [10,177ms] [INFO] [isaacsim.benchmark.services.metrics.backend] LocalLogMetricsEvent::add_metrics TestPhase(phase_name='runtime', measurements=[DictMeasurement(name='Step Frametimes', value={'Environment step times': [43.234203, 49.244002, 4.376877, 3.562158, 3.320063, 3.317025, 3.292544, 3.370069, 3.454109, 3.497783], 'Environment step FPS': [23.129835422200337, 20.307041657580957, 228.4734069520345, 280.7287043415817, 301.19910375194684, 301.47496627248813, 303.7165182910236, 296.7298295672878, 289.5102615464654, 285.89538001642757], 'Environment step effective FPS': [370.0773667552054, 324.9126665212953, 3655.574511232552, 4491.659269465307, 4819.185660031149, 4823.59946035981, 4859.464292656377, 4747.677273076605, 4632.164184743447, 4574.326080262841]}, type='dict'), SingleMeasurement(name='Min Environment step times', value=3.292544, unit='ms', type='single'), SingleMeasurement(name='Max Environment step times', value=49.244002, unit='ms', type='single'), SingleMeasurement(name='Mean Environment step times', value=12.066883300000002, unit='ms', type='single'), SingleMeasurement(name='Min Environment step FPS', value=20.307041657580957, unit='ms', type='single'), SingleMeasurement(name='Max Environment step FPS', value=303.7165182910236, unit='ms', type='single'), SingleMeasurement(name='Mean Environment step FPS', value=233.11650478190373, unit='ms', type='single'), SingleMeasurement(name='Min Environment step effective FPS', value=324.9126665212953, unit='ms', type='single'), SingleMeasurement(name='Max Environment step effective FPS', value=4859.464292656377, unit='ms', type='single'), SingleMeasurement(name='Mean Environment step effective FPS', value=3729.8640765104597, unit='ms', type='single')], metadata=[StringMetadata(name='workflow_name', data='benchmark_non_rl', type='string'), StringMetadata(name='task', data='Isaac-Cartpole-Direct-v0', type='string'), IntMetadata(name='num_envs', data=16, type='int'), IntMetadata(name='num_frames', data=10, type='int'), StringMetadata(name='phase', data='runtime', type='string')])\n| Mean Environment step times: 12.066883300000002 ms |\n| Mean Environment step FPS: 233.11650478190373 ms   |\n| Mean Environment step effective FPS: 3729.8640765104597 ms |"
+        },
+        {
           "name": "long RL training not run",
-          "status": "blocked_needs_approval",
-          "detail": "requires installed Isaac Lab and explicit approval"
+          "status": "pass_with_warnings",
+          "detail": "long RL training/convergence tests intentionally skipped; tiny non-RL benchmark artifact passed"
         }
       ],
       "extra": {
@@ -366,15 +371,22 @@
             "returncode": 0,
             "stdout": "/home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh",
             "stderr": "",
-            "duration_s": 0.114
+            "duration_s": 0.109
           },
           "isaaclab_verify": {
             "cmd": "if [ -x /home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh ]; then env TERM=xterm bash -lc 'cd /home/horde/.openclaw/workspace/IsaacLab && ./isaaclab.sh -p -c \"import isaaclab; print(\\\"Isaac Lab OK\\\")\"'; else echo \"no known isaaclab.sh\"; exit 42; fi",
             "returncode": 0,
             "stdout": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\nIsaac Lab OK",
             "stderr": "",
-            "duration_s": 0.042
+            "duration_s": 0.039
           }
+        },
+        "tiny_benchmark": {
+          "cmd": "env TERM=xterm OMNI_KIT_ACCEPT_EULA=YES bash -lc 'cd /home/horde/.openclaw/workspace/IsaacLab && ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py --task=Isaac-Cartpole-Direct-v0 --headless --num_frames 10 --num_envs 16 --benchmark_backend LocalLogMetrics'",
+          "returncode": 0,
+          "stdout": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\n[INFO][AppLauncher]: Using device: cuda:0\n[INFO][AppLauncher]: Loading experience file: /home/horde/.openclaw/workspace/IsaacLab/apps/isaacsim_4_5/isaaclab.python.headless.kit\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Generating formatted report = True\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Using metrics backend = LocalLogMetrics\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Local folder location = /tmp\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Starting\n2026-04-28 08:11:20 [5,390ms] [INFO] [isaacsim.benchmark.services.base_isaac_benchmark] Test mode = False\n[INFO]: Parsing configuration from: isaaclab_tasks.direct.cartpole.cartpole_env:CartpoleEnvCfg\n[2026-04-28 08:11:21,059][isaaclab.envs.direct_rl_env][WARNING] - Seed not set for the environment. The environment creation may not be deterministic.\n\n\u001b[36m======================================================================================\u001b[0m\n\u001b[36m\u001b[1m[INFO][IsaacLab]: Logging to file: /tmp/isaaclab/logs/isaaclab_2026-04-28_08-11-21.log\u001b[0m\n\u001b[36m======================================================================================\u001b[0m\n\n\u001b[33m08:11:21 [stage.py] WARNING: Isaac Sim < 5.0 does not support thread-local stage contexts. Skipping use_stage().\u001b[0m\n\u001b[33m08:11:21 [simulation_context.py] WARNING: The `enable_external_forces_every_iteration` parameter in the PhysxCfg is set to False. If you are experiencing noisy velocities, consider enabling this flag. You may need to slightly increase the number of velocity iterations (setting it to 1 or 2 rather than 0), together with this flag, to improve the accuracy of velocity updates.\u001b[0m\n[INFO]: Base environment:\n\tEnvironment device    : cuda:0\n\tEnvironment seed      : None\n\tPhysics step-size     : 0.008333333333333333\n\tRendering step-size   : 0.016666666666666666\n\tEnvironment step-size : 0.016666666666666666\n[INFO]: Time taken for scene creation : 0.619895 seconds\n[INFO]: Scene manager:  <class InteractiveScene>\n\tNumber of environments: 16\n\tEnvironment spacing   : 4.0\n\tSource prim name      : /World/envs/env_0\n\tGlobal prim paths     : []\n\tReplicate physics     : True\n[I\n... [truncated in committed report]",
+          "stderr": "",
+          "duration_s": 11.123
         }
       }
     },
@@ -403,6 +415,11 @@
           "detail": ""
         },
         {
+          "name": "container-safe no CPU sampling mode documented",
+          "status": "pass",
+          "detail": ""
+        },
+        {
           "name": "Tracy capture sequence documented",
           "status": "pass",
           "detail": ""
@@ -421,9 +438,9 @@
         "tiny_nsys": {
           "cmd": "nsys profile --force-overwrite=true -o /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/tiny -t nvtx,osrt python3 /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/tiny_profile.py",
           "returncode": 0,
-          "stdout": "tiny\nCollecting data...\nGenerating '/tmp/nsys-report-6c48.qdstrm'\n\n[1/1] [0%                          ] tiny.nsys-rep\n[1/1] [0%                          ] tiny.nsys-rep\n[1/1] [======33%                   ] tiny.nsys-rep\n[1/1] [===============67%          ] tiny.nsys-rep\n[1/1] [====================83%     ] tiny.nsys-rep\n[1/1] [========================100%] tiny.nsys-rep\n[1/1] [========================100%] tiny.nsys-rep\nGenerated:\n\t/home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/tiny.nsys-rep",
+          "stdout": "tiny\nCollecting data...\nGenerating '/tmp/nsys-report-441a.qdstrm'\n\n[1/1] [0%                          ] tiny.nsys-rep\n[1/1] [0%                          ] tiny.nsys-rep\n[1/1] [======34%                   ] tiny.nsys-rep\n[1/1] [================68%         ] tiny.nsys-rep\n[1/1] [====================83%     ] tiny.nsys-rep\n[1/1] [========================100%] tiny.nsys-rep\n[1/1] [========================100%] tiny.nsys-rep\nGenerated:\n\t/home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/tiny.nsys-rep",
           "stderr": "WARNING: The version of the system or its configuration does not allow enabling CPU profiling:\n- CPU IP/backtrace sampling will be disabled.\n- CPU context switch tracing will be disabled.\nTry the 'nsys status --environment' command to learn more.",
-          "duration_s": 2.079
+          "duration_s": 1.966
         }
       }
     },
@@ -437,9 +454,9 @@
           "detail": "/usr/bin/sqlite3"
         },
         {
-          "name": "existing sqlite trace artifact",
+          "name": "existing or generated sqlite trace artifact",
           "status": "pass",
-          "detail": "/home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys-smoke/isaacsim_import.sqlite, /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys-smoke/tiny_nvtx.sqlite, /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/profiling-api-smoke/isaac_carb_profiler_smoke.sqlite, /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase3-tooling-smoke/nsys-tiny/tiny_python.sqlite"
+          "detail": "/home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_analyze_tiny.sqlite"
         },
         {
           "name": "NVTX_EVENTS text/StringIds gotcha documented",
@@ -458,10 +475,24 @@
         }
       ],
       "extra": {
-        "tables": {
-          "cmd": "sqlite3 /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys-smoke/isaacsim_import.sqlite '.tables'",
+        "create_tiny_trace": {
+          "cmd": "nsys profile --force-overwrite=true -o /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_analyze_tiny -t nvtx,osrt python3 /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_tiny_for_analyze.py",
           "returncode": 0,
-          "stdout": "ANALYSIS_DETAILS                          \nANALYSIS_FILE                             \nDIAGNOSTIC_EVENT                          \nENUM_DIAGNOSTIC_SEVERITY_LEVEL            \nENUM_DIAGNOSTIC_SOURCE_TYPE               \nENUM_DIAGNOSTIC_TIMESTAMP_SOURCE          \nENUM_NSYS_EVENT_CLASS                     \nENUM_NSYS_EVENT_TYPE                      \nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_FLAGS   \nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_PROPERTY\nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_TYPE    \nENUM_NSYS_GENERIC_EVENT_FIELD_TYPE        \nENUM_NSYS_GENERIC_EVENT_GROUP             \nENUM_NSYS_GENERIC_EVENT_SOURCE            \nENUM_OSRT_FILE_ACCESS_EVENT_TYPE          \nENUM_SAMPLING_THREAD_STATE                \nENUM_SCHEDULING_THREAD_BLOCK              \nENUM_STACK_UNWIND_METHOD                  \nMETA_DATA_CAPTURE                         \nMETA_DATA_EXPORT                          \nOSRT_API                                  \nOSRT_FILE_ACCESS_DESCRIPTORS              \nOSRT_FILE_ACCESS_EVENTS                   \nPROCESSES                                 \nPROFILER_OVERHEAD                         \nProcessStreams                            \nStringIds                                 \nTARGET_INFO_GPU                           \nTARGET_INFO_NIC_INFO                      \nTARGET_INFO_SESSION_START_TIME            \nTARGET_INFO_SYSTEM_ENV                    \nThreadNames",
+          "stdout": "analyze tiny\nCollecting data...\nGenerating '/tmp/nsys-report-99fc.qdstrm'\n\n[1/1] [0%                          ] nsys_analyze_tiny.nsys-rep\n[1/1] [0%                          ] nsys_analyze_tiny.nsys-rep\n[1/1] [======33%                   ] nsys_analyze_tiny.nsys-rep\n[1/1] [===============66%          ] nsys_analyze_tiny.nsys-rep\n[1/1] [===================82%      ] nsys_analyze_tiny.nsys-rep\n[1/1] [========================100%] nsys_analyze_tiny.nsys-rep\n[1/1] [========================100%] nsys_analyze_tiny.nsys-rep\nGenerated:\n\t/home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_analyze_tiny.nsys-rep",
+          "stderr": "WARNING: The version of the system or its configuration does not allow enabling CPU profiling:\n- CPU IP/backtrace sampling will be disabled.\n- CPU context switch tracing will be disabled.\nTry the 'nsys status --environment' command to learn more.",
+          "duration_s": 2.049
+        },
+        "export_tiny_sqlite": {
+          "cmd": "nsys export --force-overwrite=true --type sqlite --output /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_analyze_tiny.sqlite /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_analyze_tiny.nsys-rep",
+          "returncode": 0,
+          "stdout": "Processing 283 events:",
+          "stderr": "[1%                                                                            ]\n[2%                                                                            ]\n[3%                                                                            ]\n[=4%                                                                           ]\n[=5%                                                                           ]\n[==6%                                                                          ]\n[===7%                                                                         ]\n[====8%                                                                        ]\n[=====9%                                                                       ]\n[====10%                                                                       ]\n[=====11%                                                                      ]\n[======12%                                                                     ]\n[=======13%                                                                    ]\n[=======14%                                                                    ]\n[========15%                                                                   ]\n[=========16%                                                                  ]\n[==========17%                                                                 ]\n[===========18%                                                                ]\n[===========19%                                                                ]\n[============20%                                                               ]\n[=============21%                                                              ]\n[==============22%                                                             ]\n[==============23%                                                             ]\n[===============24%                                                            ]\n[================25%                                                           ]\n[=================26%                                                          ]\n[==================27%                                                         ]\n[==================28%                                                         ]\n[===================29%                                                        ]\n[====================30%                                                       ]\n[=====================31%                                             \n... [truncated in committed report]",
+          "duration_s": 0.018
+        },
+        "tables": {
+          "cmd": "sqlite3 /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys_analyze_tiny.sqlite '.tables'",
+          "returncode": 0,
+          "stdout": "ANALYSIS_DETAILS                          \nANALYSIS_FILE                             \nDIAGNOSTIC_EVENT                          \nENUM_DIAGNOSTIC_SEVERITY_LEVEL            \nENUM_DIAGNOSTIC_SOURCE_TYPE               \nENUM_DIAGNOSTIC_TIMESTAMP_SOURCE          \nENUM_NSYS_EVENT_CLASS                     \nENUM_NSYS_EVENT_TYPE                      \nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_FLAGS   \nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_PROPERTY\nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_TYPE    \nENUM_NSYS_GENERIC_EVENT_FIELD_TYPE        \nENUM_NSYS_GENERIC_EVENT_GROUP             \nENUM_NSYS_GENERIC_EVENT_SOURCE            \nENUM_OSRT_FILE_ACCESS_EVENT_TYPE          \nENUM_SAMPLING_THREAD_STATE                \nENUM_SCHEDULING_THREAD_BLOCK              \nENUM_STACK_UNWIND_METHOD                  \nMETA_DATA_CAPTURE                         \nMETA_DATA_EXPORT                          \nOSRT_API                                  \nOSRT_CALLCHAINS                           \nOSRT_FILE_ACCESS_DESCRIPTORS              \nOSRT_FILE_ACCESS_EVENTS                   \nPROCESSES                                 \nPROFILER_OVERHEAD                         \nProcessStreams                            \nStringIds                                 \nTARGET_INFO_GPU                           \nTARGET_INFO_NIC_INFO                      \nTARGET_INFO_SESSION_START_TIME            \nTARGET_INFO_SYSTEM_ENV                    \nThreadNames",
           "stderr": "",
           "duration_s": 0.002
         }
@@ -503,13 +534,13 @@
           "returncode": 0,
           "stdout": "nvtx import OK",
           "stderr": "",
-          "duration_s": 0.024
+          "duration_s": 0.022
         }
       }
     },
     "profiling-api": {
       "skill": "profiling-api",
-      "status": "blocked_missing_prereq",
+      "status": "pass",
       "checks": [
         {
           "name": "C++ macro header example",
@@ -532,12 +563,20 @@
           "detail": ""
         },
         {
-          "name": "Kit SDK build/run artifact test",
-          "status": "blocked_missing_prereq",
-          "detail": "requires Kit SDK or buildable extension context"
+          "name": "Kit/Isaac runtime artifact test",
+          "status": "pass",
+          "detail": "carb profiler runtime smoke 332833500"
         }
       ],
-      "extra": {}
+      "extra": {
+        "carb_runtime_smoke": {
+          "cmd": "/home/horde/venvs/isaacsim45/python.sh /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/profiling-api-smoke/carb_profiler_runtime_smoke.py",
+          "returncode": 0,
+          "stdout": "carb profiler runtime smoke 332833500",
+          "stderr": "",
+          "duration_s": 0.07
+        }
+      }
     },
     "tracy-memory": {
       "skill": "tracy-memory",
@@ -576,7 +615,7 @@
         {
           "name": "real memory capture artifact test",
           "status": "blocked_missing_prereq",
-          "detail": "requires Kit app + Tracy tools"
+          "detail": "requires Kit app + Tracy tools + liballocwrapper.so"
         }
       ],
       "extra": {
@@ -585,18 +624,18 @@
           "returncode": 0,
           "stdout": "",
           "stderr": "",
-          "duration_s": 0.287
+          "duration_s": 0.316
         }
       }
     },
     "diagnose-perf": {
       "skill": "diagnose-perf",
-      "status": "warning",
+      "status": "pass",
       "checks": [
         {
           "name": "GPU snapshot command works",
           "status": "pass",
-          "detail": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.26 W, 300.00 W"
+          "detail": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.38 W, 300.00 W"
         },
         {
           "name": "CPU governor snapshot works",
@@ -615,7 +654,7 @@
         },
         {
           "name": "governor changes require approval",
-          "status": "warning",
+          "status": "pass",
           "detail": "mutating fix must be gated"
         }
       ],
@@ -624,23 +663,23 @@
           "nvidia_smi": {
             "cmd": "nvidia-smi --query-gpu=name,driver_version,memory.total,memory.used,temperature.gpu,pstate,clocks_throttle_reasons.active,utilization.gpu,power.draw,power.limit --format=csv,noheader",
             "returncode": 0,
-            "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.26 W, 300.00 W",
+            "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.38 W, 300.00 W",
             "stderr": "",
-            "duration_s": 0.048
+            "duration_s": 0.044
           },
           "cpu_governor": {
             "cmd": "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unavailable",
             "returncode": 0,
             "stdout": "schedutil",
             "stderr": "",
-            "duration_s": 0.002
+            "duration_s": 0.001
           }
         }
       }
     },
     "perf-tuning": {
       "skill": "perf-tuning",
-      "status": "warning",
+      "status": "blocked_needs_approval",
       "checks": [
         {
           "name": "synthetic evidence case documented: PresentFrame",
@@ -673,8 +712,8 @@
           "detail": ""
         },
         {
-          "name": "system setting changes present and approval-gated",
-          "status": "warning",
+          "name": "system setting changes are approval-gated",
+          "status": "pass",
           "detail": ""
         },
         {
@@ -690,16 +729,16 @@
     "nvidia_smi": {
       "cmd": "nvidia-smi --query-gpu=name,driver_version,memory.total,memory.used,temperature.gpu,pstate,clocks_throttle_reasons.active,utilization.gpu,power.draw,power.limit --format=csv,noheader",
       "returncode": 0,
-      "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.26 W, 300.00 W",
+      "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 0x0000000000000001, 0 %, 35.38 W, 300.00 W",
       "stderr": "",
-      "duration_s": 0.048
+      "duration_s": 0.044
     },
     "cpu_governor": {
       "cmd": "cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null || echo unavailable",
       "returncode": 0,
       "stdout": "schedutil",
       "stderr": "",
-      "duration_s": 0.002
+      "duration_s": 0.001
     },
     "perf_event_paranoid": {
       "cmd": "cat /proc/sys/kernel/perf_event_paranoid 2>/dev/null || echo unavailable",
@@ -720,28 +759,28 @@
       "returncode": 42,
       "stdout": "ModuleNotFoundError: No module named 'isaacsim'",
       "stderr": "",
-      "duration_s": 0.012
+      "duration_s": 0.011
     },
     "isaacsim_python_sh_verify": {
       "cmd": "if [ -x /home/horde/venvs/isaacsim45/python.sh ]; then OMNI_KIT_ACCEPT_EULA=YES /home/horde/venvs/isaacsim45/python.sh - <<\"PY\"\nimport isaacsim\nfrom isaacsim.simulation_app import SimulationApp\nprint(\"Isaac Sim OK\")\nPY\nelse echo \"no known isaacsim python.sh\"; exit 42; fi",
       "returncode": 0,
       "stdout": "Isaac Sim OK",
       "stderr": "",
-      "duration_s": 0.109
+      "duration_s": 0.112
     },
     "isaaclab_verify": {
       "cmd": "if [ -x /home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh ]; then env TERM=xterm bash -lc 'cd /home/horde/.openclaw/workspace/IsaacLab && ./isaaclab.sh -p -c \"import isaaclab; print(\\\"Isaac Lab OK\\\")\"'; else echo \"no known isaaclab.sh\"; exit 42; fi",
       "returncode": 0,
       "stdout": "\u001b[3g\n\u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH    \u001bH   \n[INFO] Using python from: /home/horde/.openclaw/workspace/IsaacLab/_isaac_sim/python.sh\nIsaac Lab OK",
       "stderr": "",
-      "duration_s": 0.042
+      "duration_s": 0.039
     },
     "python_import_nvtx": {
       "cmd": "python3 - <<\"PY\"\ntry:\n import nvtx\n print(\"nvtx import OK\")\nexcept Exception as e:\n print(type(e).__name__ + \": \" + str(e))\n raise SystemExit(42)\nPY",
       "returncode": 0,
       "stdout": "nvtx import OK",
       "stderr": "",
-      "duration_s": 0.024
+      "duration_s": 0.022
     },
     "python_import_torch_cuda": {
       "cmd": "python3 - <<\"PY\"\ntry:\n import torch\n print(\"torch\", torch.__version__, \"cuda\", torch.cuda.is_available())\nexcept Exception as e:\n print(type(e).__name__ + \": \" + str(e))\n raise SystemExit(42)\nPY",
@@ -755,14 +794,14 @@
       "returncode": 0,
       "stdout": "/usr/local/bin/conda\nconda 26.1.1",
       "stderr": "",
-      "duration_s": 0.53
+      "duration_s": 0.522
     },
     "uv": {
       "cmd": "command -v uv && uv --version",
       "returncode": 0,
       "stdout": "/home/horde/.local/bin/uv\nuv 0.11.8 (x86_64-unknown-linux-gnu)",
       "stderr": "",
-      "duration_s": 0.006
+      "duration_s": 0.005
     },
     "docker": {
       "cmd": "command -v docker && docker --version",
@@ -776,14 +815,14 @@
       "returncode": 0,
       "stdout": "/home/horde/venvs/isaacsim45/isaac-sim.sh\n/home/horde/venvs/isaacsim45/python.sh",
       "stderr": "",
-      "duration_s": 0.181
+      "duration_s": 0.188
     },
     "isaaclab_paths": {
       "cmd": "find /home/horde /opt /data /home/horde/.openclaw/workspace/omniperf -maxdepth 5 -name isaaclab.sh 2>/dev/null | head -100",
       "returncode": 0,
       "stdout": "/home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh",
       "stderr": "",
-      "duration_s": 0.114
+      "duration_s": 0.109
     },
     "cuda_apt_repos": {
       "cmd": "ls /etc/apt/sources.list.d/*cuda* 2>/dev/null || true",
@@ -804,7 +843,7 @@
       "returncode": 0,
       "stdout": "",
       "stderr": "",
-      "duration_s": 0.287
+      "duration_s": 0.316
     }
   }
 }

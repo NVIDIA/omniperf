@@ -1,5 +1,5 @@
 {
-  "timestamp": 1777362731.8195589,
+  "timestamp": 1777363954.290507,
   "repo": "/home/horde/.openclaw/workspace/omniperf",
   "skills": [
     {
@@ -56,7 +56,7 @@
       "risky_matches": [
         {
           "pattern": "\\bconda\\s+env\\s+remove\\b",
-          "line": 164,
+          "line": 170,
           "snippet": "conda env remove -n env_isaaclab"
         }
       ],
@@ -75,93 +75,103 @@
       "risky_matches": [
         {
           "pattern": "\\bsudo\\b",
-          "line": 64,
+          "line": 30,
+          "snippet": "**Safety gates:** `sudo apt-get`, Docker service/group changes, and cleanup commands such as `rm -rf` mutate the host. Check/discover first, then ask/obtain approval before running those examples. Prefer creating a new venv over deleting an"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 66,
           "snippet": "sudo add-apt-repository -y ppa:deadsnakes/ppa"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 65,
+          "line": 67,
           "snippet": "sudo apt-get update"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 66,
+          "line": 68,
           "snippet": "sudo apt-get install -y python3.12 python3.12-venv python3.12-dev   # adjust version to match the table"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 154,
+          "line": 158,
           "snippet": "sudo apt-get update && sudo apt-get install -y docker.io"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 154,
+          "line": 158,
           "snippet": "sudo apt-get update && sudo apt-get install -y docker.io"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 155,
+          "line": 159,
           "snippet": "sudo systemctl start docker && sudo systemctl enable docker"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 155,
+          "line": 159,
           "snippet": "sudo systemctl start docker && sudo systemctl enable docker"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 156,
+          "line": 160,
           "snippet": "sudo usermod -aG docker $USER"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 161,
+          "line": 165,
           "snippet": "# If docker ps still fails, use `sudo docker ...` for the current command"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 178,
+          "line": 182,
           "snippet": "sudo apt-get install -y libglu1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev patchelf"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 226,
+          "line": 230,
           "snippet": "sudo usermod -aG docker $USER"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 228,
+          "line": 232,
           "snippet": "# If still fails in this shell: use `sudo docker ps` to verify Docker works,"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 235,
+          "line": 239,
           "snippet": "sudo apt-get install -y xvfb"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 66,
+          "line": 68,
           "snippet": "sudo apt-get install -y python3.12 python3.12-venv python3.12-dev   # adjust version to match the table"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 154,
+          "line": 158,
           "snippet": "sudo apt-get update && sudo apt-get install -y docker.io"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 178,
+          "line": 182,
           "snippet": "sudo apt-get install -y libglu1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev patchelf"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 235,
+          "line": 239,
           "snippet": "sudo apt-get install -y xvfb"
         },
         {
           "pattern": "\\brm\\s+-rf\\b",
-          "line": 108,
-          "snippet": "- To completely reset: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`."
+          "line": 30,
+          "snippet": "**Safety gates:** `sudo apt-get`, Docker service/group changes, and cleanup commands such as `rm -rf` mutate the host. Check/discover first, then ask/obtain approval before running those examples. Prefer creating a new venv over deleting an"
+        },
+        {
+          "pattern": "\\brm\\s+-rf\\b",
+          "line": 110,
+          "snippet": "- To completely reset, only after explicit approval: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`."
         }
       ],
       "path": ".agents/skills/install-isaacsim/SKILL.md"
@@ -179,132 +189,137 @@
       "risky_matches": [
         {
           "pattern": "\\bsudo\\b",
-          "line": 35,
+          "line": 22,
+          "snippet": "**Approval gates:** Commands that install packages, write `/usr/local/bin`, change `/proc/sys/kernel/perf_event_paranoid`, or create system symlinks are host mutations. Check first, then ask/obtain approval before running the `sudo` example"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 37,
           "snippet": "sudo dpkg -i nsight-systems-*.deb"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 43,
+          "line": 45,
           "snippet": "sudo ./NsightSystems-linux-public-*.run --accept"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 55,
+          "line": 57,
           "snippet": "sudo apt-get update"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 57,
+          "line": 59,
           "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 68,
+          "line": 70,
           "snippet": "sudo ln -sf \"$NSYS_BIN\" /usr/local/bin/nsys"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 77,
+          "line": 79,
           "snippet": "sudo dpkg -i cuda-keyring_1.1-1_all.deb"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 78,
+          "line": 80,
           "snippet": "sudo apt-get update"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 83,
+          "line": 85,
           "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 92,
+          "line": 94,
           "snippet": "sudo apt-get install -y nsight-systems-cli"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 103,
+          "line": 106,
           "snippet": "sudo sh -c 'echo 2 > /proc/sys/kernel/perf_event_paranoid'"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 105,
+          "line": 109,
           "snippet": "sudo sh -c 'echo kernel.perf_event_paranoid=2 > /etc/sysctl.d/99-nsys.conf'"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 123,
+          "line": 127,
           "snippet": "sudo apt-get install -y sqlite3"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 170,
+          "line": 174,
           "snippet": "sudo apt-get install -y build-essential cmake git libcapstone-dev"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 179,
+          "line": 183,
           "snippet": "sudo cp csvexport/build/tracy-csvexport /usr/local/bin/csvexport"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 185,
+          "line": 189,
           "snippet": "sudo cp capture/build/tracy-capture /usr/local/bin/capture"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 186,
+          "line": 190,
           "snippet": "sudo ln -sf /usr/local/bin/capture /usr/local/bin/capture-release  # compatibility alias"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 187,
+          "line": 191,
           "snippet": "sudo ln -sf /usr/local/bin/capture /usr/local/bin/tracy-capture    # optional compatibility alias"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 192,
+          "line": 196,
           "snippet": "sudo cp update/build/tracy-update /usr/local/bin/update"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 193,
+          "line": 197,
           "snippet": "sudo ln -sf /usr/local/bin/update /usr/local/bin/tracy-update  # optional compatibility alias"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 214,
+          "line": 218,
           "snippet": "sudo apt-get install -y tracy-csvexport tracy-capture"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 57,
+          "line": 59,
           "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 83,
+          "line": 85,
           "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 92,
+          "line": 94,
           "snippet": "sudo apt-get install -y nsight-systems-cli"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 123,
+          "line": 127,
           "snippet": "sudo apt-get install -y sqlite3"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 170,
+          "line": 174,
           "snippet": "sudo apt-get install -y build-essential cmake git libcapstone-dev"
         },
         {
           "pattern": "\\bapt(-get)?\\s+install\\b",
-          "line": 214,
+          "line": 218,
           "snippet": "sudo apt-get install -y tracy-csvexport tracy-capture"
         }
       ],
@@ -345,7 +360,12 @@
       "risky_matches": [
         {
           "pattern": "\\bsudo\\b",
-          "line": 180,
+          "line": 11,
+          "snippet": "**Approval gates:** Benchmark/app CLI flags are fine to test in a new run. Host-level changes (`sudo`, CPU governor, sysctl, persistence mode, package installs) require approval and may be unavailable in containers. If a container cannot ch"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 185,
           "snippet": "echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
         }
       ],
@@ -384,17 +404,17 @@
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 346,
+          "line": 348,
           "snippet": "sudo prlimit --nofile=65536:65536 /bin/bash -c \\"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 380,
+          "line": 382,
           "snippet": "For host-only CPU sampling/GPU metrics, add `--sample=system-wide --gpu-metrics-devices=all --gpuctxsw=true` only when the host allows it. Use `sudo -E` only if the non-sudo command fails because CPU sampling is blocked and you have approva"
         },
         {
           "pattern": "\\bsudo\\b",
-          "line": 380,
+          "line": 382,
           "snippet": "For host-only CPU sampling/GPU metrics, add `--sample=system-wide --gpu-metrics-devices=all --gpuctxsw=true` only when the host allows it. Use `sudo -E` only if the non-sudo command fails because CPU sampling is blocked and you have approva"
         }
       ],
@@ -435,51 +455,51 @@
         {
           "pattern": "LD_PRELOAD",
           "line": 13,
-          "snippet": "The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**."
+          "snippet": "The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**. Pip Isaac Sim installs may not ship this Packman/s"
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 20,
+          "line": 23,
           "snippet": "export LD_PRELOAD=\"$ALLOC_WRAPPER\""
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 49,
+          "line": 52,
           "snippet": "## Step 3: Unset LD_PRELOAD Before Capture Binary"
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 54,
+          "line": 57,
           "snippet": "# After launching Kit with LD_PRELOAD in background"
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 55,
+          "line": 58,
           "snippet": "unset LD_PRELOAD"
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 73,
+          "line": 76,
           "snippet": "# Broken: 18 MB \u2192 18 MB (zero memory data \u2014 LD_PRELOAD failed)"
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 84,
+          "line": 87,
           "snippet": "If you see `Failed to load library: 'liballocwrapper.so'` \u2192 LD_PRELOAD path is wrong. Stop and fix before re-running."
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 93,
+          "line": 96,
           "snippet": "If Memory tab is empty: recheck LD_PRELOAD path and `cpu.memory` channel setting."
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 107,
+          "line": 110,
           "snippet": "- Missing `LD_PRELOAD=liballocwrapper.so` \u2192 extension starts but hooks never install"
         },
         {
           "pattern": "LD_PRELOAD",
-          "line": 110,
+          "line": 113,
           "snippet": "- LD_PRELOAD bleeding into capture binary \u2192 corrupt capture"
         }
       ],
