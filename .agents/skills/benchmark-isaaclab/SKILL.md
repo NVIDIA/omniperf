@@ -13,10 +13,24 @@ description: Run Isaac Lab benchmark scripts and interpret their outputs. Covers
 
 See the `install-isaaclab` skill for installation (clone, conda env, Isaac Sim linking).
 
+### Discover Existing Isaac Lab Installation
+
+Before running any benchmark, locate the Isaac Lab entry point:
+
+```bash
+# Find isaaclab.sh
+find /home /opt /data -maxdepth 5 -name isaaclab.sh 2>/dev/null | head -20
+
+# If found, activate the intended conda/uv/venv first, then verify it works:
+# ./isaaclab.sh -p -c "import isaaclab; print('OK')"
+```
+
+If `isaaclab.sh` is not found, Isaac Lab must be installed first (see `install-isaaclab`). Do not proceed with benchmarks until the discovery check succeeds in the target environment.
+
 ## Before Running Any Benchmark
 
 1. **Use a WARM run for headline FPS/frametime** — see the COLD/WARM/TRACY method in the `profiling` skill
-2. **Set CPU governor to performance** — see `perf-tuning` skill
+2. **Set CPU governor to performance when the host allows it** — see `perf-tuning` skill. In containers where governor control is unavailable, record that limitation instead of trying privileged changes.
 3. **Do not patch Isaac Sim shutdown by default.** If Tracy shutdown hangs after outputs are complete, use the scoped last-resort guidance in the `profiling` skill
 
 ## Benchmark Scripts
@@ -41,12 +55,20 @@ All in `scripts/benchmarks/`. Run via `./isaaclab.sh -p scripts/benchmarks/<scri
 
 **Common params:** `--device`, `--enable_cameras`, `--benchmark_backend`, `--output_path`, `--distributed`
 
-> **Note:** `--headless` is deprecated. Omit `--viz` for headless mode, or use `--viz none`.
+> **Headless flag is version-dependent.** Some Isaac Lab versions expose `--headless`; newer versions may expose `--viz none`. Always check `--help` and choose the supported flag:
+>
+> ```bash
+> HELP=$(./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py --help 2>&1)
+> if echo "$HELP" | grep -q -- '--viz'; then HEADLESS_ARG="--viz none"; else HEADLESS_ARG="--headless"; fi
+> ```
 
 **Passing Kit args** (for profiling, output control, etc.):
 ```bash
+HELP=$(./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py --help 2>&1)
+if echo "$HELP" | grep -q -- '--viz'; then HEADLESS_ARG="--viz none"; else HEADLESS_ARG="--headless"; fi
+
 ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-    --task=Isaac-Ant-Direct-v0 --viz none --num_envs=4096 \
+    --task=Isaac-Ant-Direct-v0 $HEADLESS_ARG --num_envs=4096 \
     --kit_args "--/app/profilerBackend=tracy --/log/file=/tmp/kit.log"
 ```
 

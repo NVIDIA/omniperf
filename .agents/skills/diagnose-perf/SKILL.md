@@ -12,7 +12,7 @@ For deeper analysis after triage, use the **profiling** and **nsys-analyze** ski
 
 ## Phase 1 — System Snapshot (no Isaac process needed)
 
-Run these commands and check for red flags:
+Run these commands and check for red flags. Keep this skill read-only: collect facts and classify the bottleneck. Mutating fixes such as persistence mode, CPU governor changes, or package installs belong in `perf-tuning`/install skills and require approval.
 
 ### GPU Info
 ```bash
@@ -23,7 +23,7 @@ Key fields to check:
 
 | Field | Red Flag | Action |
 |-------|----------|--------|
-| Performance State | P2 or higher (P3, P8…) | GPU in power-saving mode — run a workload to wake it, or set `nvidia-smi -pm 1` |
+| Performance State | P2 or higher (P3, P8…) | GPU in power-saving mode — run a workload to wake it; persistence-mode changes are host mutations and need approval |
 | Clocks Throttle Reasons | Any "Active" | Thermal or power throttling — check cooling, power limits |
 | FB Memory Usage | >90% used at idle | Other processes hogging VRAM — check with `nvidia-smi` process list |
 | PCIe Generation | Gen2 or Gen1 | Bandwidth bottleneck for large scenes — check BIOS/motherboard |

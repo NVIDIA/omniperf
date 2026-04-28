@@ -8,6 +8,27 @@ description: Install Isaac Sim via pip or source build. Covers Docker setup, ver
 **Public repo:** https://github.com/isaac-sim/IsaacSim
 **Branch convention:** `develop` (latest), `release/*` (stable), version tags (e.g., `6.0.0`)
 
+## Check for Existing Installation
+
+Before installing, check if Isaac Sim is already available:
+
+```bash
+# Source build or pip-env helper scripts?
+find /home /opt /data -maxdepth 5 \( -name python.sh -o -name isaac-sim.sh \) 2>/dev/null | head -20
+
+# Pip install in the currently active env? This only checks the current Python;
+# activate the target venv first if Isaac Sim was installed into one.
+python -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; print('Isaac Sim pip env OK')" \
+  2>/dev/null || echo "Not usable in current Python env"
+
+# Docker image?
+docker images --filter 'reference=*isaac*sim*' 2>/dev/null || true
+```
+
+If an existing installation is found, activate its environment or use its `python.sh`, then verify it before installing again. Do not treat a system `python3` import failure as proof that no isolated Isaac Sim venv exists.
+
+**Safety gates:** `sudo apt-get`, Docker service/group changes, and cleanup commands such as `rm -rf` mutate the host. Check/discover first, then ask/obtain approval before running those examples. Prefer creating a new venv over deleting an existing one unless the user explicitly requested a reset.
+
 ## System Requirements
 
 - **GPU:** NVIDIA RTX (Ada, Ampere, or newer recommended)
@@ -86,7 +107,7 @@ conda activate isaacsim
 - **Method 2 (source build) ships its own Python** via `_build/linux-x86_64/release/python.sh` — you do not need a venv for running the source build, but you still want one for any host-side tooling (tests, scripts, editable installs).
 - **Editable install (Method 3) needs an active venv** — never `pip install -e .` into system Python.
 - **Cached assets & shader caches** live under `~/.cache/ov` and `~/.local/share/ov`. These are shared across venvs; deleting the venv does not clear them.
-- To completely reset: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`.
+- To completely reset, only after explicit approval: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`.
 
 ## Method 1: Pip Install (Quickest)
 
@@ -112,11 +133,16 @@ pip install 'isaacsim[all,extscache]==5.1.0.0' --extra-index-url https://pypi.nv
 pip install 'isaacsim[all,extscache]==6.0.0.0' --extra-index-url https://pypi.nvidia.com   # Python 3.12
 ```
 
-Verify:
+Verify in the same activated venv:
 ```bash
+export OMNI_KIT_ACCEPT_EULA=YES
 python -c "import isaacsim; print('OK')"
 python -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; print('SimulationApp OK')"
 ```
+
+If `import isaacsim` works but `SimulationApp` fails, the install is incomplete; reinstall with the full extras (`isaacsim[all,extscache]`) in the target venv.
+
+> **Benchmark scripts note:** A pip install can provide the Isaac Sim runtime and benchmark service extensions without shipping the source-tree `standalone_examples/benchmarks/*.py` scripts used by the `benchmark-isaacsim` skill. For standalone benchmark scripts, use a source checkout/source build or another package/archive that includes `standalone_examples/benchmarks`.
 
 ## Method 2: Source Build from GitHub
 

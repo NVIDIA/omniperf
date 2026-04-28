@@ -6,9 +6,25 @@ description: Install Isaac Lab for Isaac Sim-backed workflows or Isaac Lab 3.0+ 
 # Install Isaac Lab
 
 **Repo:** https://github.com/isaac-sim/IsaacLab.git
-**Modes:** Isaac Sim-backed full install, or Isaac Lab 3.0+ kit-less/Newton install.
+**Modes:** Isaac Sim-backed full install, or Isaac Lab 3.0+ kit-less/Newton install. Conda is the most common setup path for full installs, while newer Isaac Lab versions can also use `uv`/pip virtual environments.
 
 ## Choose Install Mode
+
+First, check for an existing Isaac Lab installation:
+
+```bash
+# Find isaaclab.sh
+find /home /opt /data -maxdepth 5 -name isaaclab.sh 2>/dev/null | head -20
+
+# Check _isaac_sim symlink if Isaac Lab dir is found
+# ls -la /path/to/IsaacLab/_isaac_sim 2>/dev/null
+```
+
+If an existing installation is found, activate the intended conda/uv/venv environment and verify it works before reinstalling.
+
+**Safety gates:** Environment creation is usually safe; environment removal, package-manager installs, and shell-startup mutations are not. Do not run `conda init`; ask/obtain approval before deleting environments or installing system packages.
+
+### Mode Selection
 
 - **Full Isaac Sim-backed install:** use for PhysX, ROS, URDF/MJCF importers, Omniverse visualization, and most benchmarking/profiling work. This requires Isaac Sim first.
 - **Kit-less/Newton install (Isaac Lab 3.0+):** use only when the user explicitly wants core Isaac Lab/Newton workflows that do not require Isaac Sim features.
@@ -69,9 +85,9 @@ git checkout develop   # or a specific commit/tag
 # If Isaac Sim was source-built:
 ln -s /path/to/IsaacSim/_build/linux-x86_64/release _isaac_sim
 
-# If Isaac Sim was pip-installed, the link may not be needed —
-# isaaclab.sh should detect the pip installation automatically.
-# Check: ./isaaclab.sh -p -c "import isaacsim; print('OK')"
+# If Isaac Sim was pip-installed in a venv, activate that venv first. The link
+# may not be needed because isaaclab.sh can detect the active pip installation.
+# Check in the target env: ./isaaclab.sh -p -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; print('OK')"
 ```
 
 ### Step 5: Create Environment
@@ -120,13 +136,16 @@ cd IsaacLab
 # Quick import check
 ./isaaclab.sh -p -c "import isaaclab; print('OK')"
 
-# Run a minimal benchmark (few frames)
+# Run a minimal benchmark (few frames). Headless flag is version-dependent:
+HELP=$(./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py --help 2>&1)
+if echo "$HELP" | grep -q -- '--viz'; then HEADLESS_ARG="--viz none"; else HEADLESS_ARG="--headless"; fi
+
 ./isaaclab.sh -p scripts/benchmarks/benchmark_non_rl.py \
-  --task=Isaac-Cartpole-Direct-v0 --viz none --num_frames 10 --num_envs=16
+  --task=Isaac-Cartpole-Direct-v0 $HEADLESS_ARG --num_frames 10 --num_envs=16
 ```
 
-> **Note:** `--headless` is deprecated in recent versions. Omit `--viz` for headless mode,
-> or use `--viz none` to force headless when visualizers are configured.
+> **Note:** Check `--help` before choosing headless flags. Some Isaac Lab versions expose
+> `--headless`; newer versions may expose `--viz none`.
 
 ## Day-to-Day Activation
 
@@ -146,6 +165,7 @@ ls -la _isaac_sim/
 ```
 
 ### Conda env already exists
+Only remove an environment after confirming it is the intended target and approval is granted:
 ```bash
 conda env remove -n env_isaaclab
 ./isaaclab.sh -c env_isaaclab

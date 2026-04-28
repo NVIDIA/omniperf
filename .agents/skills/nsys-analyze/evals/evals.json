@@ -1,0 +1,26 @@
+{
+  "skill_name": "nsys-analyze",
+  "evals": [
+    {
+      "id": "analyze-sqlite",
+      "prompt": "Given a .nsys-rep, list the analysis commands and expected tables.",
+      "expected_output": "Explains export to SQLite and queries tables/NVTX data with correct schema handling.",
+      "assertions": [
+        "Uses nsys export --type sqlite",
+        "Lists relevant SQLite tables",
+        "Handles NVTX_EVENTS text vs textId/StringIds",
+        "Mentions CUDA kernel tables may be empty for Kit/RTX traces"
+      ]
+    },
+    {
+      "id": "empty-cuda-kernels",
+      "prompt": "My Nsight SQLite has NVTX_EVENTS but no CUDA kernel rows. Is that a failure?",
+      "expected_output": "Explains when empty CUDA kernel tables are expected and what capture flags/workload types would produce CUDA rows.",
+      "assertions": [
+        "States Kit/RTX Vulkan traces may have empty CUDA kernel tables",
+        "Suggests checking -t cuda only when CUDA/Warp/PyTorch work is expected",
+        "Still analyzes NVTX/OSRT/Vulkan evidence"
+      ]
+    }
+  ]
+}

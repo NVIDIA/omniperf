@@ -10,11 +10,17 @@ Prerequisite: Tracy capture setup (see `profiling` skill), `install-profilers` f
 
 ## Step 1: Environment Variables (Linux, required)
 
-The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**.
+The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**. Pip Isaac Sim installs may not ship this Packman/source-Kit library; if discovery fails, stop and install/use a Kit or Isaac Sim package that includes it.
 
 ```bash
-# Path varies by packman version
-export LD_PRELOAD=~/.cache/packman/chk/allocmemwrapper/<version>/liballocwrapper.so
+# Path varies by packman/source build version. Discover it instead of guessing <version>.
+ALLOC_WRAPPER=$(find ~/.cache/packman -name liballocwrapper.so 2>/dev/null | head -1)
+if [ -z "$ALLOC_WRAPPER" ]; then
+  ALLOC_WRAPPER=$(find /home /opt /data -name liballocwrapper.so 2>/dev/null | head -1)
+fi
+[ -n "$ALLOC_WRAPPER" ] || { echo "liballocwrapper.so not found; memory tracing blocked"; exit 1; }
+
+export LD_PRELOAD="$ALLOC_WRAPPER"
 export TRACY_USE_LIB_UNWIND_FOR_BT=1   # libunwind-based backtrace
 export TRACY_NO_SYS_TRACE=1            # reduce overhead
 ```
@@ -50,8 +56,8 @@ Only Kit should use the interposer. The Tracy capture binary must NOT inherit it
 ```bash
 # After launching Kit with LD_PRELOAD in background
 unset LD_PRELOAD
-TRACY_CAPTURE_BIN=$(command -v capture || command -v capture-release || command -v tracy-capture)
-[ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing capture/capture-release/tracy-capture binary"; exit 1; }
+TRACY_CAPTURE_BIN=$(command -v tracy-capture || command -v capture || command -v capture-release)
+[ -n "$TRACY_CAPTURE_BIN" ] || { echo "Missing tracy-capture/capture/capture-release binary"; exit 1; }
 "$TRACY_CAPTURE_BIN" -o memtrace.tracy -f -p "${TRACY_PORT:-8086}"
 ```
 
@@ -60,9 +66,10 @@ TRACY_CAPTURE_BIN=$(command -v capture || command -v capture-release || command 
 Do not rely on Kit log lines alone. Verify actual memory data in the output:
 
 ```bash
-# Strip memory events and compare file sizes
-TRACY_UPDATE_BIN=$(command -v update || command -v tracy-update)
-[ -n "$TRACY_UPDATE_BIN" ] || { echo "Missing update/tracy-update binary; see install-profilers"; exit 1; }
+# Strip memory events and compare file sizes.
+# The utility is named `update` in Tracy builds; use your built Tracy tools dir if it is not on PATH.
+TRACY_UPDATE_BIN=$(command -v tracy-update || command -v update)
+[ -n "$TRACY_UPDATE_BIN" ] || { echo "Missing tracy-update/update binary; see install-profilers"; exit 1; }
 "$TRACY_UPDATE_BIN" -s M memtrace.tracy memtrace_no_mem.tracy
 
 # Good:   67 MB → 44 MB (~23 MB of memory data)

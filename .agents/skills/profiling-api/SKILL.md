@@ -45,7 +45,7 @@ auto zoneId = CARB_PROFILE_BEGIN(kProfilerMask, "Manual zone");
 CARB_PROFILE_END(kProfilerMask, zoneId);
 ```
 
-Prefer RAII style (`CARB_PROFILE_ZONE`) over manual begin/end.
+Prefer RAII style (`CARB_PROFILE_ZONE`) over manual begin/end. If you must use manual begin/end in code with exceptions, ensure `CARB_PROFILE_END` is called in all code paths (e.g., via a scope guard or `finally` block in a wrapper).
 
 ### GPU Zones
 
@@ -67,6 +67,23 @@ Enable GPU zones in Tracy:
 
 ## Python Profiling API
 
+Python `carb.profiler` examples must run inside a Kit/Isaac Python environment where Carbonite libraries are on `PYTHONPATH` and `LD_LIBRARY_PATH`. A plain system Python, and some pip `python.sh` invocations outside app startup, may fail with `ModuleNotFoundError: carb` or `ImportError: libcarb.so`.
+
+For quick smoke tests against a pip Isaac Sim environment, locate the Carbonite Python and library paths first:
+
+```bash
+SITE=$(python - <<'PY'
+import site
+print(site.getsitepackages()[0])
+PY
+)
+export PYTHONPATH="$SITE/omni/kernel/py:${PYTHONPATH:-}"
+export LD_LIBRARY_PATH="$SITE/omni:${LD_LIBRARY_PATH:-}"
+python -c "import carb.profiler; print('carb.profiler OK')"
+```
+
+Inside a running Kit app/extension, these paths are already configured.
+
 ### Decorator (simplest)
 
 ```python
@@ -79,10 +96,14 @@ def my_function():
 
 ### Manual begin/end
 
+Wrap manual ranges in `try/finally` to ensure `end()` is always called, even if an exception occurs. An unmatched `begin` without `end` corrupts the profiler zone stack for that thread.
+
 ```python
 carb.profiler.begin(1, "My Python operation")
-# ... work ...
-carb.profiler.end(1)
+try:
+    do_work()
+finally:
+    carb.profiler.end(1)
 ```
 
 ### Full IProfiler Interface

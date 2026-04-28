@@ -1,0 +1,26 @@
+{
+  "skill_name": "nvtx-python",
+  "evals": [
+    {
+      "id": "minimal-nvtx-test",
+      "prompt": "Show a minimal Python NVTX function-range test.",
+      "expected_output": "Provides a copy-paste-safe NVTX setup using the bundled sitecustomize helper through PYTHONPATH and nsys capture.",
+      "assertions": [
+        "Installs/imports nvtx only in the target environment",
+        "Does not overwrite site-packages/sitecustomize.py",
+        "Uses NVTX_PROFILE_PYTHON and optional include/exclude filters",
+        "Uses copy-paste-safe NVTX_SKILL_DIR discovery or explicit path"
+      ]
+    },
+    {
+      "id": "non-kit-boundary",
+      "prompt": "CARB_PROFILING_PYTHON does not work in my standalone Python script. What should I use?",
+      "expected_output": "Routes to NVTX Python function tracing for non-Kit environments and explains Carbonite is unavailable.",
+      "assertions": [
+        "Explains this is for non-Kit/Carbonite environments",
+        "Uses PYTHONPATH-scoped helper",
+        "Keeps tracing scope limited to reduce overhead"
+      ]
+    }
+  ]
+}

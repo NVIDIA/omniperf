@@ -1,0 +1,28 @@
+{
+  "skill_name": "profiling",
+  "evals": [
+    {
+      "id": "container-safe-nsys",
+      "prompt": "Plan a 10-second Nsight Systems capture for a Kit app running in a container where CPU sampling and GPU metrics are unavailable.",
+      "expected_output": "Uses container-safe nsys settings with no CPU sampling or GPU metrics and records limitations.",
+      "assertions": [
+        "Uses --sample=none",
+        "Does not include --gpu-metrics-devices=all by default",
+        "Uses NVTX/Vulkan/CUDA/OSRT or explains reducing OSRT if blocked",
+        "Does not use sudo by default",
+        "Records missing CPU sampling/governor control as a limitation"
+      ]
+    },
+    {
+      "id": "full-host-approval",
+      "prompt": "I need full CPU sampling and GPU metrics for an Isaac Sim benchmark on a host.",
+      "expected_output": "Provides full host nsys flags but keeps sudo/sysctl/GPU-counter changes opt-in and approval-gated.",
+      "assertions": [
+        "Tries non-sudo nsys first or clearly gates sudo -E",
+        "Includes CPU sampling and GPU metrics only for allowed hosts",
+        "Avoids wrapping the whole command in sudo prlimit by default",
+        "Mentions fallback without GPU metrics if ERR_NVGPUCTRPERM occurs"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "skill_name": "diagnose-perf",
+  "evals": [
+    {
+      "id": "low-fps-triage",
+      "prompt": "Given low FPS in Isaac Sim, perform a no-profiling triage plan.",
+      "expected_output": "Provides read-only GPU/CPU/memory/runtime triage and classifies likely bottleneck with confidence.",
+      "assertions": [
+        "Uses read-only nvidia-smi/system commands",
+        "Does not apply fixes or mutate governor/persistence mode",
+        "Explains that idle host metrics are not workload conclusions",
+        "Hands off fixes to perf-tuning and traces to profiling/nsys-analyze"
+      ]
+    },
+    {
+      "id": "idle-gpu-no-process",
+      "prompt": "nvidia-smi shows an idle GPU and no Isaac process is running. What bottleneck is this?",
+      "expected_output": "Explains that no workload-specific bottleneck can be inferred yet and asks/runs runtime capture when workload exists.",
+      "assertions": [
+        "Does not classify idle GPU as proof of a performance issue",
+        "Requests or waits for workload runtime metrics",
+        "Keeps diagnosis read-only"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "skill_name": "benchmark-isaacsim",
+  "evals": [
+    {
+      "id": "tiny-smoke-plan",
+      "prompt": "Plan a tiny headless Isaac Sim benchmark smoke test.",
+      "expected_output": "Plans a minimal benchmark with discovery gates, explicit output paths, correct hyphenated args, and no heavy sweep.",
+      "assertions": [
+        "Verifies both Isaac Sim runtime and standalone benchmark scripts before running",
+        "Uses minimal frames/cameras/assets",
+        "Uses hyphenated Isaac Sim benchmark arguments",
+        "Sets metrics/log output location",
+        "Does not require Nucleus assets unless explicitly needed"
+      ]
+    },
+    {
+      "id": "pip-runtime-no-scripts",
+      "prompt": "Isaac Sim imports from my pip venv, but standalone_examples/benchmarks is missing. Run benchmark_camera.py.",
+      "expected_output": "Refuses to assume benchmark scripts exist, explains pip packaging limitation, and suggests source/container layout or Isaac Lab benchmark fallback.",
+      "assertions": [
+        "Does not invent paths to benchmark_camera.py",
+        "States pip installs may lack standalone_examples/benchmarks",
+        "Suggests source checkout/container/archive or Isaac Lab fallback"
+      ]
+    }
+  ]
+}

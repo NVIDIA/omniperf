@@ -1,0 +1,27 @@
+{
+  "skill_name": "benchmark-isaaclab",
+  "evals": [
+    {
+      "id": "tiny-env-step-smoke",
+      "prompt": "Plan a tiny Isaac Lab env-step FPS smoke test.",
+      "expected_output": "Plans a small benchmark_non_rl.py run with version-adaptive headless handling and explicit frame/env counts.",
+      "assertions": [
+        "Discovers isaaclab.sh before running",
+        "Checks benchmark_non_rl.py --help when possible",
+        "Chooses --headless or --viz none based on help output",
+        "Uses tiny --num_frames and --num_envs",
+        "Keeps long RL/convergence tests approval-gated"
+      ]
+    },
+    {
+      "id": "container-governor-unavailable",
+      "prompt": "I cannot change the CPU governor in this container. Can I still run an Isaac Lab smoke benchmark?",
+      "expected_output": "Allows an exploratory tiny smoke while recording governor limitation and avoiding privileged changes.",
+      "assertions": [
+        "Does not force CPU governor changes",
+        "Marks results exploratory/lower-confidence",
+        "Uses tiny benchmark parameters"
+      ]
+    }
+  ]
+}

@@ -19,6 +19,8 @@ sqlite3 --version 2>/dev/null && echo "sqlite3: OK" || echo "sqlite3: MISSING"
 
 Install only what's missing.
 
+**Approval gates:** Commands that install packages, write `/usr/local/bin`, change `/proc/sys/kernel/perf_event_paranoid`, or create system symlinks are host mutations. Check first, then ask/obtain approval before running the `sudo` examples. In containers where sysctl or GPU-counter access is unavailable, do not fight the host: use the container-safe capture mode in the `profiling` skill.
+
 ---
 
 ## 1. Nsight Systems (nsys CLI)
@@ -30,9 +32,10 @@ The `nsys` CLI captures GPU/CPU traces and exports `.nsys-rep` → SQLite.
 The profiling guide recommends the latest standalone Nsight Systems package because CUDA Toolkit packages may lag behind.
 
 ```bash
-# Check the latest version at https://developer.nvidia.com/nsight-systems
-wget https://developer.nvidia.com/downloads/assets/tools/secure/nsight-systems/2026_2/nsight-systems-2026.2.1_2026.2.1.210-1_amd64.deb
-sudo dpkg -i nsight-systems-*.deb
+# Get the current .deb URL from https://developer.nvidia.com/nsight-systems.
+# Do not blindly reuse stale versioned URLs from old docs.
+wget '<nsight-systems-current-linux-amd64.deb-url-from-download-page>' -O nsight-systems.deb
+sudo dpkg -i nsight-systems.deb
 nsys --version
 ```
 
@@ -60,11 +63,13 @@ sudo apt-get install -y "$NSYS_PKG"
 nsys --version
 ```
 
-The package installs to `/opt/nvidia/nsight-systems/<version>/bin/nsys`.
-It typically creates a symlink at `/usr/local/bin/nsys`, but if not:
+The package location varies by Nsight Systems version, commonly under `/opt/nvidia/nsight-systems/<version>/target-linux-x64/nsys` or a `bin/nsys` subdirectory. It typically creates a symlink at `/usr/local/bin/nsys`, but if not:
 
 ```bash
-sudo ln -sf /opt/nvidia/nsight-systems/*/bin/nsys /usr/local/bin/nsys
+NSYS_BIN=$(find /opt/nvidia/nsight-systems -type f -name nsys 2>/dev/null | sort -V | tail -1)
+[ -n "$NSYS_BIN" ] || { echo "nsys binary not found under /opt/nvidia/nsight-systems"; exit 1; }
+sudo ln -sf "$NSYS_BIN" /usr/local/bin/nsys
+nsys --version
 ```
 
 ### Option C: Add CUDA repo first (if not present)
@@ -93,13 +98,15 @@ sudo apt-get install -y nsight-systems-cli
 
 ### Post-install: perf_event_paranoid
 
-`nsys` needs sampling access. Check and fix:
+CPU IP/backtrace sampling needs perf access. Check first; change only on a host where privileged profiling is approved:
 
 ```bash
 cat /proc/sys/kernel/perf_event_paranoid
-# If > 2:
+
+# Host-only, approval-gated fix if > 2 and CPU sampling is required:
 sudo sh -c 'echo 2 > /proc/sys/kernel/perf_event_paranoid'
-# Persistent (survives reboot):
+
+# Persistent host-only fix, also approval-gated:
 sudo sh -c 'echo kernel.perf_event_paranoid=2 > /etc/sysctl.d/99-nsys.conf'
 ```
 
@@ -173,23 +180,31 @@ git checkout v0.11.1
 
 # Build csvexport (headless, no GUI deps)
 cmake -B csvexport/build -S csvexport -DCMAKE_BUILD_TYPE=Release -DNO_ISA_EXTENSIONS=ON
-cmake --build csvexport/build --parallel
-sudo cp csvexport/build/csvexport /usr/local/bin/csvexport
+cmake --build csvexport/build --parallel --target tracy-csvexport
+sudo cp csvexport/build/tracy-csvexport /usr/local/bin/csvexport
 
-# Build capture using the source-guide path
-make -C capture/build/unix release
-sudo cp capture/build/unix/capture-release /usr/local/bin/capture
-sudo ln -sf /usr/local/bin/capture /usr/local/bin/tracy-capture  # optional compatibility alias
+# Build capture. Tracy 0.11.x uses CMake targets here; older docs may mention
+# capture/build/unix/capture-release, which does not exist in all checkouts.
+cmake -B capture/build -S capture -DCMAKE_BUILD_TYPE=Release
+cmake --build capture/build --parallel --target tracy-capture
+sudo cp capture/build/tracy-capture /usr/local/bin/capture
+sudo ln -sf /usr/local/bin/capture /usr/local/bin/capture-release  # compatibility alias
+sudo ln -sf /usr/local/bin/capture /usr/local/bin/tracy-capture    # optional compatibility alias
 
 # Build update (optional; required by the tracy-memory strip test)
 cmake -B update/build -S update -DCMAKE_BUILD_TYPE=Release
-cmake --build update/build --parallel
-sudo cp update/build/update /usr/local/bin/update
+cmake --build update/build --parallel --target tracy-update
+sudo cp update/build/tracy-update /usr/local/bin/update
 sudo ln -sf /usr/local/bin/update /usr/local/bin/tracy-update  # optional compatibility alias
+
+# If any target name fails, inspect the checkout instead of guessing paths:
+# cmake --build capture/build --target help | grep -E 'tracy|capture'
+# find capture/build update/build csvexport/build -maxdepth 2 -type f -perm -111 | sort
 
 # Verify
 csvexport --help
 capture --help
+capture-release --help
 update --help
 ```
 

@@ -15,11 +15,21 @@ Do not write into an environment's existing `sitecustomize.py`. Load the bundled
 # From the Isaac Lab directory (or any Python project with uv/pip)
 uv pip install nvtx
 
-# Resolve this skill's directory, then put its scripts/ directory on PYTHONPATH.
-# Replace the path if the skills directory is installed somewhere else.
-NVTX_SKILL_DIR=/Users/abaillet/src/omniperf/.agents/skills/nvtx-python
+# Resolve this skill's scripts/ directory and put it on PYTHONPATH.
+# The sitecustomize.py bundled here is PYTHONPATH-scoped: it activates only when
+# PYTHONPATH includes this directory. It does NOT overwrite the environment's
+# site-packages/sitecustomize.py. To disable, simply unset PYTHONPATH or
+# remove this entry.
+NVTX_SKILL_DIR="$(find "$PWD" -path '*/.agents/skills/nvtx-python/scripts/sitecustomize.py' -print -quit | xargs -r dirname | xargs -r dirname)"
+# Or set it explicitly to wherever the skill is installed:
+# NVTX_SKILL_DIR=/path/to/omniperf/.agents/skills/nvtx-python
+[ -n "$NVTX_SKILL_DIR" ] || { echo "Set NVTX_SKILL_DIR to .agents/skills/nvtx-python"; exit 1; }
 export PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}"
 ```
+
+> **Warning:** Do not copy `sitecustomize.py` into `site-packages/` — that would
+> overwrite any existing `sitecustomize.py` (breaking tools like coverage.py,
+> virtualenv hooks, etc.). Always use the `PYTHONPATH` approach above.
 
 ## Environment Variables
 
@@ -33,7 +43,7 @@ export PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}"
 
 ```bash
 # Capture all Python modules
-NVTX_SKILL_DIR=/Users/abaillet/src/omniperf/.agents/skills/nvtx-python
+# Set NVTX_SKILL_DIR to the nvtx-python skill directory (see Setup above)
 PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}" \
 NVTX_PROFILE_PYTHON=1 \
 nsys profile -t nvtx,cuda,osrt \
@@ -41,7 +51,6 @@ uv run python scripts/reinforcement_learning/skrl/train.py \
   --task=Isaac-Velocity-Flat-Anymal-C-v0 --num_envs=1024 --max_iterations=10
 
 # Capture specific modules only (recommended — reduces overhead)
-NVTX_SKILL_DIR=/Users/abaillet/src/omniperf/.agents/skills/nvtx-python
 PYTHONPATH="$NVTX_SKILL_DIR/scripts:${PYTHONPATH:-}" \
 NVTX_PROFILE_PYTHON=1 NVTX_PROFILE_INCLUDE=isaaclab,skrl \
 nsys profile -t nvtx,cuda,osrt \
