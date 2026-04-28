@@ -1,0 +1,32 @@
+{
+  "skill": "profiling-api",
+  "status": "blocked_missing_prereq",
+  "checks": [
+    {
+      "name": "C++ macro header example",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "Python profiler API example",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "manual begin/end safety",
+      "status": "pass",
+      "detail": "manual ranges should be exception-safe"
+    },
+    {
+      "name": "metrics/plots documented",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "Kit SDK build/run artifact test",
+      "status": "blocked_missing_prereq",
+      "detail": "requires Kit SDK or buildable extension context"
+    }
+  ],
+  "extra": {}
+}

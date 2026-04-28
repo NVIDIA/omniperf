@@ -10,6 +10,20 @@ description: Install Isaac Lab for Isaac Sim-backed workflows or Isaac Lab 3.0+ 
 
 ## Choose Install Mode
 
+First, check for an existing Isaac Lab installation:
+
+```bash
+# Find isaaclab.sh
+find /home /opt /data -maxdepth 5 -name isaaclab.sh 2>/dev/null | head -20
+
+# Check _isaac_sim symlink if Isaac Lab dir is found
+# ls -la /path/to/IsaacLab/_isaac_sim 2>/dev/null
+```
+
+If an existing installation is found, activate the intended conda/uv/venv environment and verify it works before reinstalling.
+
+### Mode Selection
+
 - **Full Isaac Sim-backed install:** use for PhysX, ROS, URDF/MJCF importers, Omniverse visualization, and most benchmarking/profiling work. This requires Isaac Sim first.
 - **Kit-less/Newton install (Isaac Lab 3.0+):** use only when the user explicitly wants core Isaac Lab/Newton workflows that do not require Isaac Sim features.
 
@@ -69,9 +83,9 @@ git checkout develop   # or a specific commit/tag
 # If Isaac Sim was source-built:
 ln -s /path/to/IsaacSim/_build/linux-x86_64/release _isaac_sim
 
-# If Isaac Sim was pip-installed, the link may not be needed —
-# isaaclab.sh should detect the pip installation automatically.
-# Check: ./isaaclab.sh -p -c "import isaacsim; print('OK')"
+# If Isaac Sim was pip-installed in a venv, activate that venv first. The link
+# may not be needed because isaaclab.sh can detect the active pip installation.
+# Check in the target env: ./isaaclab.sh -p -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; print('OK')"
 ```
 
 ### Step 5: Create Environment

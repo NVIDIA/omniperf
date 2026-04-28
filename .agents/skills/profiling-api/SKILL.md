@@ -45,7 +45,7 @@ auto zoneId = CARB_PROFILE_BEGIN(kProfilerMask, "Manual zone");
 CARB_PROFILE_END(kProfilerMask, zoneId);
 ```
 
-Prefer RAII style (`CARB_PROFILE_ZONE`) over manual begin/end.
+Prefer RAII style (`CARB_PROFILE_ZONE`) over manual begin/end. If you must use manual begin/end in code with exceptions, ensure `CARB_PROFILE_END` is called in all code paths (e.g., via a scope guard or `finally` block in a wrapper).
 
 ### GPU Zones
 
@@ -79,10 +79,14 @@ def my_function():
 
 ### Manual begin/end
 
+Wrap manual ranges in `try/finally` to ensure `end()` is always called, even if an exception occurs. An unmatched `begin` without `end` corrupts the profiler zone stack for that thread.
+
 ```python
 carb.profiler.begin(1, "My Python operation")
-# ... work ...
-carb.profiler.end(1)
+try:
+    do_work()
+finally:
+    carb.profiler.end(1)
 ```
 
 ### Full IProfiler Interface

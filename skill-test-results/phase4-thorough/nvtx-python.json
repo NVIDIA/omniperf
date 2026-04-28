@@ -1,0 +1,40 @@
+{
+  "skill": "nvtx-python",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "nvtx import in active Python",
+      "status": "pass",
+      "detail": "nvtx import OK"
+    },
+    {
+      "name": "sitecustomize instructions present",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "include/exclude filters documented",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "sitecustomize overwrite/backup guidance",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "nsys artifact test for NVTX ranges",
+      "status": "pass",
+      "detail": "requires nsys + nvtx"
+    }
+  ],
+  "extra": {
+    "python_import_nvtx": {
+      "cmd": "python3 - <<\"PY\"\ntry:\n import nvtx\n print(\"nvtx import OK\")\nexcept Exception as e:\n print(type(e).__name__ + \": \" + str(e))\n raise SystemExit(42)\nPY",
+      "returncode": 0,
+      "stdout": "nvtx import OK",
+      "stderr": "",
+      "duration_s": 0.024
+    }
+  }
+}

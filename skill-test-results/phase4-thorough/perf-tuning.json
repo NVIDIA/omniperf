@@ -1,0 +1,47 @@
+{
+  "skill": "perf-tuning",
+  "status": "warning",
+  "checks": [
+    {
+      "name": "synthetic evidence case documented: PresentFrame",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "synthetic evidence case documented: resolveSamplerFeedback",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "synthetic evidence case documented: waitIdle",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "synthetic evidence case documented: fsWatcher",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "synthetic evidence case documented: CPU governor",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "measurement-before-fix posture",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "system setting changes present and approval-gated",
+      "status": "warning",
+      "detail": ""
+    },
+    {
+      "name": "real before/after artifact test",
+      "status": "blocked_needs_approval",
+      "detail": "requires workload and approval to apply tuning"
+    }
+  ],
+  "extra": {}
+}

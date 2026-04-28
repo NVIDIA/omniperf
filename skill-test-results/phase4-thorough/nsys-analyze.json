@@ -1,0 +1,40 @@
+{
+  "skill": "nsys-analyze",
+  "status": "pass",
+  "checks": [
+    {
+      "name": "sqlite3 availability",
+      "status": "pass",
+      "detail": "/usr/bin/sqlite3"
+    },
+    {
+      "name": "existing sqlite trace artifact",
+      "status": "pass",
+      "detail": "/home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys-smoke/isaacsim_import.sqlite, /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys-smoke/tiny_nvtx.sqlite, /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/profiling-api-smoke/isaac_carb_profiler_smoke.sqlite, /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase3-tooling-smoke/nsys-tiny/tiny_python.sqlite"
+    },
+    {
+      "name": "NVTX_EVENTS text/StringIds gotcha documented",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "CUDA kernels absent behavior documented",
+      "status": "pass",
+      "detail": ""
+    },
+    {
+      "name": "comparison methodology documented",
+      "status": "pass",
+      "detail": ""
+    }
+  ],
+  "extra": {
+    "tables": {
+      "cmd": "sqlite3 /home/horde/.openclaw/workspace/omniperf/skill-test-results/phase4-thorough/nsys-smoke/isaacsim_import.sqlite '.tables'",
+      "returncode": 0,
+      "stdout": "ANALYSIS_DETAILS                          \nANALYSIS_FILE                             \nDIAGNOSTIC_EVENT                          \nENUM_DIAGNOSTIC_SEVERITY_LEVEL            \nENUM_DIAGNOSTIC_SOURCE_TYPE               \nENUM_DIAGNOSTIC_TIMESTAMP_SOURCE          \nENUM_NSYS_EVENT_CLASS                     \nENUM_NSYS_EVENT_TYPE                      \nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_FLAGS   \nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_PROPERTY\nENUM_NSYS_GENERIC_EVENT_FIELD_ETW_TYPE    \nENUM_NSYS_GENERIC_EVENT_FIELD_TYPE        \nENUM_NSYS_GENERIC_EVENT_GROUP             \nENUM_NSYS_GENERIC_EVENT_SOURCE            \nENUM_OSRT_FILE_ACCESS_EVENT_TYPE          \nENUM_SAMPLING_THREAD_STATE                \nENUM_SCHEDULING_THREAD_BLOCK              \nENUM_STACK_UNWIND_METHOD                  \nMETA_DATA_CAPTURE                         \nMETA_DATA_EXPORT                          \nOSRT_API                                  \nOSRT_FILE_ACCESS_DESCRIPTORS              \nOSRT_FILE_ACCESS_EVENTS                   \nPROCESSES                                 \nPROFILER_OVERHEAD                         \nProcessStreams                            \nStringIds                                 \nTARGET_INFO_GPU                           \nTARGET_INFO_NIC_INFO                      \nTARGET_INFO_SESSION_START_TIME            \nTARGET_INFO_SYSTEM_ENV                    \nThreadNames",
+      "stderr": "",
+      "duration_s": 0.002
+    }
+  }
+}

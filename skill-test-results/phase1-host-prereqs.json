@@ -1,0 +1,101 @@
+{
+  "timestamp": 1777362057.5180902,
+  "checks": {
+    "uname": {
+      "cmd": "uname -a",
+      "returncode": 0,
+      "stdout": "Linux abaillet-horde-dgxc-14 5.15.0-113-generic #123-Ubuntu SMP Mon Jun 10 08:16:17 UTC 2024 x86_64 x86_64 x86_64 GNU/Linux",
+      "stderr": ""
+    },
+    "os_release": {
+      "cmd": "cat /etc/os-release 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "PRETTY_NAME=\"Ubuntu 22.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"22.04\"\nVERSION=\"22.04.5 LTS (Jammy Jellyfish)\"\nVERSION_CODENAME=jammy\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=jammy",
+      "stderr": ""
+    },
+    "disk_workspace": {
+      "cmd": "df -h /home/horde/.openclaw/workspace",
+      "returncode": 0,
+      "stdout": "Filesystem      Size  Used Avail Use% Mounted on\noverlay         877G  679G  162G  81% /",
+      "stderr": ""
+    },
+    "git": {
+      "cmd": "git --version",
+      "returncode": 0,
+      "stdout": "git version 2.34.1",
+      "stderr": ""
+    },
+    "python3": {
+      "cmd": "python3 --version",
+      "returncode": 0,
+      "stdout": "Python 3.10.12",
+      "stderr": ""
+    },
+    "python": {
+      "cmd": "python --version 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "pip": {
+      "cmd": "python3 -m pip --version 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "pip 22.0.2 from /usr/lib/python3/dist-packages/pip (python 3.10)",
+      "stderr": ""
+    },
+    "conda": {
+      "cmd": "conda --version 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "conda 26.1.1",
+      "stderr": ""
+    },
+    "uv": {
+      "cmd": "uv --version 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "uv 0.11.8 (x86_64-unknown-linux-gnu)",
+      "stderr": ""
+    },
+    "nvidia_smi": {
+      "cmd": "nvidia-smi 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "Tue Apr 28 07:40:57 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 570.158.01             Driver Version: 570.158.01     CUDA Version: 12.8     |\n|-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA L40                     On  |   00000000:19:00.0 Off |                  Off |\n| N/A   25C    P8             35W /  300W |       1MiB /  49140MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n                                                                                         \n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+",
+      "stderr": ""
+    },
+    "nvidia_smi_query": {
+      "cmd": "nvidia-smi --query-gpu=name,driver_version,memory.total,memory.used,temperature.gpu,pstate,clocks.sm,clocks.mem --format=csv,noheader 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "NVIDIA L40, 570.158.01, 49140 MiB, 1 MiB, 25, P8, 210 MHz, 405 MHz",
+      "stderr": ""
+    },
+    "nsys": {
+      "cmd": "nsys --version 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "NVIDIA Nsight Systems version 2025.6.3.541-256337736014v0",
+      "stderr": ""
+    },
+    "sqlite3": {
+      "cmd": "sqlite3 --version 2>/dev/null || true",
+      "returncode": 0,
+      "stdout": "3.37.2 2022-01-06 13:25:41 872ba256cbf61d9290b571c0e6d82a20c224ca3ad82971edc46b29818d5dalt1",
+      "stderr": ""
+    },
+    "csvexport": {
+      "cmd": "csvexport --help 2>/dev/null | head -40 || true",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    "tracy_capture": {
+      "cmd": "which tracy-capture 2>/dev/null || true; tracy-capture --help 2>/dev/null | head -20 || true",
+      "returncode": 0,
+      "stdout": "/usr/local/bin/tracy-capture\nUsage: capture -o output.tracy [-a address] [-p port] [-f] [-s seconds] [-m memlimit]",
+      "stderr": ""
+    },
+    "common_isaac_paths": {
+      "cmd": "find /home/horde /opt /data -maxdepth 4 \\( -name python.sh -o -name isaaclab.sh \\) 2>/dev/null | head -100",
+      "returncode": 0,
+      "stdout": "/home/horde/venvs/isaacsim45/python.sh\n/home/horde/.openclaw/workspace/IsaacLab/isaaclab.sh",
+      "stderr": ""
+    }
+  }
+}

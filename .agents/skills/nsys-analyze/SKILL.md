@@ -129,9 +129,16 @@ ORDER BY total_ms DESC LIMIT 30;
 |-------|-----|
 | `NVTX_EVENTS` | NVTX ranges/markers. **No `name` column** — use `text` (inline) or join `textId→StringIds.id`. |
 | `StringIds` | String lookup (`id` → `value`) |
-| `CUPTI_ACTIVITY_KIND_KERNEL` | CUDA kernel launches (**empty for Kit/RTX apps — normal**) |
+| `CUPTI_ACTIVITY_KIND_KERNEL` | CUDA kernel launches (**often empty for Kit/RTX apps — see note below**) |
 | `TARGET_INFO_GPU` | GPU hardware info |
 | `TARGET_INFO_SYSTEM_ENV` | System environment |
+
+> **CUDA Kernels Table Empty?** Kit/RTX apps dispatch GPU work through Vulkan, not CUDA.
+> `CUPTI_ACTIVITY_KIND_KERNEL` will be empty unless the workload uses CUDA kernels directly
+> (e.g., PhysX GPU, Warp, PyTorch ops). This is normal — focus analysis on NVTX zones
+> and GPU hardware metrics instead. If you expected CUDA kernel data (e.g., Isaac Lab with
+> `torch.cuda` ops), verify that `nsys profile` was invoked with `-t cuda` in the trace
+> flags (e.g., `-t nvtx,cuda,osrt,vulkan`).
 
 ---
 

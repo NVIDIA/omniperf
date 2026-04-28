@@ -1,0 +1,495 @@
+{
+  "timestamp": 1777362056.282552,
+  "repo": "/home/horde/.openclaw/workspace/omniperf",
+  "skills": [
+    {
+      "directory": "benchmark-isaaclab",
+      "name": "benchmark-isaaclab",
+      "description": "Run Isaac Lab benchmark scripts and interpret their outputs. Covers RL training throughput, non-RL environment step FPS, camera/load/startup benchmarks, batch suites, parameter gotchas, output files, and JSON result structure. Use when the user asks to run or compare Isaac Lab benchmarks. NOT for RL convergence or policy-quality validation, profiling capture (use profiling), trace analysis (use nsys-analyze), or applying performance fixes (use perf-tuning).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [],
+      "risky_matches": [],
+      "path": ".agents/skills/benchmark-isaaclab/SKILL.md"
+    },
+    {
+      "directory": "benchmark-isaacsim",
+      "name": "benchmark-isaacsim",
+      "description": "Run Isaac Sim benchmark scripts and interpret benchmark outputs. Covers camera, SDG, scene-loading, robot, lidar/radar/sensor benchmark scripts, common parameters, output files, and benchmark-specific pitfalls. Use when the user asks to run or compare Isaac Sim benchmark results. NOT for initial bottleneck triage (use diagnose-perf), profiling capture (use profiling), trace analysis (use nsys-analyze), or applying performance fixes (use perf-tuning).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [],
+      "risky_matches": [],
+      "path": ".agents/skills/benchmark-isaacsim/SKILL.md"
+    },
+    {
+      "directory": "diagnose-perf",
+      "name": "diagnose-perf",
+      "description": "First-responder performance triage for Isaac Sim and Isaac Lab. Identifies bottleneck category (GPU-bound, CPU-bound, VRAM, loading) using nvidia-smi and system tools without profiling. Use when a user reports slow FPS, stuttering, high latency, or wants a quick health check before profiling. NOT for applying specific fixes (use perf-tuning), capturing traces (use profiling), or analyzing traces (use nsys-analyze).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 47,
+          "snippet": "sudo cpupower frequency-set -g performance"
+        }
+      ],
+      "path": ".agents/skills/diagnose-perf/SKILL.md"
+    },
+    {
+      "directory": "install-isaaclab",
+      "name": "install-isaaclab",
+      "description": "Install Isaac Lab for Isaac Sim-backed workflows or Isaac Lab 3.0+ kit-less/Newton workflows, then verify the setup. Use when the user asks to install, set up, or build Isaac Lab.",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "\\bconda\\s+env\\s+remove\\b",
+          "line": 164,
+          "snippet": "conda env remove -n env_isaaclab"
+        }
+      ],
+      "path": ".agents/skills/install-isaaclab/SKILL.md"
+    },
+    {
+      "directory": "install-isaacsim",
+      "name": "install-isaacsim",
+      "description": "Install Isaac Sim via pip or source build. Covers Docker setup, verification, and common install issues. Use when the user asks to install, set up, or build Isaac Sim.",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 64,
+          "snippet": "sudo add-apt-repository -y ppa:deadsnakes/ppa"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 65,
+          "snippet": "sudo apt-get update"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 66,
+          "snippet": "sudo apt-get install -y python3.12 python3.12-venv python3.12-dev   # adjust version to match the table"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 154,
+          "snippet": "sudo apt-get update && sudo apt-get install -y docker.io"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 154,
+          "snippet": "sudo apt-get update && sudo apt-get install -y docker.io"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 155,
+          "snippet": "sudo systemctl start docker && sudo systemctl enable docker"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 155,
+          "snippet": "sudo systemctl start docker && sudo systemctl enable docker"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 156,
+          "snippet": "sudo usermod -aG docker $USER"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 161,
+          "snippet": "# If docker ps still fails, use `sudo docker ...` for the current command"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 178,
+          "snippet": "sudo apt-get install -y libglu1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev patchelf"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 226,
+          "snippet": "sudo usermod -aG docker $USER"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 228,
+          "snippet": "# If still fails in this shell: use `sudo docker ps` to verify Docker works,"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 235,
+          "snippet": "sudo apt-get install -y xvfb"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 66,
+          "snippet": "sudo apt-get install -y python3.12 python3.12-venv python3.12-dev   # adjust version to match the table"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 154,
+          "snippet": "sudo apt-get update && sudo apt-get install -y docker.io"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 178,
+          "snippet": "sudo apt-get install -y libglu1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev patchelf"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 235,
+          "snippet": "sudo apt-get install -y xvfb"
+        },
+        {
+          "pattern": "\\brm\\s+-rf\\b",
+          "line": 108,
+          "snippet": "- To completely reset: `deactivate && rm -rf ~/venvs/isaacsim ~/.cache/ov ~/.local/share/ov`."
+        }
+      ],
+      "path": ".agents/skills/install-isaacsim/SKILL.md"
+    },
+    {
+      "directory": "install-profilers",
+      "name": "install-profilers",
+      "description": "Install profiling tools for Isaac Sim / Isaac Lab / Kit-based applications. Covers Nsight Systems (`nsys` CLI), `sqlite3`, Tracy `csvexport`, canonical Tracy `capture`/`capture-release`, and `update` for memory strip tests, with optional `tracy-capture`/`tracy-update` aliases. Use when setting up a profiling environment, when nsys/sqlite3/csvexport/capture/update tools are missing, or before running profiling, nsys-analyze, or tracy-memory.",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 35,
+          "snippet": "sudo dpkg -i nsight-systems-*.deb"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 43,
+          "snippet": "sudo ./NsightSystems-linux-public-*.run --accept"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 55,
+          "snippet": "sudo apt-get update"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 57,
+          "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 68,
+          "snippet": "sudo ln -sf \"$NSYS_BIN\" /usr/local/bin/nsys"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 77,
+          "snippet": "sudo dpkg -i cuda-keyring_1.1-1_all.deb"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 78,
+          "snippet": "sudo apt-get update"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 83,
+          "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 92,
+          "snippet": "sudo apt-get install -y nsight-systems-cli"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 103,
+          "snippet": "sudo sh -c 'echo 2 > /proc/sys/kernel/perf_event_paranoid'"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 105,
+          "snippet": "sudo sh -c 'echo kernel.perf_event_paranoid=2 > /etc/sysctl.d/99-nsys.conf'"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 123,
+          "snippet": "sudo apt-get install -y sqlite3"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 170,
+          "snippet": "sudo apt-get install -y build-essential cmake git libcapstone-dev"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 179,
+          "snippet": "sudo cp csvexport/build/tracy-csvexport /usr/local/bin/csvexport"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 185,
+          "snippet": "sudo cp capture/build/tracy-capture /usr/local/bin/capture"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 186,
+          "snippet": "sudo ln -sf /usr/local/bin/capture /usr/local/bin/capture-release  # compatibility alias"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 187,
+          "snippet": "sudo ln -sf /usr/local/bin/capture /usr/local/bin/tracy-capture    # optional compatibility alias"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 192,
+          "snippet": "sudo cp update/build/tracy-update /usr/local/bin/update"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 193,
+          "snippet": "sudo ln -sf /usr/local/bin/update /usr/local/bin/tracy-update  # optional compatibility alias"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 214,
+          "snippet": "sudo apt-get install -y tracy-csvexport tracy-capture"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 57,
+          "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 83,
+          "snippet": "sudo apt-get install -y \"$NSYS_PKG\""
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 92,
+          "snippet": "sudo apt-get install -y nsight-systems-cli"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 123,
+          "snippet": "sudo apt-get install -y sqlite3"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 170,
+          "snippet": "sudo apt-get install -y build-essential cmake git libcapstone-dev"
+        },
+        {
+          "pattern": "\\bapt(-get)?\\s+install\\b",
+          "line": 214,
+          "snippet": "sudo apt-get install -y tracy-csvexport tracy-capture"
+        }
+      ],
+      "path": ".agents/skills/install-profilers/SKILL.md"
+    },
+    {
+      "directory": "nsys-analyze",
+      "name": "nsys-analyze",
+      "description": "Analyze profiling data from Kit-based apps. Covers Omniverse-specific NVTX zone interpretation, phase detection using sqlite3, Tracy Statistics/Range Limit analysis, csvexport fallback queries, and two-version comparison methodology. Use after capturing profiles with the profiling skill. NOT for capturing traces (use profiling), adding zones to code (use profiling-api), or applying fixes (use perf-tuning).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [],
+      "risky_matches": [],
+      "path": ".agents/skills/nsys-analyze/SKILL.md"
+    },
+    {
+      "directory": "nvtx-python",
+      "name": "nvtx-python",
+      "description": "Profile Python functions with NVTX in non-Kit environments (Isaac Lab 3.0+ standalone, any Python app without Carbonite). Uses a bundled PYTHONPATH-scoped sitecustomize.py with sys.setprofile hook, NVTX push/pop ranges, module include/exclude filtering, and Nsight Systems integration. Use when CARB_PROFILING_PYTHON doesn't work (no Kit/Carbonite runtime), when profiling standalone Isaac Lab scripts, or when you need per-function Python tracing in nsys captures outside Kit.",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [],
+      "risky_matches": [],
+      "path": ".agents/skills/nvtx-python/SKILL.md"
+    },
+    {
+      "directory": "perf-tuning",
+      "name": "perf-tuning",
+      "description": "Resolve common Kit/Isaac Sim/Isaac Lab performance issues using specific settings and configuration changes. Covers PresentFrame stalls, resolveSamplerFeedback, headless mode, multi-GPU tradeoffs, DLSS/DLSS-G, PhysX tuning, RTX presets (isaaclab_performance/balanced/quality), viewport gizmos, HydraEngine waitIdle, fsWatcher overhead, and CPU governor. Use when profiling data shows a specific bottleneck and you need the fix, when someone asks \"why is it slow\" and you have Tracy/nsys evidence, or when tuning RTX settings for GPU-bound workloads. NOT for: initial triage (use diagnose-perf), capturing profiles (use profiling), or analyzing traces (use nsys-analyze).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 180,
+          "snippet": "echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor"
+        }
+      ],
+      "path": ".agents/skills/perf-tuning/SKILL.md"
+    },
+    {
+      "directory": "profiling",
+      "name": "profiling",
+      "description": "Capture performance traces using CPU ChromeTrace, Tracy, and Nsight Systems/NVTX for Kit-based applications (Isaac Sim, Isaac Lab, Kit SDK). Covers COLD/WARM/TRACY measurement separation, canonical Tracy capture sequence, last-resort force-kill handling, nsys profile commands, Kit profiler args, and lightweight export handoff to nsys-analyze. Use when running profiling captures, setting up trace collection, or troubleshooting capture failures. NOT for adding profiling zones (use profiling-api), deep trace analysis (use nsys-analyze), memory allocation profiling (use tracy-memory), or applying performance fixes (use perf-tuning).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 217,
+          "snippet": "sudo dpkg -i nsight-systems-*.deb"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 236,
+          "snippet": "Try without `sudo` first. Use `sudo -E` only when `perf_event_paranoid` blocks CPU sampling or system-wide OS runtime data, and only after confirming it is acceptable for the machine. In containers, `sudo` may not exist and GPU metrics may "
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 236,
+          "snippet": "Try without `sudo` first. Use `sudo -E` only when `perf_event_paranoid` blocks CPU sampling or system-wide OS runtime data, and only after confirming it is acceptable for the machine. In containers, `sudo` may not exist and GPU metrics may "
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 236,
+          "snippet": "Try without `sudo` first. Use `sudo -E` only when `perf_event_paranoid` blocks CPU sampling or system-wide OS runtime data, and only after confirming it is acceptable for the machine. In containers, `sudo` may not exist and GPU metrics may "
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 294,
+          "snippet": "sudo prlimit --nofile=65536:65536 /bin/bash -c \\"
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 330,
+          "snippet": "Use `sudo -E` only if the non-sudo command fails because CPU sampling is blocked and you have approval to run privileged profiling."
+        },
+        {
+          "pattern": "\\bsudo\\b",
+          "line": 330,
+          "snippet": "Use `sudo -E` only if the non-sudo command fails because CPU sampling is blocked and you have approval to run privileged profiling."
+        }
+      ],
+      "path": ".agents/skills/profiling/SKILL.md"
+    },
+    {
+      "directory": "profiling-api",
+      "name": "profiling-api",
+      "description": "Add profiling zones, metrics, and annotations to Kit-based C++ and Python code. Covers Carbonite macros (CARB_PROFILE_ZONE, CARB_PROFILE_FUNCTION, GPU zones), Python profiler API (decorators, begin/end), profiler masks, channels, Tracy plot data, event annotations, and automatic Kit Python function capture (CARB_PROFILING_PYTHON). Use when a developer asks how to add profiling spans to Kit/Carbonite code, configure masks/channels, record custom Tracy plots, or annotate traces with event markers. NOT for capturing traces (use profiling), analyzing traces (use nsys-analyze), or non-Kit Python function tracing (use nvtx-python).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [],
+      "risky_matches": [],
+      "path": ".agents/skills/profiling-api/SKILL.md"
+    },
+    {
+      "directory": "tracy-memory",
+      "name": "tracy-memory",
+      "description": "Profile CPU and GPU memory allocations using Tracy in Kit-based applications after Tracy capture tooling is installed. Covers LD_PRELOAD setup for liballocwrapper.so, Kit memory-channel flags, capture binary isolation (unset LD_PRELOAD), tracy-update strip-test verification, Tracy Memory tab analysis, and debug symbol requirements. Use when investigating memory leaks, allocation hotspots, or VRAM growth in Isaac Sim, Isaac Lab, or Kit apps. Requires profiling capture setup plus install-profilers. NOT for generic trace capture (use profiling) or non-memory trace analysis (use nsys-analyze).",
+      "has_frontmatter": true,
+      "installed_status": "match",
+      "issues": [],
+      "warnings": [
+        "contains_risky_or_privileged_commands_review_required"
+      ],
+      "risky_matches": [
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 3,
+          "snippet": "description: Profile CPU and GPU memory allocations using Tracy in Kit-based applications after Tracy capture tooling is installed. Covers LD_PRELOAD setup for liballocwrapper.so, Kit memory-channel flags, capture binary isolation (unset LD"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 3,
+          "snippet": "description: Profile CPU and GPU memory allocations using Tracy in Kit-based applications after Tracy capture tooling is installed. Covers LD_PRELOAD setup for liballocwrapper.so, Kit memory-channel flags, capture binary isolation (unset LD"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 13,
+          "snippet": "The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free. Without it, Kit logs `Failed to load library: 'liballocwrapper.so'` and **zero memory events are captured**."
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 20,
+          "snippet": "export LD_PRELOAD=\"$ALLOC_WRAPPER\""
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 49,
+          "snippet": "## Step 3: Unset LD_PRELOAD Before Capture Binary"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 54,
+          "snippet": "# After launching Kit with LD_PRELOAD in background"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 55,
+          "snippet": "unset LD_PRELOAD"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 73,
+          "snippet": "# Broken: 18 MB \u2192 18 MB (zero memory data \u2014 LD_PRELOAD failed)"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 84,
+          "snippet": "If you see `Failed to load library: 'liballocwrapper.so'` \u2192 LD_PRELOAD path is wrong. Stop and fix before re-running."
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 93,
+          "snippet": "If Memory tab is empty: recheck LD_PRELOAD path and `cpu.memory` channel setting."
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 107,
+          "snippet": "- Missing `LD_PRELOAD=liballocwrapper.so` \u2192 extension starts but hooks never install"
+        },
+        {
+          "pattern": "LD_PRELOAD",
+          "line": 110,
+          "snippet": "- LD_PRELOAD bleeding into capture binary \u2192 corrupt capture"
+        }
+      ],
+      "path": ".agents/skills/tracy-memory/SKILL.md"
+    }
+  ],
+  "summary": {
+    "skill_count": 12,
+    "pass_count": 12,
+    "fail_count": 0,
+    "warning_count": 7
+  }
+}

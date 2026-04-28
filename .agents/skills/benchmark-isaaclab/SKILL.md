@@ -13,6 +13,20 @@ description: Run Isaac Lab benchmark scripts and interpret their outputs. Covers
 
 See the `install-isaaclab` skill for installation (clone, conda env, Isaac Sim linking).
 
+### Discover Existing Isaac Lab Installation
+
+Before running any benchmark, locate the Isaac Lab entry point:
+
+```bash
+# Find isaaclab.sh
+find /home /opt /data -maxdepth 5 -name isaaclab.sh 2>/dev/null | head -20
+
+# If found, activate the intended conda/uv/venv first, then verify it works:
+# ./isaaclab.sh -p -c "import isaaclab; print('OK')"
+```
+
+If `isaaclab.sh` is not found, Isaac Lab must be installed first (see `install-isaaclab`). Do not proceed with benchmarks until the discovery check succeeds in the target environment.
+
 ## Before Running Any Benchmark
 
 1. **Use a WARM run for headline FPS/frametime** — see the COLD/WARM/TRACY method in the `profiling` skill

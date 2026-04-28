@@ -12,6 +12,21 @@ description: Run Isaac Sim benchmark scripts and interpret benchmark outputs. Co
 
 See the `install-isaacsim` skill for installation (pip, source build, Docker).
 
+### Discover Existing Isaac Sim Installation
+
+Before running any benchmark, locate the Isaac Sim Python entry point:
+
+```bash
+# Source build or pip-env helper scripts: find python.sh / isaac-sim.sh
+find /home /opt /data -maxdepth 5 \( -name python.sh -o -name isaac-sim.sh \) 2>/dev/null | head -20
+
+# Pip install: check the currently active Python env only
+python -c "import isaacsim; from isaacsim.simulation_app import SimulationApp; print('pip env OK')" \
+  2>/dev/null || echo "Not usable in current Python env"
+```
+
+If neither is found, Isaac Sim must be installed first (see `install-isaacsim`). If Isaac Sim is installed in a venv, activate that venv before checking; a system `python3` import failure does not rule out an isolated install. Do not proceed with benchmarks until one of these checks succeeds.
+
 ## Before Running Any Benchmark
 
 1. **Use a WARM run for headline FPS/frametime** — see the COLD/WARM/TRACY method in the `profiling` skill.
