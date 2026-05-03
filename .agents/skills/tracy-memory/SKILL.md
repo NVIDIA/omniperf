@@ -17,6 +17,7 @@ The `omni.cpumemorytracking` extension uses LD_PRELOAD to intercept malloc/free.
 export LD_PRELOAD=~/.cache/packman/chk/allocmemwrapper/<version>/liballocwrapper.so
 export TRACY_USE_LIB_UNWIND_FOR_BT=1   # libunwind-based backtrace
 export TRACY_NO_SYS_TRACE=1            # reduce overhead
+export TRACY_PORT="${TRACY_PORT:-8086}" # use 8087 for Isaac Sim 6.0+ when needed
 ```
 
 ## Step 2: Kit Flags

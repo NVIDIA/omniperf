@@ -101,6 +101,7 @@ profiler.instant(mask, type, name)              # instant event
 profiler.flow(mask, type, id, name)             # cross-thread flow
 profiler.frame(mask, name)                      # frame marker
 profiler.set_python_profiling_enabled(bool)     # toggle auto-profiling
+profiler.is_python_profiling_enabled() -> bool
 ```
 
 Types:
@@ -118,7 +119,10 @@ carb.profiler.FlowType.BEGIN / END  # flow start/end
 constexpr uint64_t kCaptureMaskNone    = 0;              // nothing
 constexpr uint64_t kCaptureMaskAll     = (uint64_t)-1;   // everything (default when no mask arg)
 constexpr uint64_t kCaptureMaskDefault = uint64_t(1);    // bit 0
+constexpr uint64_t kCaptureMaskProfiler = uint64_t(1) << 63; // profiler internals
 ```
+
+If a zone uses mask `0`, Carbonite treats it as `kCaptureMaskDefault` (`1`).
 
 **Workflow:** Start with `--/app/profilerMask=1` (major spans only, minimal overhead). If more detail needed, remove the arg (defaults to ALL). Always start coarse, then zoom in.
 
@@ -164,6 +168,12 @@ CARB_PROFILE_VALUE(gpuFrameTimeMs, 1, "GPU Frame Time (ms)");
 
 int32_t triangleCount = 1500000;
 CARB_PROFILE_VALUE(triangleCount, 1, "Triangle Count");
+
+uint32_t gpuMemoryMB = 4096;
+CARB_PROFILE_VALUE(gpuMemoryMB, 1, "GPU Memory (MB)");
+
+int gpuIndex = 0;
+CARB_PROFILE_VALUE(gpuFrameTimeMs, 1, "GPU %d Frame Time", gpuIndex);
 ```
 
 ### Python

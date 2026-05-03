@@ -164,6 +164,18 @@ Using the bundled binary guarantees version compatibility with the Tracy protoco
 
 ### Option B: Build Tracy 0.11.1 from source (recommended fallback)
 
+Before building, check Kit's `all-deps.packman.xml` for the `carb_sdk_plugins`
+version so the capture protocol matches the profiled app:
+
+| `carb_sdk_plugins` version | Tracy version |
+|---|---|
+| `< 178` | `0.9.1` legacy protocol |
+| `>= 178` | `0.11.1+nv1` current protocol |
+
+The commands below build Tracy `v0.11.1`, which matches current Kit builds
+using `carb_sdk_plugins >= 178`. For older Kit builds, check out the matching
+legacy Tracy tag instead.
+
 ```bash
 sudo apt-get install -y build-essential cmake git libcapstone-dev
 
