@@ -26,6 +26,23 @@ class SkillDocsTests(unittest.TestCase):
                 self.assertEqual(path.parent.name, fields.get("name"))
                 self.assertTrue(fields.get("description"))
 
+    def test_skill_frontmatter_plain_scalars_do_not_contain_mapping_delimiters(self):
+        for path in self.skill_files():
+            with self.subTest(path=path.relative_to(REPO_ROOT)):
+                text = path.read_text()
+                end = text.find("\n---\n", 4)
+                frontmatter = text[4:end]
+                fields = dict(re.findall(r"^(name|description):\s*(.*)$", frontmatter, re.MULTILINE))
+                for key, value in fields.items():
+                    stripped = value.strip()
+                    if stripped.startswith(("'", '"', "|", ">")):
+                        continue
+                    self.assertNotRegex(
+                        stripped,
+                        r":(?:\s|$)",
+                        f"{key} contains an unquoted YAML mapping delimiter",
+                    )
+
     def test_skill_indexes_cover_all_skills(self):
         skills = [path.parent.name for path in self.skill_files()]
         root_readme = (REPO_ROOT / "README.md").read_text()
