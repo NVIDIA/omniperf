@@ -1,6 +1,6 @@
 ---
 name: perf-tuning
-description: Resolve common Kit/Isaac Sim/Isaac Lab performance issues using specific settings and configuration changes. Covers PresentFrame stalls, resolveSamplerFeedback, headless mode, multi-GPU tradeoffs, DLSS/DLSS-G, PhysX tuning, RTX presets (isaaclab_performance/balanced/quality), viewport gizmos, HydraEngine waitIdle, fsWatcher overhead, and CPU governor. Use when profiling data shows a specific bottleneck and you need the fix, when someone asks "why is it slow" and you have Tracy/nsys evidence, or when tuning RTX settings for GPU-bound workloads. NOT for: initial triage (use diagnose-perf), capturing profiles (use profiling), or analyzing traces (use nsys-analyze).
+description: 'Resolve common Kit/Isaac Sim/Isaac Lab performance issues using specific settings and configuration changes. Covers PresentFrame stalls, resolveSamplerFeedback, headless mode, multi-GPU tradeoffs, DLSS/DLSS-G, PhysX tuning, RTX presets (isaaclab_performance/balanced/quality), viewport gizmos, HydraEngine waitIdle, fsWatcher overhead, and CPU governor. Use when profiling data shows a specific bottleneck and you need the fix, when someone asks "why is it slow" and you have Tracy/nsys evidence, or when tuning RTX settings for GPU-bound workloads. NOT for: initial triage (use diagnose-perf), capturing profiles (use profiling), or analyzing traces (use nsys-analyze).'
 ---
 
 # Performance Tuning for Kit / Isaac Sim / Isaac Lab
