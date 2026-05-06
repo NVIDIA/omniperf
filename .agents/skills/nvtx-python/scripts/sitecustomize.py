@@ -14,8 +14,8 @@ if os.environ.get("NVTX_PROFILE_PYTHON") == "1":
     try:
         import nvtx
 
-        _include = tuple(filter(None, os.environ.get("NVTX_PROFILE_INCLUDE", "").split(",")))
-        _exclude = tuple(filter(None, os.environ.get("NVTX_PROFILE_EXCLUDE", "importlib").split(",")))
+        _include = tuple(part.strip() for part in os.environ.get("NVTX_PROFILE_INCLUDE", "").split(",") if part.strip())
+        _exclude = tuple(part.strip() for part in os.environ.get("NVTX_PROFILE_EXCLUDE", "importlib").split(",") if part.strip())
         _module_cache = {}
         _pushed_frames = set()
 

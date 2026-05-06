@@ -83,13 +83,17 @@ To enable GitHub Pages for a fresh clone:
 This repo ships a set of [Claude Code agent skills](.agents/skills/) for working with Omniverse, Isaac Sim, Isaac Lab, and their profiling tools. They encode install steps, benchmark recipes, and profile-analysis workflows validated from live testing.
 
 - [install-isaacsim](.agents/skills/install-isaacsim/SKILL.md) — install Isaac Sim via pip or source build
-- [install-isaaclab](.agents/skills/install-isaaclab/SKILL.md) — install Isaac Lab and link it to Isaac Sim
+- [install-isaaclab](.agents/skills/install-isaaclab/SKILL.md) — install Isaac Lab for Isaac Sim-backed or kit-less/Newton workflows
 - [install-profilers](.agents/skills/install-profilers/SKILL.md) — set up Nsight Systems, Tracy, and related tooling
 - [benchmark-isaacsim](.agents/skills/benchmark-isaacsim/SKILL.md) — run Isaac Sim benchmarks
 - [benchmark-isaaclab](.agents/skills/benchmark-isaaclab/SKILL.md) — run Isaac Lab RL and environment benchmarks
 - [profiling](.agents/skills/profiling/SKILL.md) — capture traces with Tracy and Nsight Systems
+- [profiling-api](.agents/skills/profiling-api/SKILL.md) — add profiling zones, metrics, and annotations to Kit code
 - [nsys-analyze](.agents/skills/nsys-analyze/SKILL.md) — analyze Kit-based `.nsys-rep` profiles and compare versions
+- [tracy-memory](.agents/skills/tracy-memory/SKILL.md) — profile CPU and GPU memory allocations in Tracy
+- [nvtx-python](.agents/skills/nvtx-python/SKILL.md) — trace Python functions with NVTX outside Kit/Carbonite
 - [diagnose-perf](.agents/skills/diagnose-perf/SKILL.md) — first-responder triage for slow FPS, stutter, or latency
+- [perf-tuning](.agents/skills/perf-tuning/SKILL.md) — apply guide-backed fixes for known performance bottlenecks
 
 ## Security
 

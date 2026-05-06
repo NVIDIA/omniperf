@@ -155,14 +155,16 @@ Do not compare a single frame unless the issue is known to occur in one frame an
 csvexport profile.tracy > zones.csv
 ```
 
-**CSV columns:** `name,src_file,src_line,total_ns,total_perc,counts,mean_ns,min_ns,max_ns,std_ns`
+Inspect the header before scripting against `csvexport` output. Tracy versions and builds can differ:
+- Guide examples use `name`, `mean`, `count`, and `total_time`.
+- Other builds emit nanosecond-specific names such as `total_ns`, `counts`, and `mean_ns`.
+
+Normalize the column names in scripts instead of assuming one schema.
 
 Data is **pre-aggregated** — one row per unique zone, covering the entire trace (no phase separation).
 
 ```bash
-# Top zones, noise filtered
-tail -n+2 zones.csv | grep -v -E '^(Carbonite|carb::|Thread waiting|Executing task|Running fiber)' \
-  | sort -t',' -k4 -rn | head -30
+head -1 zones.csv
 ```
 
 > **Tracy CSV limitation:** No per-invocation timestamps — only aggregates. For phase-aware analysis, prefer the nsys SQLite path.
@@ -192,14 +194,24 @@ Compare with Python:
 ```python
 import csv
 
+def number(row, *names):
+    for name in names:
+        value = row.get(name)
+        if value not in (None, ""):
+            return float(value)
+    return 0.0
+
 def load_zones(path):
     zones = {}
     with open(path) as f:
         for row in csv.DictReader(f):
-            zones[row['name']] = {
-                'total_ms': int(row['total_ns']) / 1e6,
-                'count': int(row['counts']),
-                'mean_ms': int(row['mean_ns']) / 1e6,
+            name = row.get('name') or row.get('zone_name')
+            if not name:
+                continue
+            zones[name] = {
+                'total_ms': number(row, 'total_ns', 'total_time') / 1e6,
+                'count': int(number(row, 'counts', 'count')),
+                'mean_ms': number(row, 'mean_ns', 'mean') / 1e6,
             }
     return zones
 

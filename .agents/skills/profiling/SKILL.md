@@ -54,6 +54,7 @@ profiler.set_capture_mask(0)  # stop targeted capture
 ```bash
 export TRACY_NO_SYS_TRACE=1
 export TRACY_NO_CALLSTACK=1
+export TRACY_PORT="${TRACY_PORT:-8086}"  # Isaac Sim 6.0+ commonly uses 8087 to avoid OV Hub
 
 # TRACY analysis phase only. Do not set during COLD/WARM benchmark measurement.
 export CARB_PROFILING_PYTHON=1
@@ -81,7 +82,14 @@ Tracy capture is error-prone. Follow this exact sequence to avoid port conflicts
 
 **Tracy port:** default is `8086`; Isaac Sim 6.0+ commonly uses `8087` to avoid OV Hub. Kit auto-increments to `8087`, `8088`, etc. on conflict. Set `TRACY_PORT` when you know the port.
 
-**Tracy capture binary:** use the bundled `omni.kit.profiler.tracy` capture binary when available, or build Tracy 0.11.1 from source (`capture/build/unix/capture-release`).
+**Tracy capture binary:** use the bundled `omni.kit.profiler.tracy` capture binary when available, or build the Tracy version that matches Kit's `carb_sdk_plugins` from source.
+
+| `carb_sdk_plugins` version | Tracy version |
+|---|---|
+| `< 178` | `0.9.1` legacy protocol |
+| `>= 178` | `0.11.1+nv1` current protocol |
+
+Check Kit's `all-deps.packman.xml` before building a fallback capture binary. For current Kit builds, use Tracy `v0.11.1` and the headless binary at `capture/build/unix/capture-release`.
 
 #### Step-by-step:
 ```bash
