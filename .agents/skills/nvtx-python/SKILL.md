@@ -56,6 +56,33 @@ uv run python scripts/reinforcement_learning/skrl/train.py \
 - Use `NVTX_PROFILE_INCLUDE` to limit scope to modules of interest
 - To disable: unset `NVTX_PROFILE_PYTHON` or remove the skill's `scripts/` directory from `PYTHONPATH`
 
+## Caveat: Isaac Lab / Kit-based hosts clobber `sys.setprofile`
+
+Isaac Lab 3.0+ standalone *does* boot Kit/Carb under the hood via `AppLauncher`. Just running `from isaaclab.app import AppLauncher` (or any import that transitively pulls `carb` / `isaacsim`) registers Carb's own Python profile callback during module load, **silently overwriting the hook this skill installed at interpreter startup**. The resulting `.nsys-rep` then shows Python NVTX only for the brief window between interpreter startup and the first Carb-pulling import — typically just `argparse`, then nothing.
+
+**Fix:** call `sitecustomize.install()` after the import to re-arm. `install()` is idempotent, re-reads `NVTX_PROFILE_INCLUDE` / `NVTX_PROFILE_EXCLUDE` each call, and re-installs both `sys.setprofile` and `threading.setprofile`.
+
+```python
+import sys
+print(f"[NVTX] before AppLauncher: {sys.getprofile()!r}", flush=True)  # likely None
+app_launcher = AppLauncher(args_cli)
+simulation_app = app_launcher.app
+print(f"[NVTX] after AppLauncher:  {sys.getprofile()!r}", flush=True)  # still None
+
+import sitecustomize
+sitecustomize.install()
+print(f"[NVTX] re-installed:       {sys.getprofile()!r}", flush=True)  # callback restored
+```
+
+The probes are how you confirm the issue and the fix in one run. Drop them once verified.
+
+### Limitations even after re-install
+
+- `sys.setprofile` is **per-thread**. `threading.setprofile` only catches threads created via Python's `threading` module — Kit / PhysX / Hydra / Fabric / TBB native threads stay invisible. Most of `env.step()` runs in C++ on those threads, so even with the hook re-armed you'll see relatively few Python NVTX zones during the step loop.
+- Tracing every module floods the trace and can swamp nsys's NVTX backend; **always set `NVTX_PROFILE_INCLUDE`** to your own packages (e.g. `simulation,isaaclab.envs,isaaclab_tasks`) for Isaac Lab workloads.
+- For native-side coverage of Kit/PhysX/Hydra, use `CARB_PROFILING_PYTHON=1` + Carb's NVTX backend (see `profiling` skill) instead of, or alongside, this skill.
+- For a clean, low-overhead view of specific hot paths, drop the auto-tracer entirely and decorate the functions you care about with `@nvtx.annotate` (`env.step`, IK solve, observation manager, camera readout).
+
 ## Alternative: nsys Built-in Python Tracing
 
 If you know exactly which modules/functions to trace, nsys has a built-in option:
