@@ -16,7 +16,7 @@
 TOP_N                    = 20
 YIELD_EVERY              = 200
 INCLUDE_INSIDE_INSTANCES = True
-OUTPUT_CSV               = "/tmp/animation.csv"
+OUTPUT_CSV               = "./animation.csv"
 STAGE_PATH               = None
 ENABLE_USD_FALLBACK      = True
 # ---------------------------------------------------------------------------

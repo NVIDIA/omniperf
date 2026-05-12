@@ -18,7 +18,7 @@ YIELD_EVERY              = 200
 THIN_ASPECT              = 20.0       # max-dim / min-dim ratio to flag as plate
 COVERAGE_PCT             = 30.0       # % of stage XY footprint
 INCLUDE_INSIDE_INSTANCES = True
-OUTPUT_CSV               = "/tmp/slabs.csv"
+OUTPUT_CSV               = "./slabs.csv"
 STAGE_PATH               = None
 # ---------------------------------------------------------------------------
 

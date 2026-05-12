@@ -22,7 +22,7 @@ INCLUDE_INSIDE_INSTANCES = True
 TIME_CODE                = None
 YIELD_EVERY              = 100         # meshes processed between UI yields
 PROGRESS_EVERY           = 500         # progress print interval
-OUTPUT_CSV               = "/tmp/largest_meshes.csv"
+OUTPUT_CSV               = "./largest_meshes.csv"
 STAGE_PATH               = None
 # ---------------------------------------------------------------------------
 

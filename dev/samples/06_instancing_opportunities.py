@@ -31,7 +31,7 @@ MIN_DUP_GROUP_SIZE       = 2
 MIN_VERTS_FOR_REPORT     = 10
 BBOX_QUANTIZE            = 0.001
 INCLUDE_INSIDE_INSTANCES = False
-OUTPUT_CSV               = "/tmp/instancing_opportunities.csv"
+OUTPUT_CSV               = "./instancing_opportunities.csv"
 STAGE_PATH               = None
 ENABLE_USD_FALLBACK      = True
 # ---------------------------------------------------------------------------
