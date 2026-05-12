@@ -1,5 +1,7 @@
 import asyncio
+import json
 import logging
+import os
 
 import omni
 import omni.kit.app
@@ -7,6 +9,8 @@ import omni.ui
 from pxr import UsdUtils
 
 logger = logging.getLogger(__name__)
+
+OUTPUT_JSON = "./stage_stats.json"
 
 
 async def wait_for_frames(count: int):
@@ -107,5 +111,12 @@ async def get_stage_stats() -> dict[str, dict]:
 async def main():
     stats = await get_stage_stats()
     print(stats)
+    try:
+        out_path = os.path.abspath(os.path.expanduser(OUTPUT_JSON))
+        with open(out_path, "w") as f:
+            json.dump(stats, f, indent=4, default=str)
+        print(f"[stage_stats] wrote {out_path}")
+    except Exception as e:
+        print(f"[stage_stats] write failed: {e}")
 
 asyncio.ensure_future(main())
