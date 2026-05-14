@@ -35,6 +35,7 @@ Agent skills for performance engineering across the NVIDIA Omniverse stack (Isaa
 |---|---|
 | [diagnose-perf](diagnose-perf/) | Quick triage — identify bottleneck category without profiling tools |
 | [perf-tuning](perf-tuning/) | Apply specific fixes for known performance issues |
+| [kit-app-streaming-debug](kit-app-streaming-debug/) | Debug Kit app livestream bottlenecks using StreamSDK logs and browser WebRTC stats |
 
 ## Workflow
 
@@ -53,6 +54,9 @@ Specialized profiling:
 - **profiling-api** — when writing new code that needs profiling zones
 - **tracy-memory** — when investigating memory leaks or allocation hotspots
 - **nvtx-python** — when profiling Python in standalone Isaac Lab (no Kit runtime)
+
+Specialized streaming:
+- **kit-app-streaming-debug** — when WebRTC/native app streaming lags, freezes, disconnects, drops frames, or logs StreamSDK warnings
 
 Routing boundaries:
 - Use **benchmark-*** skills to run benchmark scripts and read benchmark outputs, not to diagnose or fix bottlenecks.
