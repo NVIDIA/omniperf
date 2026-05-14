@@ -94,6 +94,7 @@ This repo ships a set of [Claude Code agent skills](.agents/skills/) for working
 - [nvtx-python](.agents/skills/nvtx-python/SKILL.md) — trace Python functions with NVTX outside Kit/Carbonite
 - [diagnose-perf](.agents/skills/diagnose-perf/SKILL.md) — first-responder triage for slow FPS, stutter, or latency
 - [perf-tuning](.agents/skills/perf-tuning/SKILL.md) — apply guide-backed fixes for known performance bottlenecks
+- [kit-app-streaming-debug](.agents/skills/kit-app-streaming-debug/SKILL.md) — debug Kit app livestream bottlenecks using StreamSDK logs and browser WebRTC stats
 
 ## Security
 
