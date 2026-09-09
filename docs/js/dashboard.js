@@ -4,6 +4,13 @@
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => [...document.querySelectorAll(s)];
 
+  function textElement(tag, className, value) {
+    const element = document.createElement(tag);
+    element.className = className;
+    element.textContent = String(value);
+    return element;
+  }
+
   const PRESET_COLORS = [
     "#00d4ff", "#ff3e96", "#00ff88", "#ff6b35", "#ffea00",
     "#7c4dff", "#00bcd4", "#e040fb", "#69f0ae", "#ff5722",
@@ -677,7 +684,10 @@
     if (pendingMemCharts.length > 0) {
       const memHeading = document.createElement("div");
       memHeading.className = "scaling-category-heading";
-      memHeading.innerHTML = `<span>GPU Memory Usage</span><span class="scaling-category-sub">${gpuTotalMemGb ? `Total VRAM: ${formatNumber(gpuTotalMemGb)} GB` : ""}</span>`;
+      memHeading.append(
+        textElement("span", "", "GPU Memory Usage"),
+        textElement("span", "scaling-category-sub", gpuTotalMemGb ? `Total VRAM: ${formatNumber(gpuTotalMemGb)} GB` : ""),
+      );
       container.appendChild(memHeading);
 
       for (const { rawTask, wfShort, memData: md, memPresetLabels: mpl } of pendingMemCharts) {
@@ -805,7 +815,9 @@
     for (const item of items) {
       const div = document.createElement("div");
       div.className = "info-env-item";
-      div.innerHTML = `<span class="label">${item.label}</span><span class="value" title="${item.value}">${item.value}</span>`;
+      const value = textElement("span", "value", item.value);
+      value.title = String(item.value);
+      div.append(textElement("span", "label", item.label), value);
       container.appendChild(div);
     }
   }
@@ -927,9 +939,7 @@
     if (warnings.length > 0) {
       const banner = document.createElement("div");
       banner.className = "warning-banner";
-      banner.innerHTML = warnings
-        .map((w) => `<div class="warning-line">\u26A0 ${w}</div>`)
-        .join("");
+      banner.append(...warnings);
       container.appendChild(banner);
     }
 
@@ -1080,6 +1090,16 @@
 
   function detectPresetMismatches(run) {
     const warnings = [];
+    function addWarning(preset, kind, configured, actual) {
+      const line = document.createElement("div");
+      line.className = "warning-line";
+      line.append(
+        "\u26A0 Preset ", textElement("strong", "", preset),
+        ` configured ${kind} as `, textElement("strong", "", configured),
+        ", but ", textElement("strong", "", actual), " was actually used.",
+      );
+      warnings.push(line);
+    }
     for (const entry of run.entries) {
       if (!entry.preset || isHiddenPreset(entry.preset)) continue;
       const p = parsePreset(entry.preset);
@@ -1090,14 +1110,10 @@
       const presetPhys = p.physics.toLowerCase();
 
       if (actualPhys && presetPhys && actualPhys !== presetPhys) {
-        warnings.push(
-          `Preset <strong>${entry.preset}</strong> configured physics as <strong>${p.physics}</strong>, but <strong>${entry.actual_physics}</strong> was actually used.`
-        );
+        addWarning(entry.preset, "physics", p.physics, entry.actual_physics);
       }
       if (actualRend && p.renderer && !rendererMatches(p.renderer, actualRend)) {
-        warnings.push(
-          `Preset <strong>${entry.preset}</strong> configured renderer as <strong>${p.renderer}</strong>, but <strong>${actualRend}</strong> was actually used.`
-        );
+        addWarning(entry.preset, "renderer", p.renderer, actualRend);
       }
     }
     return warnings;
@@ -1178,15 +1194,21 @@
       const mi = presetMaxIter[item.preset];
       const cmd = buildShellCmd(workflow, rawTask, numEnvs, rawPreset, nf, mi);
       const vram = vramValues[item.preset];
-      let vramStr = "";
+      const rankLabel = textElement("span", "rank-label", label);
+      if (numEnvs) {
+        rankLabel.append(" ", textElement("span", "rank-envs", `(${numEnvs} envs)`));
+      }
       if (vram != null) {
         const pct = gpuTotalGb ? ((vram / gpuTotalGb) * 100).toFixed(1) : null;
-        vramStr = pct
-          ? ` <span class="rank-vram">${formatNumber(vram)} GB / ${pct}% VRAM</span>`
-          : ` <span class="rank-vram">${formatNumber(vram)} GB VRAM</span>`;
+        const vramText = pct
+          ? `${formatNumber(vram)} GB / ${pct}% VRAM`
+          : `${formatNumber(vram)} GB VRAM`;
+        rankLabel.append(" ", textElement("span", "rank-vram", vramText));
       }
-      li.innerHTML = `<button class="copy-cmd-btn" title="Copy run command">&#x1F4CB;</button><span class="rank-label">${label}${numEnvs ? ` <span class="rank-envs">(${numEnvs} envs)</span>` : ""}${vramStr}</span><span class="rank-value">${formatNumber(item.value)}</span>`;
-      li.querySelector(".copy-cmd-btn").addEventListener("click", (e) => {
+      const copyButton = textElement("button", "copy-cmd-btn", "\uD83D\uDCCB");
+      copyButton.title = "Copy run command";
+      li.append(copyButton, rankLabel, textElement("span", "rank-value", formatNumber(item.value)));
+      copyButton.addEventListener("click", (e) => {
         e.stopPropagation();
         const btn = e.currentTarget;
         function onSuccess() {
@@ -1347,11 +1369,14 @@
       for (const preset of currentOrder) {
         const th = document.createElement("th");
         const p = parsePreset(preset);
-        th.innerHTML = `<div class="preset-header-cell">
-          <span class="preset-part physics">${p.physics}</span>
-          <span class="preset-part renderer">${p.renderer}</span>
-          <span class="preset-part datatype">${p.datatype}</span>
-        </div>`;
+        const header = document.createElement("div");
+        header.className = "preset-header-cell";
+        header.append(
+          textElement("span", "preset-part physics", p.physics),
+          textElement("span", "preset-part renderer", p.renderer),
+          textElement("span", "preset-part datatype", p.datatype),
+        );
+        th.appendChild(header);
         headerRow.appendChild(th);
       }
       thead.appendChild(headerRow);
@@ -1436,7 +1461,9 @@
     for (const item of items) {
       const div = document.createElement("div");
       div.className = "version-item";
-      div.innerHTML = `<span class="version-label">${item.label}</span><span class="version-value" title="${item.value}">${item.value}</span>`;
+      const value = textElement("span", "version-value", item.value);
+      value.title = String(item.value);
+      div.append(textElement("span", "version-label", item.label), value);
       bar.appendChild(div);
     }
   }
@@ -1805,10 +1832,10 @@
       const p = parsePreset(entry.preset);
       const div = document.createElement("div");
       div.className = "summary-metric";
-      div.innerHTML = `
-        <div class="label">${p.physics} / ${p.renderer} / ${p.datatype}</div>
-        <div class="value">${formatNumber(val)}</div>
-      `;
+      div.append(
+        textElement("div", "label", `${p.physics} / ${p.renderer} / ${p.datatype}`),
+        textElement("div", "value", formatNumber(val)),
+      );
       content.appendChild(div);
     }
   }
@@ -2075,7 +2102,10 @@
         const info = allWfTasks[col];
         const th = document.createElement("th");
         const wfShort = info.workflow.replace("benchmark_", "").replace("_train", "");
-        th.innerHTML = `<div class="status-col-header"><span>${wfShort}</span><span class="status-task-name">${info.task}</span></div>`;
+        const header = document.createElement("div");
+        header.className = "status-col-header";
+        header.append(textElement("span", "", wfShort), textElement("span", "status-task-name", info.task));
+        th.appendChild(header);
         hRow.appendChild(th);
       }
       thead.appendChild(hRow);
